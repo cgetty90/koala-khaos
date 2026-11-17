@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, type Sprite } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Sprite, type Texture } from 'pixi.js';
 import { loadCandyArt, type BoardSymbol } from './art';
 import { columns, rows, type Movement } from './game';
 import { createBoardTimeline, type Tween } from './motion';
@@ -17,22 +17,31 @@ type BoardMove = Omit<Movement, 'candy'> & { candy: BoardSymbol };
 export type ScatterReveal = { order: readonly number[]; alreadyLanded: number; onLand(cell: number): void };
 
 export async function mountBoard(host: HTMLElement, animate: Tween, living = false, fallPace = () => 1) {
-  const candyArt = await loadCandyArt();
+  const [candyArt, stone] = await Promise.all([
+    loadCandyArt(),
+    Assets.load<Texture>(import.meta.env.BASE_URL + 'art/identity/obsidian-reel.webp'),
+  ]);
   const app = new Application();
   await app.init({ width, height, backgroundAlpha: 0, preference: 'canvas', autoStart: false, resolution: 1 });
   host.appendChild(app.canvas);
 
-  const backdrop = new Graphics();
+  const surface = new Sprite(stone);
+  surface.setSize(width,height);
+  const dividers = new Graphics();
   const pieces = new Container();
   const sparks = new Graphics();
-  app.stage.addChild(backdrop, pieces, sparks);
-  for (let i = 0; i < columns * rows; i++) {
-    const color = (i + rowAt(i)) % 2 ? 0x3d2254 : 0x2d1e46;
-    backdrop.roundRect(xAt(i) - 45, rowY(rowAt(i)) - 45, 90, 90, 13)
-      .fill({ color, alpha: .92 }).stroke({ color: 0xbe8bac, alpha: .22, width: 1 });
-    backdrop.roundRect(xAt(i) - 43, rowY(rowAt(i)) - 43, 86, 86, 11)
-      .stroke({ color: 0x9d73be, alpha: .15, width: 1.25 });
+  app.stage.addChild(surface, dividers, pieces, sparks);
+  host.dataset.well = 'obsidian-stone';
+  for (let column = 1; column < columns; column++) {
+    const x = column * cell;
+    dividers.rect(x - 1, 0, 2, height).fill({ color:0x02050a, alpha:.75 });
+    dividers.rect(x + 1, 0, 1, height).fill({ color:0xffd394, alpha:.31 });
   }
+  for (let row = 1; row < rows; row++) {
+    dividers.rect(0, row * cell, width, 1).fill({ color:0xafa1cb, alpha:.13 });
+  }
+  dividers.roundRect(1, 1, width - 2, height - 2, 8)
+    .stroke({ color:0x99745e, alpha:.66, width:2 });
 
   let sprites: Sprite[] = [];
   let restingBoard: readonly BoardSymbol[] = [];

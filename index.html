@@ -2,20 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="A candy-jungle tumble game with fictional credits.">
   <title>KOALA KHAOS</title>
+  <link rel="icon" href="/art/identity/khaos-icon.webp" type="image/webp">
 </head>
 <body>
   <div class="scenery" aria-hidden="true"><div class="world"><canvas id="waterfall-field" width="800" height="450"></canvas></div><div class="foreground"></div><div class="jungle-canopy"></div><div class="jungle-embers"></div><div class="jungle-glints"></div><div id="scenery-light" class="scenery-light"></div></div>
   <main class="shell">
     <header class="top">
-      <a class="brand" href="./" aria-label="KOALA KHAOS home"><span aria-hidden="true">✦</span> KOALA KHAOS</a>
+      <a class="brand" href="./" aria-label="KOALA KHAOS home"><img class="brand-jewel" src="/art/identity/khaos-icon.webp" alt=""> KOALA KHAOS</a>
       <strong class="demo">HOBBY DEMO — NO REAL MONEY</strong>
     </header>
     <div class="layout">
       <section class="intro" aria-labelledby="title">
-        <h1 id="title"><img class="stage-logo" src="/art/concept/logo.webp" alt="KOALA KHAOS"></h1>
+        <h1 id="title"><img class="stage-logo" src="/art/identity/khaos-logo.webp" srcset="/art/identity/khaos-logo-small.webp 360w, /art/identity/khaos-logo.webp 760w" sizes="(max-width: 560px) 160px, 260px" alt="KOALA KHAOS"></h1>
         <p>Match 8 candies anywhere to start a tumble.</p>
         <div id="gumleaf-relic" class="gumleaf-relic" aria-hidden="true">
           <img src="/art/production/gumleaf.webp" alt="">
@@ -30,11 +31,12 @@
           </div>
         </header>
         <div id="bonus-track" class="bonus-track" hidden>
-          <div><strong id="mode-name">Base game</strong><span id="bonus-remaining"></span></div>
+          <div class="bonus-meter bonus-spins"><span>Free spins remaining</span><strong id="bonus-remaining">10</strong></div>
+          <div class="bonus-progress"><strong id="mode-name">Base game</strong>
           <ol class="progression" aria-label="Free spin multipliers">
             
-          </ol>
-          <div><span>Bonus total</span><strong id="bonus-total">0.00</strong></div>
+          </ol></div>
+          <div class="bonus-meter bonus-award"><span>Bonus Win</span><strong id="bonus-total">0.00</strong></div>
         </div>
         <div class="board-space"><div class="reel-frame">
           <div id="board" role="img" aria-label="Candy grid, 6 columns by 5 rows"></div>
@@ -51,29 +53,43 @@
           </div>
           <div class="cabinet-display"><span>Total Bet</span><output id="total-bet" aria-label="Total bet">0.20</output></div>
           <div class="cabinet-display"><span>Last Win</span><output id="last-win" aria-label="Last settled spin win">0.00</output></div>
-          <button id="drop" class="spin-button" disabled><span class="spin-glyph" aria-hidden="true">↻</span><span class="spin-text">Spin</span></button><button id="auto-stop" class="spin-button spin-stop" type="button" hidden><span class="spin-glyph" aria-hidden="true">■</span><span class="spin-text">STOP</span></button><button id="fast-forward" class="secondary fast-forward" type="button" hidden>Fast-forward</button>
+          <button id="drop" class="spin-button" disabled><span class="spin-glyph" aria-hidden="true">↻</span><span class="spin-text">Spin</span></button>
           <div class="deck-actions">
           <button id="ante-open" class="ante-control" type="button" aria-haspopup="dialog" aria-label="Gumleaf Ante ×3 information" aria-describedby="ante-availability" disabled>
             <img src="/art/production/gumleaf.webp" alt="">
             <strong>Ante ×3</strong><b>OFF</b><span id="ante-availability" class="spotlight-announcement">Not yet available</span>
           </button>
-          <button id="bonus" class="bonus-button" disabled><span aria-hidden="true">✦</span> Buy Bonus</button>
-          <button id="autoplay" class="secondary" disabled><span aria-hidden="true">▸▸</span> Autoplay</button>
-          <button id="deck-speed" class="secondary" type="button" aria-label="Speed settings" disabled><span aria-hidden="true">◴</span> <span id="deck-speed-label">Gentle</span></button>
-          <button id="deck-sound" class="secondary" type="button" aria-label="Deck sound" aria-pressed="true"><span aria-hidden="true">♫</span> <span id="deck-sound-label">On</span></button>
-          <button id="utility-open" class="secondary" type="button" disabled><span aria-hidden="true">⚙</span> Menu</button>
+          <button id="bonus" class="bonus-button" disabled><svg class="deck-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.8-5.4 2.8 1-6L3.3 8.4l6-.9z"/><path d="M12 7.5v8.3m-4.8-3.2h9.6"/></svg><span>Buy Bonus</span></button>
+          <button id="autoplay" class="secondary" disabled><svg class="deck-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10a8 8 0 1 0-1.7 8.7M20 5v5h-5"/><path d="M10 8.5v7l5.5-3.5z"/></svg><span>Autoplay</span></button>
+          <button id="deck-speed" class="secondary" type="button" aria-label="Change spin speed" title="Change spin speed" disabled><svg class="deck-icon" id="deck-speed-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18a9 9 0 1 1 18 0H3"/><path id="speed-needle" d="M12 16l-3-5"/><path d="M7 15h.1m5-6h.1m5 6h.1"/></svg><span id="deck-speed-label">Gentle</span></button>
+          <button id="deck-sound" class="secondary" type="button" aria-label="Deck sound" aria-pressed="true"><svg class="deck-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l4-4v14l-4-4H4zm11 0a4 4 0 0 1 0 6m2.5-8a7 7 0 0 1 0 10"/></svg><span id="deck-sound-label">On</span></button>
+          <button id="utility-open" class="secondary" type="button" disabled><svg class="deck-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 2 2.6 3.2-.4.7 3.2 2.9 1.5-1.2 3.1 1.2 3.1-2.9 1.5-.7 3.2-3.2-.4L12 22l-2-2.6-3.2.4-.7-3.2-2.9-1.5 1.2-3.1-1.2-3.1 2.9-1.5.7-3.2 3.2.4z"/><circle cx="12" cy="12" r="3"/></svg><span>Menu</span></button>
         </div>
+        <span id="speed-announcement" class="spotlight-announcement" role="status"></span>
         </div>
         <div id="auto-track" class="auto-track" hidden>
-          <output id="auto-remaining" aria-label="Auto spins remaining"></output>
+          <output id="auto-remaining" aria-label="Auto spins remaining"></output><button id="auto-stop" class="secondary" type="button" hidden>STOP</button>
         </div>
-        <p id="status" class="status" role="status">Loading the candy jungle…</p>
+        <p id="status" class="status" role="status" data-phase="loading">Loading the candy jungle…</p>
         <div class="cabinet-notes">
           <small class="fictional">Fictional credits · non-redeemable</small>
         </div>
       </section>
       </section>
       </div></main>
+  <dialog id="welcome" aria-labelledby="welcome-title">
+    <div class="welcome-world" aria-hidden="true"><canvas id="welcome-water" width="800" height="450"></canvas></div>
+    <div class="welcome-vignette" aria-hidden="true"></div>
+    <div id="welcome-lights" aria-hidden="true"></div>
+    <div class="welcome-layout">
+      <div class="welcome-brand">
+        <h2 id="welcome-title"><img src="/art/identity/khaos-welcome.webp" srcset="/art/identity/khaos-logo.webp 760w, /art/identity/khaos-welcome.webp 1060w" sizes="(max-width: 680px) 82vw, 540px" alt="Koala Khaos"></h2>
+        <button id="welcome-enter" class="primary" type="button">Enter the Khaos</button>
+        <p>Fictional-credit demo · No real money</p>
+      </div>
+      <canvas id="welcome-mochi" width="286" height="320" role="img" aria-label="Mochi, the koala jungle mechanic"></canvas>
+    </div>
+  </dialog>
   <dialog id="celebration" class="celebration" aria-labelledby="win-title">
     <div class="win-depth" aria-hidden="true"><i></i><b></b></div>
     <div id="win-particles" class="win-particles" aria-hidden="true"></div>
@@ -83,7 +99,7 @@
       <output id="win-counter" aria-label="Win in fictional credits" aria-live="off"></output>
       <small>Fictional credits</small>
     </div>
-    <div id="win-actions" class="cinema-actions"></div>
+    <div id="win-actions" class="cinema-actions"><button id="fast-forward" class="spin-button" aria-label="Fast-forward" type="button"><span class="spin-glyph" aria-hidden="true">»</span><span class="spin-text">Skip</span><span class="spotlight-announcement">Fast-forward</span></button></div>
   </dialog>
   <dialog id="utility" class="feature-dialog utility-dialog" aria-labelledby="utility-title"><header class="utility-head"><h2 id="utility-title">Game menu</h2><button type="button" data-close class="secondary">Close menu</button></header><nav id="guide-nav" class="guide-nav" aria-label="Game menu sections">
   <button type="button" data-guide="play">How to Play</button><button type="button" data-guide="pay">Paytable</button>
@@ -94,7 +110,8 @@
 <div class="guide-content"><div id="guide-page" hidden></div><div id="guide-settings">
         <section class="panel settings" aria-label="Settings">
           <h3>Sound &amp; motion</h3>
-          <label for="speed">Animation speed<select id="speed"><option value="0.65" selected>Gentle</option><option value="1">Normal</option><option value="2">Fast</option><option value="0">Instant</option></select></label>
+          <button type="button" class="secondary" id="welcome-open">Reopen welcome screen</button>
+          <label for="speed">Animation speed<select id="speed"><option value="0.65" selected>Gentle</option><option value="1">Normal</option><option value="2">Turbo</option><option value="0">Instant</option></select></label>
                     <label for="sound">Sound <input id="sound" type="checkbox" role="switch" aria-describedby="audio-status"></label>
           <label for="reduced-effects">Reduced effects <input id="reduced-effects" type="checkbox"></label><div class="sound-controls" aria-label="Audio mixer">
             <label for="music-volume">Music volume <input id="music-volume" type="range" min="0" max="100" step="1" value="44"><output id="music-volume-value" for="music-volume">44%</output></label>
@@ -134,9 +151,11 @@
     <button id="fixture-continue" type="button" class="primary" hidden>Continue demo</button>
   </dialog>
   <dialog id="ante-dialog" class="feature-dialog ante-dialog" aria-labelledby="ante-title">
-    <h2 id="ante-title">Gumleaf Ante ×3</h2>
-    <p><span id="ante-heading">OFF · 1× Base Bet</span></p>
-    <p>Ante costs 3× your Base Bet and raises the natural bonus chance from 0.446% to 2.230%.</p>
+    <div class="ante-hero">
+      <img src="/art/production/gumleaf.webp" alt="">
+      <div><h2 id="ante-title">Gumleaf Ante ×3</h2><p id="ante-heading">OFF · 1× Base Bet</p></div>
+    </div>
+    <p>Ante costs 3× your Base Bet and makes natural bonuses 5× as frequent. The chance rises from 0.446% to 2.230%.</p>
     <dl class="dialog-metrics"><div><dt>Base Bet</dt><dd><output id="ante-base">0.20</output></dd></div>
       <div><dt>Total with Ante</dt><dd><output id="ante-price">0.60</output></dd></div></dl>
     <div class="confirmation-actions"><button type="button" id="ante-confirm" class="primary">Confirm Ante</button><button type="button" data-close class="secondary" aria-label="Close Ante information">Close</button></div>
@@ -149,23 +168,31 @@
     <div class="confirmation-actions"><button id="auto-start" class="primary">Start autoplay</button><button type="button" data-close class="secondary">Cancel</button></div>
   </dialog>
   <dialog id="shop" class="feature-dialog shop-dialog" aria-labelledby="shop-title">
-    <h2 id="shop-title">Buy a bonus</h2>
-    <p class="shop-intro">Each bonus includes 10 free spins at your current Base Bet.</p>
-        <div id="shop-options"></div>
+    <header class="shop-heading"><h2 id="shop-title">Buy a bonus</h2>
+      <p class="shop-intro">Choose a bonus world. Each includes 10 free spins at your Base Bet.</p></header>
+    <div id="shop-options"></div>
     <section id="shop-confirmation" hidden aria-labelledby="confirm-title">
+      <div class="confirm-illustration"><img id="confirm-art" alt="" /></div>
+      <div class="confirm-details">
       <h3 id="confirm-title"></h3>
-      <dl class="dialog-metrics"><div><dt>Purchase cost</dt><dd id="confirm-price"></dd></div><div><dt>Free spins</dt><dd>10</dd></div></dl>
+      <div class="purchase-price"><span>Purchase cost</span><strong id="confirm-price"></strong></div>
+      <dl class="dialog-metrics">
+        <div><dt>Current balance</dt><dd id="confirm-balance"></dd></div>
+        <div><dt>Balance after purchase</dt><dd id="confirm-remaining"></dd></div>
+        <div><dt>Free spins</dt><dd>10</dd></div>
+      </dl>
       <p id="confirm-odds" hidden></p>
       <div class="confirmation-actions">
         <button id="confirm-buy" type="button" class="primary">Confirm purchase</button>
         <button id="cancel-buy" type="button" class="secondary">Back</button>
-      </div>
+      </div></div>
     </section>
     <p id="shop-status" role="status"></p>
     <button type="button" data-close class="secondary">Close</button>
   </dialog>
   <dialog id="feature-dialog" class="feature-dialog" aria-labelledby="feature-title">
     <div class="feature-depth" aria-hidden="true"></div>
+    <div class="feature-spin-lock" aria-hidden="true">Spin</div>
         <div class="cinematic-art" aria-hidden="true"><div class="kart-cinematic" hidden><canvas id="kart-canvas" width="640" height="270"></canvas><strong class="kart-route"></strong></div>
       <div class="cinematic-light"></div><div id="cinematic-rays" class="cinematic-rays"></div><img id="cinematic-emblem" class="cinematic-emblem" src="/art/concept/scatter.webp" alt="" hidden>
       <canvas id="cinematic-mochi" class="cinematic-mochi" width="286" height="320"></canvas>
@@ -173,6 +200,7 @@
     <div class="feature-caption">
     <h2 id="feature-title"></h2>
     <p id="feature-copy"></p>
+    <p id="feature-tap-hint">Tap anywhere to continue</p>
     <button id="auto-stop-modal" type="button" class="secondary" hidden>STOP autoplay</button><button id="feature-continue" type="button" class="primary" hidden>CONTINUE</button><button type="button" data-close class="primary" id="feature-action" hidden>Back to base game</button>
     </div>
   </dialog>

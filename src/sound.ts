@@ -56,6 +56,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
   let music: GainNode | undefined;
   let bed: GainNode | undefined;
   let tensionWanted = false;
+  let cinematicDucked = false;
   let tensionRevision = 0;
   let tensionVoice: { source: AudioBufferSourceNode; gain: GainNode } | undefined;
   let jungleBuffer: AudioBuffer | undefined;
@@ -88,16 +89,21 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     lastCue.clear();
   }
 
+  async function decodeTrack(url: string, context: AudioContext) {
+    const response = await fetch(url, { signal: requests.signal });
+    if (!response.ok || response.headers.get('content-type')?.includes('text/html')) {
+      throw new Error('Music file unavailable');
+    }
+    return context.decodeAudioData(await response.arrayBuffer());
+  }
+
   function load(track: Scene, context: AudioContext) {
     let buffer = buffers.get(track);
     if (!buffer) {
-      buffer = fetch(import.meta.env.BASE_URL + 'audio/' + track + '.ogg', { signal: requests.signal })
-        .then(response => {
-          if (!response.ok) throw new Error('Music file unavailable');
-          return response.arrayBuffer();
-        })
-        .then(data => context.decodeAudioData(data))
-        .catch(error => { buffers.delete(track); throw error; });
+      const fallback = () => decodeTrack(import.meta.env.BASE_URL + 'audio/' + track + '.ogg', context);
+      buffer = (track === 'base'
+        ? decodeTrack(import.meta.env.BASE_URL + 'audio/koala-khaos-music-1.ogg', context).catch(fallback)
+        : fallback()).catch(error => { buffers.delete(track); throw error; });
       buffers.set(track, buffer);
     }
     return buffer;
@@ -119,12 +125,18 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     return buffer;
   }
 
+  function updateMusicDuck() {
+    if (!bed || !ctx) return;
+    const level = cinematicDucked ? .4 : tensionWanted && scene === 'base' ? .62 : 1;
+    bed.gain.setTargetAtTime(level, ctx.currentTime, level === 1 ? .14 : .065);
+  }
+
   function releaseTension() {
     const voice = tensionVoice;
     tensionVoice = undefined;
     if (!ctx || !bed) return;
     const now = ctx.currentTime;
-    bed.gain.setTargetAtTime(1, now, .09);
+    updateMusicDuck();
     if (voice) {
       voice.gain.gain.setTargetAtTime(0, now, .055);
       stop(voice.source, now + .24);
@@ -146,7 +158,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
       source.connect(gain).connect(music!);
       gain.gain.value = 0;
       gain.gain.setTargetAtTime(.93, now, .075);
-      bed!.gain.setTargetAtTime(.62, now, .08);
+      updateMusicDuck();
       const voice = { source, gain };
       tensionVoice = voice;
       source.onended = () => {
@@ -154,7 +166,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
         gain.disconnect();
         if (tensionVoice === voice) {
           tensionVoice = undefined;
-          bed!.gain.setTargetAtTime(1, context.currentTime, .09);
+          updateMusicDuck();
         }
       };
       source.start(now);
@@ -256,6 +268,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
       samples[i] = (seed / 2147483648) - 1;
     }
     ctx = context;
+    updateMusicDuck();
   }
 
 
@@ -411,7 +424,12 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     setSuspense(value: boolean) {
       if (tensionWanted === value) return;
       tensionWanted = value;
+      updateMusicDuck();
       void syncTension();
+    },
+    setCinematicDuck(value: boolean) {
+      cinematicDucked = value;
+      updateMusicDuck();
     },
     setEnabled(value: boolean) {
       enabled = value;
@@ -433,6 +451,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     setScene(value: Scene) {
       if (scene === value) return;
       scene = value;
+      updateMusicDuck();
       if (scene !== 'base') { tensionRevision++; releaseTension(); }
       if (enabled) void reconcile();
     },

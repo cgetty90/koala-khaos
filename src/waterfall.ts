@@ -11,7 +11,7 @@ const falls = [
 ];
 const seed = (n: number) => ((Math.sin(n * 147.79 + 31.46) * 47289.177) % 1 + 1) % 1;
 
-export function mountWaterfall(canvas: HTMLCanvasElement) {
+export function mountWaterfall(canvas: HTMLCanvasElement, dialog?: HTMLDialogElement) {
   const ctx = canvas.getContext('2d')!;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const compact = matchMedia('(max-width: 680px)');
@@ -96,7 +96,7 @@ export function mountWaterfall(canvas: HTMLCanvasElement) {
 
   function tick(now: number) {
     request = 0;
-    if (closing || document.hidden) return;
+    if (closing || document.hidden || (dialog && !dialog.open)) return;
     request = requestAnimationFrame(tick);
     const enabled = baseWorld() && !motion.matches && root.dataset.motion !== 'instant';
     if (!enabled) {
@@ -115,8 +115,10 @@ export function mountWaterfall(canvas: HTMLCanvasElement) {
   function visibility() {
     cancelAnimationFrame(request);
     last = 0;
-    if (!document.hidden && !closing) request = requestAnimationFrame(tick);
+    if (!document.hidden && !closing && (!dialog || dialog.open)) request = requestAnimationFrame(tick);
   }
+  const visibilityObserver = dialog ? new MutationObserver(visibility) : undefined;
+  if (dialog) visibilityObserver?.observe(dialog, { attributeFilter:['open'] });
   const resize = new ResizeObserver(fit);
   resize.observe(host);
   fit();
@@ -128,6 +130,7 @@ export function mountWaterfall(canvas: HTMLCanvasElement) {
     if (!event.persisted) {
       closing = true;
       resize.disconnect();
+      visibilityObserver?.disconnect();
       document.removeEventListener('visibilitychange', visibility);
       window.removeEventListener('pageshow', visibility);
     }

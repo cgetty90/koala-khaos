@@ -1,12 +1,14 @@
 export type Tween = (duration: number, draw: (progress: number) => void) => Promise<void>;
 
-export function createMotion(getRate: () => number) {
-  let skipped = false;
+type PlaybackStage = { skipped: boolean };
+
+export function createMotion(getRate: () => number, onActivity = () => {}) {
+  const active: PlaybackStage[] = [];
+  let scope: PlaybackStage | undefined;
   let visibilityChanges = 0;
-  const root = document.documentElement;
   function syncVisibility() {
     visibilityChanges++;
-    root.dataset.paused = String(document.hidden);
+    document.documentElement.dataset.paused = String(document.hidden);
   }
   document.addEventListener('visibilitychange', syncVisibility);
   syncVisibility();
@@ -17,52 +19,70 @@ export function createMotion(getRate: () => number) {
     }
   }
 
-  const tween: Tween = async (duration, draw) => {
+  const current = () => scope ?? active.at(-1);
+  const tween = async (duration: number, draw: (progress: number) => void, skippable = true) => {
+    const stage = scope ?? { skipped: false };
     await visible();
-    if (skipped || !getRate() || duration <= 0) {
+    if (stage.skipped || !getRate() || duration <= 0) {
       draw(1);
       return;
     }
-    draw(0);
-    let elapsed = 0;
-    let previous: number | undefined;
-    let visibility = visibilityChanges;
-    while (elapsed < duration) {
-      await visible();
-      const now = await new Promise<number>(resolve => requestAnimationFrame(resolve));
-      if (document.hidden) continue;
-      const rate = getRate();
-      if (skipped || !rate) {
-        draw(1);
-        return;
+    if (skippable) { active.push(stage); onActivity(); }
+    try {
+      draw(0);
+      let elapsed = 0;
+      let previous: number | undefined;
+      let visibility = visibilityChanges;
+      while (elapsed < duration) {
+        await visible();
+        const now = await new Promise<number>(resolve => requestAnimationFrame(resolve));
+        if (document.hidden) continue;
+        const rate = getRate();
+        if (stage.skipped || !rate) {
+          draw(1);
+          return;
+        }
+        if (visibility === visibilityChanges && previous !== undefined) {
+          elapsed += Math.min(now - previous, 50) * rate;
+        }
+        visibility = visibilityChanges;
+        previous = now;
+        draw(Math.min(elapsed / duration, 1));
       }
-      if (visibility === visibilityChanges && previous !== undefined) {
-        elapsed += Math.min(now - previous, 50) * rate;
-      }
-      visibility = visibilityChanges;
-      previous = now;
-      draw(Math.min(elapsed / duration, 1));
+    } finally {
+      if (skippable) { active.splice(active.lastIndexOf(stage), 1); onActivity(); }
     }
   };
   return {
     tween,
     visible,
     wait: (duration: number) => tween(duration, () => {}),
+    pause: (duration: number) => tween(duration, () => {}, false),
     async nextSpin() {
       await visible();
-      // Even instant playback yields between spins so rendering and visibility events can run.
       await new Promise<number>(resolve => requestAnimationFrame(resolve));
       await visible();
     },
-    reset() {
-      skipped = false;
-      root.dataset.skip = 'false';
+    async stage(task: () => Promise<void>) {
+      const previous = scope;
+      scope = { skipped:false };
+      onActivity();
+      try { await task(); }
+      finally { scope = previous; onActivity(); }
     },
-    skip() {
-      skipped = true;
-      root.dataset.skip = 'true';
+    skipCurrent() {
+      const stage = current();
+      if (!stage || stage.skipped || !getRate() || document.hidden) return false;
+      stage.skipped = true;
+      onActivity();
+      return true;
     },
-    get instant() { return skipped || !getRate(); },
+    get skippable() {
+      const stage = current();
+      return Boolean(stage && !stage.skipped && getRate() && !document.hidden);
+    },
+    get skipping() { return current()?.skipped === true; },
+    get instant() { return current()?.skipped || !getRate(); },
   };
 }
 

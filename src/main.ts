@@ -17,6 +17,9 @@ import './cinematic-v23.css';
 import './interface-polish.css';
 import './fullscreen-cinema.css';
 import './jungle-finish.css';
+import './identity-v25.css';
+import './bonus-v26.css';
+import './responsive-v27.css';
 import { mountScatterDemo } from './scatter-demo';
 import { conceptArt as art, presentationCandyNames as candyNames } from './art';
 import { mountMascot } from './mascot';
@@ -30,6 +33,7 @@ import { basis, bonusModes, freeSpins, math, maximumStake, modeNames, mysteryWei
 
 const get = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const host = get('board');
+
 const game = document.querySelector<HTMLElement>('.game')!;
 const spin = get<HTMLButtonElement>('drop');
 const buy = get<HTMLButtonElement>('bonus');
@@ -68,8 +72,6 @@ let auto: AutoRun | undefined;
 function renderAuto() {
   autoTrack.hidden = !auto;
   autoStop.hidden = !auto;
-  if (auto) autoTrack.append(fastForward);
-  else autoStop.after(fastForward);
   autoStopModal.hidden = !auto;
   autoStop.disabled = autoStopModal.disabled = Boolean(auto?.stopped);
   get('auto-remaining').textContent = auto?.stopped ? 'Stopping…' : (auto?.remaining ?? 0) + ' auto spins left';
@@ -107,16 +109,16 @@ let balance = startingBalance;
 const anteKey = 'koala-candidate.ante-confirmed.v21';
 let ante = sessionStorage.getItem(anteKey) === 'true';
 const chargedStake = () => stake() * (ante ? 3 : 1);
-let count = 0;
 let busy = true;
 let purchaseReveal = false;
+let lastSkipInteraction = -Infinity;
 const mascot = get<HTMLCanvasElement>('mascot');
 const cinematicMochi = get<HTMLCanvasElement>('cinematic-mochi');
 const featureAction = get<HTMLButtonElement>('feature-action');
 const continueButton = get<HTMLButtonElement>('feature-continue');
 const fastForward = get<HTMLButtonElement>('fast-forward');
 const celebration = get<HTMLDialogElement>('celebration');
-const motion = createMotion(() => (reducedMotion.matches ? 0 : Number(speed.value)) * (auto?.turbo ? 2.5 : 1));
+const motion = createMotion(() => (reducedMotion.matches ? 0 : Number(speed.value)) * (auto?.turbo ? 2.5 : 1), refreshSpinButton);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const introClock = createMotion(() => Number(speed.value) && !reducedMotion.matches ? 1 : 0);
 const audioStatus = get('audio-status');
@@ -141,9 +143,12 @@ const tracks = {
 };
 
 const atlas = import.meta.env.BASE_URL + 'art/production/mochi-poses.webp';
-const pose = mountMascot(mascot, motion.tween, atlas);
+const pose = mountMascot(mascot, introClock.tween, atlas);
 const cinematicPose = mountMascot(cinematicMochi, introClock.tween, atlas);
-const winPose = mountMascot(get<HTMLCanvasElement>('win-mochi'), motion.tween, atlas);
+const winPose = mountMascot(get<HTMLCanvasElement>('win-mochi'), introClock.tween, atlas);
+const welcome = get<HTMLDialogElement>('welcome');
+mountMascot(get<HTMLCanvasElement>('welcome-mochi'), introClock.tween, atlas);
+mountWaterfall(get<HTMLCanvasElement>('welcome-water'), welcome);
 const gumleafValue = get('gumleaf-value');
 const effects = get<HTMLInputElement>('reduced-effects');
 const reducedEffects = () => effects.checked || reducedMotion.matches;
@@ -156,7 +161,7 @@ const stageSignal = mountPresentation(get('scenery-light'), get('gumleaf-relic')
   () => motion.instant || reducedEffects());
 function signal(event: Parameters<typeof stageSignal>[0]) {
   stageSignal(event);
-  if (!reducedEffects() && (event === 'scatter' || event === 'gumleaf' || event === 'win')) brightenFalls();
+  if (!motion.instant && !reducedEffects() && (event === 'scatter' || event === 'gumleaf' || event === 'win')) brightenFalls();
 }
 function setLeaf(value: number, reset = false) {
   const next = '×' + value;
@@ -178,7 +183,10 @@ let audioUnlocked = false;
 
 function syncMotion() {
   document.documentElement.dataset.motion = reducedMotion.matches || speed.value === '0' ? 'instant' : 'animated';
-  get('deck-speed-label').textContent = speed.selectedOptions[0].textContent;
+  const label = speed.selectedOptions[0].textContent;
+  get('deck-speed-label').textContent = label;
+  deckSpeed.dataset.speed = speed.value;
+  deckSpeed.setAttribute('aria-label', 'Change spin speed. Current speed: ' + label);
 }
 reducedMotion.addEventListener('change', syncMotion);
 function syncSound() {
@@ -222,9 +230,13 @@ speed.addEventListener('change', () => {
 });
 deckSpeed.addEventListener('click', () => {
   if (busy || utility.open) return;
-  selectGuide('settings');
-  utility.showModal();
-  speed.focus();
+  speed.selectedIndex = (speed.selectedIndex + 1) % speed.options.length;
+  speed.dispatchEvent(new Event('change'));
+  get('speed-announcement').textContent = 'Animation speed: ' + speed.selectedOptions[0].textContent;
+  if (!reducedEffects() && !motion.instant) {
+    deckSpeed.getAnimations().forEach(animation => animation.cancel());
+    deckSpeed.animate([{ filter:'brightness(1.44)' }, { filter:'brightness(1)' }], { duration:370 });
+  }
 });
 anteOpen.addEventListener('click', () => { if (!busy && !anteDialog.open) anteDialog.showModal(); });
 anteDialog.addEventListener('close', () => anteOpen.focus());
@@ -248,6 +260,51 @@ bindVolume('sfx-volume', 'sfx', defaultSfx, audio.setSfxVolume);
 syncMotion();
 syncSound();
 
+const welcomeKey = 'koala-khaos.welcomed.v25';
+const enter = get<HTMLButtonElement>('welcome-enter');
+let returningFromMenu = false;
+function welcomeSeen() {
+  try { return localStorage.getItem(welcomeKey) === '1'; }
+  catch { return sessionStorage.getItem(welcomeKey) === '1'; }
+}
+function markWelcomeSeen() {
+  try { localStorage.setItem(welcomeKey, '1'); }
+  catch { sessionStorage.setItem(welcomeKey, '1'); }
+}
+for (let index = 0; index < 15; index++) {
+  const spark = document.createElement('i');
+  spark.style.setProperty('--x', ((index * 31 + 12) % 100) + '%');
+  spark.style.setProperty('--y', ((index * 19 + 9) % 88) + '%');
+  spark.style.setProperty('--lag', '-' + (index % 7) + 's');
+  get('welcome-lights').append(spark);
+}
+get('welcome-open').addEventListener('click', () => {
+  if (busy || welcome.open) return;
+  returningFromMenu = true;
+  utility.close();
+  welcome.showModal();
+});
+welcome.addEventListener('cancel', event => { event.preventDefault(); });
+enter.addEventListener('click', async () => {
+  if (enter.disabled || !welcome.open) return;
+  enter.disabled = true;
+  if (!audioUnlocked) activateSound();
+  markWelcomeSeen();
+  if (!motion.instant && !reducedEffects()) {
+    const exit = welcome.animate([{ opacity:1 }, { opacity:0 }], { duration:240, easing:'ease-in' });
+    await exit.finished.catch(() => {});
+  }
+  welcome.close();
+  enter.disabled = false;
+  if (returningFromMenu) get('utility-open').focus();
+  else if (!spin.disabled) spin.focus();
+  returningFromMenu = false;
+});
+if (!welcomeSeen()) {
+  if (pending()) markWelcomeSeen();
+  else welcome.showModal();
+}
+
 const rays = spotlight.querySelector('i')!;
 for (let index = 0; index < 12; index++) {
   const ray = document.createElement('b');
@@ -260,9 +317,8 @@ async function showLeafSpotlight(values: readonly number[]) {
   const reduced = reducedEffects();
   const rate = Number(speed.value);
   const plan = planGumleafSpotlight(values, rate, reduced, Boolean(auto?.turbo));
-  if (!plan || document.documentElement.dataset.skip === 'true') return;
+  if (!plan) return;
   await motion.visible();
-  if (document.documentElement.dataset.skip === 'true') return;
   spotlight.dataset.intensity = plan.intensity;
   spotlight.dataset.duration = String(plan.duration);
   spotlight.dataset.static = String(plan.static);
@@ -286,11 +342,15 @@ async function showLeafSpotlight(values: readonly number[]) {
 mountScatterDemo(audio, utility, atlas, () => reducedMotion.matches ? 0 : Number(speed.value), () => signal('scatter'));
 
 function skip() {
-  motion.skip();
+  if (!busy || purchaseReveal || feature.open || shop.open || autoDialog.open || anteDialog.open || utility.open) return;
+  lastSkipInteraction = performance.now();
+  if (!motion.skipCurrent()) return;
+  audio.setSuspense(false);
   audio.silence();
-  fastForward.disabled = true;
 }
+host.addEventListener('click', () => { if (!celebration.open) skip(); });
 fastForward.addEventListener('click', skip);
+document.addEventListener('visibilitychange', refreshSpinButton);
 celebration.addEventListener('cancel', event => {
   event.preventDefault();
   skip();
@@ -342,6 +402,7 @@ function refreshControls() {
   anteOpen.dataset.enabled = String(ante);
   get('ante-availability').textContent = ante ? 'On' : 'Off';
   get('ante-confirm').textContent = ante ? 'Turn Ante off' : 'Confirm Ante · ' + fmt(selectedStake * 3);
+  anteDialog.dataset.enabled = String(ante);
   get('ante-heading').textContent = ante ? 'ON · 3× Base Bet' : 'OFF · 1× Base Bet';
   get<HTMLOutputElement>('ante-price').value = fmt(selectedStake * 3);
   get<HTMLOutputElement>('ante-base').value = fmt(selectedStake);
@@ -349,10 +410,7 @@ function refreshControls() {
   deckSpeed.disabled = busy;
   total.value = fmt(balance);
   const locked = busy || feature.open || shop.open;
-  spin.disabled = locked || Boolean(session) || balance < chargedStake();
-  spin.hidden = Boolean(session || auto);
-  fastForward.hidden = !busy || purchaseReveal;
-  fastForward.disabled = motion.instant;
+  refreshSpinButton();
   buy.disabled = locked || Boolean(session);
   autoButton.disabled = buy.disabled || balance < chargedStake();
   get<HTMLButtonElement>('utility-open').disabled = locked;
@@ -361,6 +419,55 @@ function refreshControls() {
   stakeUp.disabled = stakeSelect.disabled || stake() >= maximumStake;
   qa.forEach(button => { button.disabled = buy.disabled; });
 }
+function refreshSpinButton() {
+  const blocked = purchaseReveal || feature.open || shop.open || utility.open || anteDialog.open || autoDialog.open;
+  const canSkip = busy && !blocked && motion.skippable;
+  const ready = !busy && !blocked && !session && balance >= chargedStake();
+  spin.dataset.spinState = ready ? 'ready' : canSkip ? 'skip' : busy
+    ? motion.skipping ? 'skipping' : 'spinning' : 'disabled';
+  spin.disabled = !ready && (!canSkip || celebration.open);
+  const label = ready || !busy ? 'Spin' : canSkip || motion.skipping ? 'Skip' : 'Spinning';
+  spin.querySelector('.spin-text')!.textContent = label;
+  spin.querySelector('.spin-glyph')!.textContent = label === 'Skip' ? '»' : '↻';
+  fastForward.disabled = !celebration.open || !canSkip;
+  host.dataset.skippable = String(canSkip && !celebration.open);
+}
+
+let displayedSession: Session | undefined;
+let bonusTarget = 0;
+let visibleBonus = 0;
+let bonusFrame = 0;
+function paintBonus(value: number) {
+  visibleBonus = value;
+  bonusTotal.textContent = fmt(value);
+}
+function updateBonusMeter(state: Session, value: number, left: number) {
+  const nextRemaining = String(left);
+  const animate = displayedSession === state && !motion.instant && !reducedEffects() && !document.hidden;
+  if (remaining.textContent !== nextRemaining && animate) {
+    remaining.getAnimations().forEach(effect => effect.cancel());
+    remaining.animate([{ transform:'translateY(4px)',opacity:.52 },{ transform:'none',opacity:1 }],
+      { duration:220,easing:'ease-out' });
+  }
+  remaining.textContent = nextRemaining;
+  if (displayedSession === state && value === bonusTarget) return;
+  displayedSession = state;
+  bonusTarget = value;
+  bonusTotal.dataset.confirmed = String(value);
+  cancelAnimationFrame(bonusFrame);
+  if (!animate || value <= visibleBonus) { paintBonus(value); return; }
+  const from = visibleBonus;
+  const started = performance.now();
+  bonusTotal.getAnimations().forEach(effect => effect.cancel());
+  bonusTotal.animate([{ color:'#fffcea',textShadow:'0 0 15px #ffcb6c' },{ color:'',textShadow:'' }],
+    { duration:330,easing:'ease-out' });
+  const update = (now: number) => {
+    const progress = Math.max(0,Math.min(1,(now-started)/230));
+    paintBonus(from + Math.floor((value-from)*(1-(1-progress)**2)));
+    if (progress < 1) bonusFrame = requestAnimationFrame(update);
+  };
+  bonusFrame = requestAnimationFrame(update);
+}
 function updateBonus(state: Session) {
   const { board, stake: locked, source } = state;
   track.hidden = false;
@@ -368,8 +475,7 @@ function updateBonus(state: Session) {
   document.body.dataset.world = board.mode;
   get('mode-name').textContent = modeNames[board.mode] + (source === 'practice' ? ' · Practice' : '');
   const left = freeSpins - board.played;
-  remaining.textContent = left ? left + (left === 1 ? ' spin left' : ' spins left') : 'Complete';
-  bonusTotal.textContent = fmt(settleCredits(board.total, locked));
+  updateBonusMeter(state, settleCredits(board.total, locked), left);
   [...progression.children].forEach((step, index) => {
     step.classList.toggle('done', index < board.played);
     if (index === board.played) step.setAttribute('aria-current', 'step');
@@ -430,6 +536,22 @@ async function showIntro(active: Session, presentation?: Presentation) {
   feature.close();
   await motion.visible();
 }
+function cinematicAction() {
+  if (!feature.open) return undefined;
+  const action = feature.dataset.stage === 'continue' ? continueButton
+    : feature.dataset.stage === 'summary' ? featureAction : undefined;
+  return action && !action.hidden && !action.disabled ? action : undefined;
+}
+featureAction.addEventListener('click', () => { lastSkipInteraction = performance.now(); }, { capture:true });
+feature.addEventListener('click', event => {
+  if (event.target instanceof Element && !event.target.closest('button')) cinematicAction()?.click();
+});
+feature.addEventListener('keydown', event => {
+  if (event.repeat || !['Enter',' '].includes(event.key) ||
+      (event.target instanceof Element && event.target.closest('button'))) return;
+  const action = cinematicAction();
+  if (action) { event.preventDefault(); action.click(); }
+});
 feature.addEventListener('cancel', event => {
   if (busy) event.preventDefault();
 });
@@ -437,6 +559,8 @@ feature.addEventListener('cancel', event => {
 feature.addEventListener('close', () => {
   refreshControls();
   if (!busy) {
+    track.hidden = true;
+    game.dataset.mode = 'base';
     document.body.dataset.world = 'base';
     audio.setScene('base');
   }
@@ -468,6 +592,7 @@ stakeUp.addEventListener('click', () => {
 const shopNames = { regular: 'Sugar Rush', super: 'Koala Frenzy', mystery: 'Mystery Bonus' };
 const purchases = Object.keys(prices) as Purchase[];
 const shopOptions = get('shop-options');
+const shopEmblems = { regular:'chest-regular',super:'chest-super',mystery:'chest-closed' } satisfies Record<Purchase,string>;
 const confirmation = get('shop-confirmation');
 const confirmBuy = get<HTMLButtonElement>('confirm-buy');
 const weightSum = mysteryWeights.reduce<number>((a, b) => a + b, 0);
@@ -500,7 +625,7 @@ buy.addEventListener('click', () => {
     option.className = 'secondary';
     option.setAttribute('aria-label', shopNames[purchase] + ' · ' + fmt(cost) + ' credits');
     const image = document.createElement('img');
-    image.src = art('scatter');
+    image.src = import.meta.env.BASE_URL + 'art/cinematic/' + shopEmblems[purchase] + '.webp';
     image.alt = '';
     const label = document.createElement('strong');
     label.textContent = shopNames[purchase];
@@ -511,11 +636,22 @@ buy.addEventListener('click', () => {
     multiplier.textContent = prices[purchase] + '× Base Bet';
     option.append(image, label, multiplier, price);
     option.disabled = balance < cost;
+    if (option.disabled) {
+      const shortage = document.createElement('small');
+      shortage.className = 'purchase-shortage';
+      shortage.textContent = 'Insufficient credits';
+      option.append(shortage);
+      option.setAttribute('aria-label', option.getAttribute('aria-label') + ' · Insufficient credits');
+    }
     option.addEventListener('click', () => {
       if (busy || session || !shop.open || quote || balance < cost) return;
       quote = { purchase, stake: selectedStake };
       get('confirm-title').textContent = shopNames[purchase];
       get('confirm-price').textContent = fmt(cost) + ' credits';
+      get('confirm-balance').textContent = fmt(balance);
+      get('confirm-remaining').textContent = fmt(balance - cost);
+      get<HTMLImageElement>('confirm-art').src = image.src;
+      confirmation.style.setProperty('--purchase-world', 'url("' + art(purchase === 'mystery' ? 'epic' : purchase) + '")');
       const disclosure = get('confirm-odds');
       disclosure.textContent = odds;
       disclosure.hidden = purchase !== 'mystery';
@@ -553,25 +689,28 @@ async function animateWin(payout: number, award: number) {
   get('win-title').textContent = tier === 'epic' ? 'Epic Win' : tier === 'mega' ? 'Mega Win' : 'Big Win';
   const counter = get('win-counter');
   counter.textContent = fmt(0);
-  const returnPoint = document.createComment('fast-forward position');
-  fastForward.before(returnPoint);
-  get('win-actions').append(fastForward);
+  const bounds = spin.getBoundingClientRect();
+  celebration.style.setProperty('--skip-left', bounds.left + 'px');
+  celebration.style.setProperty('--skip-top', bounds.top + 'px');
+  celebration.style.setProperty('--skip-size', bounds.width + 'px');
   try {
     celebration.showModal();
-    pose('win');
-    winPose(tier === 'epic' ? 'bonus' : 'win');
+    audio.setCinematicDuck(true);
+    pose('big');
+    winPose(tier === 'epic' ? 'bonus' : 'big');
     signal('win');
     cue(tier === 'epic' ? 'jackpot' : tier);
     await motion.tween(tier === 'epic' ? 2050 : tier === 'mega' ? 1500 : 1080, progress => {
       counter.textContent = fmt(Math.floor(award * (1 - (1 - progress) ** 3)));
     });
   } finally {
+    audio.setCinematicDuck(false);
     celebration.close();
-    returnPoint.replaceWith(fastForward);
+    refreshSpinButton();
   }
 }
 
-async function playSpin(active?: Session, recorded?: RecordedSpin, paidCharge?: number, openingDuration = 520, openingPace = 1) {
+async function playSpin(active?: Session, recorded?: RecordedSpin, openingDuration = 520, openingPace = 1) {
   await motion.visible();
   const locked = active?.stake ?? stake();
   const mode = active?.board.mode ?? 'base';
@@ -630,7 +769,7 @@ async function playSpin(active?: Session, recorded?: RecordedSpin, paidCharge?: 
       host.dispatchEvent(new CustomEvent('scatter-landed', { detail: { cell, count: landedScatters } }));
       status.textContent = landedScatters + (landedScatters === 1 ? ' scatter landed' : ' scatters landed');
       if (!motion.instant) audio.cue('scatter-impact', landedScatters-1);
-      if (landedScatters === 1) pose('ready');
+      if (landedScatters === 1) pose('curious');
       if (landedScatters >= 2) {
         pose('watch');
         signal('scatter');
@@ -702,7 +841,6 @@ async function playSpin(active?: Session, recorded?: RecordedSpin, paidCharge?: 
     balance += award - locked;
   }
   total.value = fmt(balance);
-  if (award > 0 && !motion.instant) pose('win');
   if (!cascades) writeHistory('No group of 8 or more matching candies.');
   spinWin.value = fmt(award);
   spinWin.dataset.confirmed = String(award);
@@ -714,15 +852,17 @@ async function playSpin(active?: Session, recorded?: RecordedSpin, paidCharge?: 
     lastWin.animate([{ color:'#fff0ab', textShadow:'0 0 10px #ffba61' },
       { color:'#c0ffe6',textShadow:'none' }], { duration:640,easing:'ease-out' });
   }
-  const summary = active ? modeNames[active.board.mode] + ' · Free spin ' + active.board.played : 'Spin ' + (++count) + ' · Stake ' + fmt(paidCharge ?? locked);
+  const summary = active ? modeNames[active.board.mode] + ' · Free spin ' + active.board.played : '';
   const unit = active?.source === 'practice' ? ' practice credits' : ' fake credits';
-  status.textContent = summary + ' · ' + (award ? '+' + spinWin.value + unit : payout ? 'Win below 0.01 credit' : 'No win');
+  const resultLabel = award ? active ? '+' + spinWin.value + unit : 'Candy win' : payout ? 'Win below 0.01 credit' : 'No win';
+  status.textContent = summary ? summary + ' · ' + resultLabel : resultLabel;
   if (landedScatters) status.textContent += ' · ' + landedScatters + (landedScatters === 1 ? ' scatter' : ' scatters');
   if (payout > 0 && (payout === math[mode].spinCap * basis || active?.board.total === math[mode].sessionCap * basis)) {
     status.textContent += ' · Payout cap reached';
   }
   await animateWin(payout, award);
-  pose('idle');
+  if (motion.instant || payout >= 10 * basis) pose('idle');
+  else pose(award ? 'win' : 'reset', true);
   return { trigger: 'trigger' in result ? result.trigger : undefined, locked };
 }
 
@@ -734,7 +874,7 @@ async function playBonus(mode: BonusMode, source: Source, locked: number, record
   if (source !== 'natural') {
     spinWin.value = '0.00';
     setLeaf(1, true);
-    status.textContent = modeNames[mode] + ' · 10 free spins at stake ' + fmt(locked);
+    status.textContent = modeNames[mode] + ' · 10 free spins';
   } else {
     status.textContent += ' · ' + modeNames[mode] + ' unlocked';
   }
@@ -742,16 +882,21 @@ async function playBonus(mode: BonusMode, source: Source, locked: number, record
     audio.cue('scatter');
     signal('scatter');
   }
-  await showIntro(active, presentation);
+  audio.setCinematicDuck(true);
+  try {
+    await showIntro(active, presentation);
+  } finally { audio.setCinematicDuck(false); }
   purchaseReveal = false;
   refreshControls();
   updateBonus(active);
   while (active.board.played < freeSpins) {
     await motion.nextSpin();
     await playSpin(active, recorded?.[active.board.played]);
-    if (active.board.played < freeSpins) await motion.wait(320);
+    if (active.board.played < freeSpins) await motion.pause(320);
   }
   await motion.visible();
+  cancelAnimationFrame(bonusFrame);
+  paintBonus(bonusTarget);
   get('feature-title').textContent = modeNames[mode] + ' complete';
   get('feature-copy').textContent = 'Total ' + fmt(settleCredits(active.board.total, locked)) +
     (source === 'practice' ? ' practice credits. Your live balance is unchanged.' : ' fake credits across ten free spins.');
@@ -762,6 +907,7 @@ async function playBonus(mode: BonusMode, source: Source, locked: number, record
   cinematicPose('bonus');
   featureAction.hidden = false;
   feature.showModal();
+  featureAction.focus();
 }
 
 async function playPaid(mode: PaidMode, stakeMinor: number) {
@@ -781,10 +927,10 @@ async function playPaid(mode: PaidMode, stakeMinor: number) {
     void ready.catch(() => {});
     game.dataset.storm = 'active';
     try {
-      await display.storm(duration * .43, reducedEffects(), () => {
-        if (!reducedEffects()) brightenFalls();
+      await motion.stage(() => display.storm(duration * .43, reducedEffects(), () => {
+        if (!motion.instant && !reducedEffects()) brightenFalls();
         cue('storm');
-      }, ready);
+      }, ready));
     } finally {
       delete game.dataset.storm;
     }
@@ -794,7 +940,7 @@ async function playPaid(mode: PaidMode, stakeMinor: number) {
   if (opening) {
     const quietSpin = !tier && opening.tumbles.length === 0 && opening.award.credit === 0;
     const openingPace = quietSpin && speed.value === '0.65' && !auto?.turbo ? 1.5 : 1;
-    await playSpin(undefined, opening, receipt.cost, storm ? duration * .57 : 520, openingPace);
+    await playSpin(undefined, opening, storm ? duration * .57 : 520, openingPace);
   }
   if (tier) await playBonus(tier, opening ? 'natural' : mode === 'mystery' ? 'mystery' : 'purchase', stakeMinor, bonus, presentation);
   if (balance !== receipt.balance) throw Error('Final balance disagrees with receipt.');
@@ -805,7 +951,6 @@ async function playPaid(mode: PaidMode, stakeMinor: number) {
 async function runSequence(task: () => Promise<void>) {
   if (busy) return;
   busy = true;
-  motion.reset();
   refreshControls();
   try {
     await task();
@@ -821,8 +966,7 @@ async function runSequence(task: () => Promise<void>) {
     busy = false;
     burst.hidden = true;
     if (celebration.open) celebration.close();
-    pose('idle');
-    motion.reset();
+    if (mascot.dataset.pose !== 'win' && mascot.dataset.pose !== 'reset') pose('idle');
     refreshControls();
   }
 }
@@ -839,7 +983,6 @@ async function playAuto(settings: AutoRun) {
     await motion.nextSpin();
     if (settings.stopped) break;
     settings.remaining--;
-    motion.reset();
     renderAuto();
     refreshControls();
     const trigger = await playPaid(ante ? 'ante' : 'normal', stake());
@@ -849,13 +992,13 @@ async function playAuto(settings: AutoRun) {
         else if (!settings.stopped && balance < chargedStake()) reason = 'Autoplay stopped · insufficient fake credits.';
         break;
       }
-      await motion.wait(1150);
+      await motion.pause(1150);
       if (feature.open) feature.close();
       session = undefined;
     purchaseReveal = false;
       refreshControls();
     }
-    if (settings.remaining > 0 && !settings.stopped) await motion.wait(145);
+    if (settings.remaining > 0 && !settings.stopped) await motion.pause(145);
   }
   status.textContent = settings.stopped ? 'Autoplay stopped.' : reason;
 }
@@ -886,6 +1029,7 @@ async function start() {
     spinWin.dataset.confirmed = String(previous);
     get<HTMLOutputElement>('last-win').value = spinWin.value;
   }
+  delete status.dataset.phase;
   status.textContent = 'Choose a stake, then spin.';
   busy = false;
   refreshControls();
@@ -896,7 +1040,8 @@ async function start() {
     void runSequence(async () => { await playPaid(unplayed.mode, unplayed.stake); });
   }
   spin.addEventListener('click', () => {
-    if (busy || feature.open || shop.open || balance < chargedStake()) return;
+    if (busy) { skip(); return; }
+    if (performance.now() - lastSkipInteraction < 320 || feature.open || shop.open || balance < chargedStake()) return;
     void runSequence(async () => {
       await playPaid(ante ? 'ante' : 'normal', stake());
     });
@@ -906,12 +1051,15 @@ const shell = document.querySelector<HTMLElement>('.shell')!;
 new ResizeObserver(([entry]) => {
   const { width, height } = entry.contentRect;
   const portrait = width < height * 1.18;
+  const sidecar = !portrait && (height < 550 || width < 880);
   shell.dataset.layout = portrait ? 'portrait' : 'landscape';
-  shell.dataset.size = !portrait && height <= 455 ? 'mini' : 'normal';
+  shell.dataset.size = sidecar ? 'mini' : 'normal';
+  shell.dataset.stage = portrait ? 'stacked' : sidecar ? 'sidecar' : 'cabinet';
 }).observe(shell);
 
 start().catch(error => {
   console.error(error);
+  status.dataset.phase = 'error';
   status.textContent = 'The candy grid could not load. Reload to try again.';
 });
 

@@ -1,0 +1,204 @@
+/* The layout rectangle is the only size budget. The artwork remains contained in its own cells. */
+.shell {
+  box-sizing:border-box;
+  width:100%;
+  max-width:none;
+  height:100dvh;
+  padding:max(7px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right))
+    max(7px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));
+  gap:5px;
+}
+.shell .top { width:min(100%,1760px); justify-self:center; }
+.shell .layout {
+  --stage-gap:clamp(5px,1vw,14px);
+  container-type:size;
+  height:100%;
+  max-height:none;
+  width:min(100%,1760px);
+  justify-self:center;
+  gap:var(--stage-gap);
+}
+.shell[data-stage] .game {
+  --header-reserve:0px;
+  --auto-reserve:0px;
+  --cabinet-trim:clamp(205px,calc(100cqh * .15 + 101px),251px);
+  --cabinet-reserve:calc(var(--cabinet-trim) + var(--header-reserve) + var(--auto-reserve));
+  align-self:center;
+  justify-self:center;
+  min-width:0;
+  height:auto;
+  max-height:none;
+  margin:0;
+  padding:5px;
+  gap:4px;
+}
+.shell[data-stage] .game:has(.bonus-track:not([hidden])) { --header-reserve:67px; }
+.shell[data-stage] .game:has(#auto-track:not([hidden])) { --auto-reserve:34px; }
+.shell[data-stage] .game .board-space {
+  display:block;
+  container-type:normal;
+  height:auto;
+  min-width:0;
+  margin:0;
+  flex:none;
+}
+.shell[data-stage] .game .reel-frame { width:100%; padding:4px; }
+.shell[data-stage] #board { aspect-ratio:6/5; }
+.shell[data-stage] .game .deck { margin:0; align-self:stretch; min-width:0; }
+.shell[data-stage] .intro { min-width:0; min-height:0; padding:0; }
+.shell[data-stage] .intro .stage-logo { width:100%; max-width:290px; height:auto; aspect-ratio:auto; object-fit:contain; }
+.shell[data-stage] .mascot canvas { object-fit:contain; }
+.shell[data-stage] .game .deck .controls .spin-button { width:var(--spin-size); height:var(--spin-size); aspect-ratio:1; }
+.shell[data-stage] .game .deck .controls .cabinet-display output {
+  font-size:clamp(.68rem,2.45cqw,1.26rem);
+}
+.shell[data-stage] .game .deck .controls .stake-tools select {
+  font-size:clamp(.65rem,2.2cqw,1.14rem);
+  min-height:24px;
+}
+.shell[data-stage] .game .deck .controls .stake-tools button { min-width:24px; }
+.shell[data-stage] .deck .status { min-height:1.15em; text-align:center; }
+.shell[data-stage] .deck .cabinet-notes { white-space:normal; }
+
+.shell[data-stage="cabinet"] .layout {
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr);
+  grid-template-areas:"intro game .";
+  align-items:center;
+}
+.shell[data-stage="cabinet"] .intro { width:min(100%,270px); justify-self:end; align-self:center; }
+.shell[data-stage="cabinet"] .intro p { font-size:clamp(.72rem,1vw,.95rem); }
+.shell[data-stage="cabinet"] .intro .mascot { height:min(28cqh,288px); flex:none; }
+.shell[data-stage="cabinet"] .game {
+  width:min(72cqw,1320px,max(260px,calc((100cqh - var(--cabinet-reserve))*1.2)));
+}
+.shell[data-stage="cabinet"] .game .deck { --spin-size:clamp(67px,11cqw,110px); }
+.shell[data-stage="cabinet"] .game .deck .deck-actions button { min-height:38px; }
+.shell[data-stage="cabinet"] .game .deck .controls .deck-actions .ante-control { white-space:normal; flex-wrap:wrap; }
+
+.shell[data-layout][data-stage="stacked"] .layout {
+  --rail-size:clamp(51px,10cqh,96px);
+  max-height:none;
+  align-self:stretch;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:auto auto;
+  grid-template-areas:"intro" "game";
+  align-content:start;
+  padding-block-start:clamp(0px,(100dvh - 555px)*.045,25px);
+}
+.shell[data-layout][data-stage="stacked"] .intro {
+  display:grid;
+  grid-template-columns:minmax(0,1.25fr) minmax(0,.78fr) minmax(0,.72fr);
+  grid-template-rows:minmax(0,1fr);
+  align-self:start;
+  justify-self:center;
+  width:min(100%,660px);
+  height:var(--rail-size);
+  gap:clamp(5px,1vw,11px);
+}
+.shell[data-stage="stacked"] .intro :is(h1,.mascot,.gumleaf-relic) { grid-row:1; align-self:center; }
+.shell[data-stage="stacked"] .intro h1 { margin:0; }
+.shell[data-stage="stacked"] .intro .stage-logo { max-height:var(--rail-size); }
+.shell[data-stage="stacked"] .intro .mascot { grid-column:3; width:100%; height:var(--rail-size); }
+.shell[data-stage="stacked"] .intro .gumleaf-relic { width:min(100%,155px); margin:0; }
+.shell[data-layout][data-stage="stacked"] .game {
+  --cabinet-trim:187px;
+  align-self:start;
+  width:min(100%,820px,max(245px,calc((100cqh - var(--rail-size) - var(--cabinet-reserve) - var(--stage-gap))*1.2)));
+}
+.shell[data-stage="stacked"] .game .deck { --spin-size:clamp(56px,16cqw,94px); }
+.shell[data-stage="stacked"] .game .deck .controls {
+  grid-template-columns:minmax(0,1fr) minmax(108px,1.63fr) minmax(0,.87fr) minmax(0,.87fr) var(--spin-size);
+  grid-template-rows:minmax(41px,1fr) minmax(46px,1fr);
+}
+.shell[data-stage="stacked"] .game .deck .controls .stake-tools { grid-template-columns:24px minmax(0,1fr) 24px; }
+.shell[data-stage="stacked"] .game .deck .controls .stake-tools button { min-height:38px; }
+.shell[data-stage="stacked"] .game .deck .controls .deck-actions button { min-height:44px; }
+.shell[data-stage="stacked"] .deck .deck-actions {
+  grid-template-columns:1.2fr 1.1fr 1.1fr .89fr .72fr .8fr;
+}
+.shell[data-stage="stacked"] .game .deck .controls .deck-actions .ante-control { white-space:normal; }
+.shell[data-stage="stacked"] .deck .controls .cabinet-display { overflow-wrap:anywhere; }
+
+.shell[data-stage="sidecar"] .layout {
+  grid-template-columns:minmax(73px,15%) minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr);
+  grid-template-areas:"intro game";
+  align-items:center;
+}
+.shell[data-stage="sidecar"] .intro { align-self:center; }
+.shell[data-stage="sidecar"] .intro .mascot { height:min(31cqh,157px); flex:none; }
+.shell[data-stage="sidecar"] .intro .gumleaf-relic { width:min(87%,116px); margin-top:3px; }
+.shell[data-stage="sidecar"] .game {
+  --sidecar-width:clamp(165px,29cqw,254px);
+  --cabinet-trim:64px;
+  width:min(100%,calc(var(--sidecar-width) + max(165px,(100cqh - var(--cabinet-reserve))*1.2)));
+  display:grid;
+  grid-template-columns:minmax(0,1fr) var(--sidecar-width);
+  grid-template-rows:auto auto auto;
+}
+.shell[data-stage="sidecar"] .game .cabinet-round { grid-area:1/1; }
+.shell[data-stage="sidecar"] .game .bonus-track { grid-area:2/1; }
+.shell[data-stage="sidecar"] .game .board-space { grid-area:3/1; align-self:end; }
+.shell[data-stage="sidecar"] .game .deck {
+  --spin-size:clamp(52px,16dvh,78px);
+  grid-area:1/2/4/3;
+  align-content:center;
+  justify-self:stretch;
+  padding:4px;
+}
+.shell[data-stage="sidecar"] .game .deck .controls {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(34px,auto)) var(--spin-size) auto;
+  min-height:0;
+}
+.shell[data-stage="sidecar"] .game .deck .controls .stake-tools { grid-template-columns:24px minmax(0,1fr) 24px; }
+.shell[data-stage="sidecar"] .game .deck .controls .spin-button { grid-area:3/1/4/3; }
+.shell[data-stage="sidecar"] .game .deck .deck-actions { grid-area:4/1/5/3; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.shell[data-stage="sidecar"] .game .deck .controls .deck-actions button { min-height:38px; }
+.shell[data-stage="sidecar"] .game .deck .controls .cabinet-display output,
+.shell[data-stage="sidecar"] .game .deck .controls .stake-tools select { font-size:clamp(.72rem,2.6cqw,.94rem); }
+.shell[data-stage="sidecar"] .game .bonus-track .bonus-meter strong { font-size:1.04rem; }
+.shell[data-stage="sidecar"] .bonus-progress .progression { display:none; }
+@media (any-pointer:coarse) and (min-height:375px) {
+  .shell[data-stage="sidecar"] .game .deck .controls .deck-actions button { min-height:44px; }
+}
+@media (max-height:370px) {
+  .shell[data-stage="sidecar"] .game .deck .controls .deck-actions button { min-height:31px; }
+}
+@media (max-width:360px) {
+  .shell[data-stage="stacked"] .game .deck .controls {
+    grid-template-columns:minmax(0,1fr) 102px minmax(0,.9fr) minmax(0,.9fr) var(--spin-size);
+  }
+}
+dialog.feature-dialog:not(#feature-dialog) {
+  max-width:calc(100% - max(14px,env(safe-area-inset-left)) - max(14px,env(safe-area-inset-right)));
+  max-height:calc(100dvh - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)));
+  overflow:auto;
+  overscroll-behavior:contain;
+}
+#feature-dialog .feature-caption button { min-height:44px; }
+@media (orientation:landscape) and (max-height:480px) {
+  #feature-dialog #feature-title { font-size:clamp(1.3rem,6.4dvh,2.15rem); }
+  #feature-dialog .feature-caption { padding-block:5px 8px; }
+}
+@media (any-pointer:coarse) {
+  dialog.feature-dialog :is(.primary,.secondary), #guide-nav button { min-height:44px; }
+}
+.shell[data-stage="cabinet"] .game .cabinet-round { margin-block-end:-1px; }
+@media (min-width:1200px) and (min-height:650px) {
+  .shell[data-stage="cabinet"] .game {
+    --cabinet-trim:clamp(226px,calc(100cqh * .13 + 134px),251px);
+  }
+  .shell[data-stage="cabinet"] .game .deck { --spin-size:clamp(96px,11cqw,110px); }
+}
+@media (max-width:360px) {
+  .shell[data-layout][data-stage="stacked"] .layout:has(.bonus-track:not([hidden])) { --rail-size:40px; }
+  .shell[data-stage="stacked"] .game:has(.bonus-track:not([hidden])) { --header-reserve:53px; }
+}
+@media (max-width:360px) {
+  .shell[data-stage="stacked"] .game:has(.bonus-track:not([hidden])) .deck .deck-actions {
+    grid-template-columns:minmax(31px,1.16fr) minmax(30px,1.04fr) minmax(40px,1.2fr)
+      minmax(27px,.81fr) minmax(24px,.69fr) minmax(25px,.75fr);
+  }
+}
