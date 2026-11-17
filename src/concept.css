@@ -1,0 +1,341 @@
+:root {
+  --ink: #1a0926;
+  --gold-light: #ffe299;
+  --gold-line: #e7a753;
+  --violet: #8e25bb;
+  background: #10061a;
+}
+body { background: #10061a; }
+.scenery .world {
+  background-image: linear-gradient(90deg,#19092315,#17071c33 53%,#17061d38), url('/art/concept/base.webp');
+  background-size: cover;
+  background-position: 50% 50%;
+}
+.scenery .foreground { opacity: .23; filter: hue-rotate(34deg) saturate(.9); }
+body[data-world="regular"] .world { background-image: url('/art/concept/regular.webp'); }
+body[data-world="super"] .world { background-image: url('/art/concept/super.webp'); }
+body[data-world="epic"] .world { background-image: url('/art/concept/epic.webp'); }
+body:is([data-world="regular"],[data-world="super"],[data-world="epic"]) .foreground { opacity: .12; }
+.top { border-color: #f1bc7494; }
+.brand { color: #ffe39c; font-family: "Trebuchet MS", sans-serif; font-weight: 1000; letter-spacing: .1em; }
+.brand span { color: #ffa3f4; text-shadow: 0 0 10px #ff44db; }
+.demo { background: #210b32; border-color: #f0bd727d; }
+.intro .stage-logo { display: block; width: 114%; max-width: 280px; margin-left: -7%; aspect-ratio: 1.42; object-fit: contain; filter: drop-shadow(0 5px 12px #240629); }
+.intro p { color:#fff0d4; font-weight:700; text-shadow:0 1px 5px #140618; }
+.mascot canvas { filter: drop-shadow(0 8px 3px #11051eac) drop-shadow(0 0 8px #9229b555); }
+.game { border-color: #ba794d; background: #160b22e8; box-shadow: inset 0 0 0 2px #4f2546, 0 8px 24px #100313a3; }
+.scoreboard div { background: #251033; border-color: #9c5c7e; box-shadow: inset 0 1px 9px #101; }
+.scoreboard span { color: #eecff1; }
+.scoreboard output { color: #fff0c8; }
+.scoreboard div:nth-child(2) output { color: #ffbaff; }
+.scoreboard div:nth-child(3) output { color: #ffd779; }
+.reel-frame { border-color: #ffd581; background: linear-gradient(155deg,#ffe099,#975c37 20%,#3f1c47 48%,#713852 67%,#efb367); box-shadow: 0 0 0 2px #622b4d, 0 0 21px #bb40c354, inset 0 0 0 1px #ffda97; }
+#board { background: #1c0925; box-shadow: 0 0 0 1px #e4ad76; }
+.deck { border-color: #c18a55; background: #241031ee; box-shadow: inset 0 0 0 1px #7b3c72, 0 10px 24px #130b1ade; }
+.deck .status { color: #ffe7b8; }
+.deck .controls .stake-tools button,.deck-actions button,.deck .stake-tools select { background: #4d1d6b; border-color: #bd6ca9; color: #fff0ea; }
+.deck .stake-tools select { background: #21112f; }
+.deck .spin-button { background: linear-gradient(#e468df,#8a24ac 55%,#4c1675); border: 1px solid #ffd984; border-radius: 24px; color: #ffe7a2; font-weight: 1000; text-shadow: 0 1px 3px #3a1046; box-shadow: inset 0 0 0 2px #b55e79, 0 2px 0 #6e334b, 0 0 13px #ce39d660; }
+.deck .spin-button span { font-size:1.36em; }
+.deck .spin-button:hover:not(:disabled) { background: linear-gradient(#f48beb,#9430bc 62%,#5e1785); }
+.deck-actions [id="bonus"] { color:#ffe6a6; border-color:#c38a59; }
+.shop-dialog,.feature-dialog.utility-dialog,#auto-dialog {
+  background: #220d33;
+  border-color: #dc9a5e;
+  box-shadow: 0 14px 50px #11031e, inset 0 0 0 2px #71337c;
+}
+.shop-dialog { width:min(775px,calc(100% - 20px)); }
+#shop-options button { position: relative; isolation: isolate; overflow: hidden; padding: 9px 7px 12px; gap: 5px; background: #3c154b; border: 2px solid #ffc469; box-shadow: inset 0 0 0 1px #80345f, 0 4px 10px #110419aa; }
+#shop-options button::before { content:""; position:absolute; inset:0; z-index:-1; background-size:cover; background-position:center; opacity:.8; }
+#shop-options button[data-purchase="regular"]::before { background-image:linear-gradient(transparent 10%,#5a124980 62%,#4a113d 94%),url('/art/concept/regular.webp'); }
+#shop-options button[data-purchase="super"]::before { background-image:linear-gradient(transparent 10%,#1a144e70 62%,#201049 94%),url('/art/concept/super.webp'); }
+#shop-options button[data-purchase="mystery"]::before { background-image:linear-gradient(#3f114454,#38104e 95%),url('/art/concept/epic.webp'); }
+#shop-options button img { height:clamp(57px,21vw,156px); width:100%; filter:drop-shadow(0 4px 7px #220327); }
+#shop-options strong { color:#ffe489; font:1000 italic clamp(.76rem,2.8vw,1.46rem)/.95 "Trebuchet MS",sans-serif; text-transform:uppercase; text-shadow:0 2px #882856,0 3px #240b3c,0 0 10px #4b145b; }
+#shop-options small { color:#fff4d2; font-weight:900; font-size:clamp(.56rem,1.5vw,.76rem); }
+#shop-options span { color:#ffe0a7; font-size:clamp(.61rem,1.6vw,.85rem); }
+
+#feature-dialog { width:min(670px,calc(100% - 16px)); background:#260e36; border:1px solid #ffd47f; box-shadow:0 0 32px #b629b166,inset 0 0 0 2px #8f4683; }
+#feature-dialog[data-mode="regular"] { background:#461444; border-color:#ffd78a; }
+#feature-dialog[data-mode="super"] { background:#211749; border-color:#bfb5ff; }
+#feature-dialog[data-mode="epic"] { background:#3b1147; border-color:#ffd683; }
+#feature-dialog h2 { margin:.35em 0 .2em; color:#ffe2a3; font:1000 italic clamp(1.35rem,5vw,2.35rem)/1 "Trebuchet MS",sans-serif; letter-spacing:-.055em; text-shadow:0 2px #843c69,0 0 12px #dc59da63; }
+#feature-dialog p { margin:.7em 0 1em; color:#ffebf9; }
+#feature-dialog .cinematic-art { height:clamp(100px,41dvh,297px); isolation:isolate; border-radius:12px; box-shadow: inset 0 0 0 1px #ecac747d; }
+.cinematic-art::before { content:""; position:absolute; inset:0; z-index:-2; background-image:linear-gradient(#36134a21,#2c103959),var(--feature-world,none); background-size:cover; background-position:center; transform:scale(var(--zoom,1)); }
+.cinematic-rays { position:absolute; inset:-45%; pointer-events:none; z-index:-1; transform:rotate(var(--ray-angle,0deg)); opacity:var(--charge,.24); background:repeating-conic-gradient(from 4deg at 56% 55%,#ffbb6680 0 5deg,transparent 12deg 26deg); mask-image:radial-gradient(circle,#000 7%,transparent 56%); }
+.cinematic-light { left:21%; top:4%; width:62%; opacity:var(--charge,.22); animation:none !important; background:radial-gradient(ellipse,#ffdf98,transparent 68%); }
+#feature-dialog[data-mode="super"] .cinematic-rays { background:repeating-conic-gradient(from 4deg at 56% 55%,#c998ff91 0 5deg,transparent 12deg 26deg); }
+#feature-dialog[data-mode="epic"] .cinematic-rays { background:repeating-conic-gradient(from 4deg at 56% 55%,#ffc661aa 0 5deg,transparent 12deg 24deg); }
+#feature-dialog .cinematic-mochi { width:45%; height:88%; left:-1%; animation:none; filter:drop-shadow(0 4px 5px #1c062b); }
+.cinematic-emblem { position:absolute; width:49%; height:87%; bottom:4%; right:4%; object-fit:contain; filter:drop-shadow(0 3px 15px #460b4c); }
+#feature-continue { min-width:clamp(110px,28vw,180px); color:#481346; font-weight:1000; border-radius:18px; background:linear-gradient(#ffe9ad,#e8a259); box-shadow:0 0 15px #f5bc7761; }
+
+.burst[data-tone="leaf"] { color:#ffeaa6; grid-template-columns:1fr; grid-template-rows:auto auto; align-content:center; justify-items:center; background:radial-gradient(ellipse,#5a284bec,#301034b9 45%,transparent 76%); }
+.burst[data-tone="leaf"]::before { grid-area:1 / 1; background-image:url('/art/concept/gumleaf.webp'); width:clamp(115px,26vw,245px); animation:leaf-rise .45s both ease-out; }
+.burst[data-tone="leaf"] #burst-value { grid-area:1 / 1; align-self:center; z-index:1; font-size:clamp(1.65rem,6.1vw,4.4rem); transform:rotate(-9deg); text-shadow:0 2px #a24563,0 3px #3a124f,0 0 16px #ff9c34; }
+.burst[data-tone="leaf"] #burst-label { grid-area:2 / 1; font-size:clamp(.95rem,3vw,1.75rem); }
+.burst[data-tone="bonus"] { gap:0; font-size:clamp(1rem,4vw,2.6rem); background:radial-gradient(ellipse,#7d287be8,#3e0d62af 55%,transparent 78%); }
+.burst[data-tone="bonus"]::before { content:""; display:block; width:clamp(80px,22vw,168px); aspect-ratio:1; margin:auto; background:url('/art/concept/scatter.webp') center / contain no-repeat; }
+.celebration { background:radial-gradient(ellipse,#823a78,#471250ed 48%,#201128ed); }
+.celebration[data-tier="mega"] { background:radial-gradient(ellipse,#7035b4,#422079ef 49%,#201128ed); color:#fee19e; }
+.celebration[data-tier="epic"] { background:radial-gradient(ellipse,#b15652,#762071ef 50%,#250c30ed); color:#ffc870; }
+.celebration strong { font:1000 italic clamp(1.55rem,5.8vw,4.6rem)/.96 "Trebuchet MS",sans-serif; text-transform:uppercase; text-shadow:0 3px #a2365e,0 5px #2b093e,0 0 23px #ffc1709b; }
+@media(max-width:680px) {
+  .scenery .world { background-image:linear-gradient(#230a291a,#19062265),url('/art/concept/base-mobile.webp'); }
+  .shell[data-layout="portrait"] .stage-logo { width:min(125px,100%); max-height:66px; margin-left:0; }
+  .shell[data-layout="portrait"] .intro { grid-template-columns:minmax(0,1.35fr) minmax(0,.9fr) 64px; }
+  .scenery .foreground { opacity:.12; }
+}
+
+
+.sound-controls { border-top: 1px solid #a878925f; margin-top: 4px; padding-top: 5px; }
+.sound-controls label { display: grid; grid-template-columns: 96px minmax(0, 1fr) 38px; justify-content: stretch; gap: 7px; }
+.sound-controls input[type="range"] { width: 100%; min-width: 0; margin: 0; accent-color: #ffd47d; }
+.sound-controls output { color: #ffe6ae; text-align: right; font-variant-numeric: tabular-nums; }
+.sound-controls #audio-status { font-size: .72rem; color: #edd0e9; margin: 3px 0 1px; }
+
+.utility-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 7px;
+  background: #220d33;
+}
+.utility-head h2 { margin: 0; }
+.utility-head button { flex-shrink: 0; min-height: 32px; font-size: .75rem; }
+
+/* A shared frame connects the reels and their control deck. */
+.shell .layout {
+  grid-template-columns: clamp(105px, 20vw, 246px) minmax(0, 1fr);
+  grid-template-areas: "intro game";
+  width: min(100%, calc(100dvh * 1.2 + 180px));
+  margin-inline: auto;
+}
+.shell[data-size="mini"] .layout { grid-template-columns: minmax(105px, 25%) minmax(0, 1fr); }
+.shell[data-layout="portrait"] .layout {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "intro" "game";
+}
+.game {
+  padding: 4px;
+  border: 2px solid #e4ab62;
+  background: linear-gradient(160deg,#492253,#1e102c 40%,#2f173f);
+  box-shadow: inset 0 0 0 2px #75375b, 0 8px 24px #100313b3;
+}
+.cabinet-round {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px 12px;
+  color: #ffe2ad;
+  font-size: clamp(.63rem, 1.35vw, .86rem);
+  font-weight: 750;
+}
+.cabinet-round output { color: #fff0cf; font-variant-numeric: tabular-nums; }
+/* The cabinet can shrink once the reels reach their width limit. */
+.game {
+  container-type: inline-size;
+  align-self: start;
+  height: fit-content;
+  max-height: calc(100% - 12px);
+}
+.game .cabinet-round, .game .bonus-track { flex: none; }
+.game .board-space {
+  flex: 0 1 auto;
+  height: calc((100cqw - 3px) / 1.2 + 3px);
+  margin-block-start: -3px;
+  align-items: end;
+}
+.game .reel-frame { border-radius: 12px 12px 5px 5px; }
+.game .deck {
+  flex: none;
+  align-self: stretch;
+  border: 1px solid #db9b58;
+  border-top: 2px solid #ffd78d;
+  border-radius: 5px 5px 12px 12px;
+  padding: clamp(4px, 1vw, 10px);
+  background: linear-gradient(#824259 0,#49234f 11px,#251332 100%);
+  box-shadow: inset 0 1px #efb47d, inset 0 0 0 2px #4f284c;
+  gap: clamp(3px, .65vh, 6px);
+}
+.game .deck .controls {
+  grid-template-columns: minmax(0,1fr) minmax(110px,1.7fr) minmax(0,1fr) minmax(0,1fr) minmax(66px,1.1fr);
+  align-items: stretch;
+  gap: 4px;
+}
+.cabinet-display,
+.game .deck .stake-tools label {
+  display: grid;
+  place-content: center;
+  min-width: 0;
+  text-align: center;
+  padding: 3px;
+  border: 1px solid #bc805c;
+  border-radius: 8px;
+  background: #20122b;
+  box-shadow: inset 0 2px 5px #100818;
+  color: #ffe3b0;
+  font: 800 clamp(.61rem, 1.25vw, .72rem)/1.13 system-ui,sans-serif;
+}
+.cabinet-display output {
+  color: #c0ffe6;
+  font-size: clamp(.74rem, 1.8vw, 1.12rem);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.game .deck .stake-tools {
+  grid-template-columns: minmax(28px,.7fr) minmax(49px,1.45fr) minmax(28px,.7fr);
+  align-items: stretch;
+}
+.game .deck .stake-tools label { place-content: center stretch; }
+.game .deck .stake-tools select {
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  color: #c0ffe6;
+  font: 850 clamp(.74rem, 1.8vw, 1.12rem)/1.2 system-ui,sans-serif;
+}
+.game .deck .spin-button, .game .deck .fast-forward { grid-column: 5; grid-row: 1; }
+.game .deck .spin-button { min-height: 40px; padding: 2px 4px; }
+.game .deck .controls:has(.fast-forward:not([hidden])) .spin-button:not([hidden]) { visibility: hidden; }
+.game .deck .fast-forward { font-size: .62rem !important; white-space: normal; }
+.game .deck-actions { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+.game .deck-actions button { border-color: #b97760; background: linear-gradient(#61325f,#391d49); }
+.game .deck .status { min-height: 0; text-align: center; }
+.cabinet-notes {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 7px;
+  color: #f4debf;
+  font: 650 clamp(.58rem,1.2vw,.71rem)/1.18 system-ui,sans-serif;
+}
+.cabinet-notes p { margin: 0; }
+@media(max-width: 480px) {
+  .game .deck .controls { grid-template-columns: minmax(0,1fr) minmax(112px,1.6fr) minmax(0,1fr) minmax(0,1fr); }
+  .game .deck .spin-button, .game .deck .fast-forward { grid-column: 1 / -1; grid-row: 2; }
+  .game .deck .controls .stake-tools button,
+  .game .deck .spin-button, .game .deck .fast-forward, .game .deck-actions button { min-height: 44px; }
+  .game .deck .stake-tools { grid-template-columns: 34px minmax(40px,1fr) 34px; }
+}
+
+
+.shell:not([data-layout="portrait"]) .game {
+  width: min(100%, clamp(280px, calc(114dvh - 246px), 650px));
+  justify-self: start;
+}
+.shell[data-layout="portrait"] .game {
+  align-self: center;
+  height: fit-content;
+  max-height: min(calc(100% - 12px), 518px);
+  margin-block-end: 12px;
+}
+.game .deck .controls:has(.spin-button:not([hidden])):has(.fast-forward:not([hidden])) {
+  grid-template-columns: minmax(0,1fr) minmax(110px,1.7fr) minmax(0,1fr) minmax(0,1fr) minmax(50px,1fr);
+}
+@media(max-width:480px) {
+  .game .deck .controls:has(.spin-button:not([hidden])):has(.fast-forward:not([hidden])) {
+    grid-template-columns: minmax(0,1fr) minmax(112px,1.6fr) minmax(0,1fr) minmax(0,1fr);
+  }
+}
+.bonus-scatter-layer {
+  position: absolute;
+  inset: clamp(3px,.65vw,8px);
+  z-index: 3;
+  isolation: isolate;
+  border-radius: 6px;
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 60%,#3410407a,#100719e8);
+  box-shadow: inset 0 0 26px #170520;
+}
+.reel-frame:has(.bonus-scatter-layer:not([hidden])) {
+  box-shadow: 0 0 0 2px #a36275, 0 0 26px #ffbe6363, inset 0 0 0 1px #ffe2a7;
+}
+.reel-frame:has(.bonus-scatter-layer:not([hidden])) #board { filter:saturate(.55) brightness(.67); }
+.scatter-drop-cell {
+  --impact:0;
+  position:absolute;
+  width:calc(100% / 6);
+  height:20%;
+  left:calc(var(--column) * 100% / 6);
+  top:calc(var(--row) * 20%);
+  display:grid;
+  place-items:center;
+}
+.scatter-drop-cell img {
+  position:relative;
+  z-index:1;
+  width:100%;
+  height:110%;
+  object-fit:contain;
+  transform-origin:center 75%;
+  filter:drop-shadow(0 0 4px #ffcc62);
+}
+.scatter-drop-cell i {
+  position:absolute;
+  display:none;
+  width:5%;
+  aspect-ratio:1;
+  border-radius:50%;
+  background:#fff1af;
+  box-shadow:0 0 5px 1px #ff9b36;
+  opacity:calc(1 - var(--impact));
+  transform:rotate(var(--angle)) translateX(calc(var(--impact) * 24px));
+}
+.scatter-drop-cell[data-landed] i { display:block; }
+.bonus-scatter-layer[data-phase="complete"] .scatter-drop-cell img {
+  filter:drop-shadow(0 0 5px #fff5be) drop-shadow(0 0 9px #ffb332);
+}
+@media (prefers-reduced-motion: reduce) {
+  .scatter-drop-cell i { display:none !important; }
+}
+
+
+.cabinet-display output { white-space: nowrap; overflow-wrap: normal; }
+@media(max-width: 1040px) {
+  .game .deck .controls,
+  .game .deck .controls:has(.spin-button:not([hidden])):has(.fast-forward:not([hidden])) {
+    grid-template-columns: minmax(0,1fr) minmax(112px,1.65fr) minmax(0,1fr) minmax(0,1fr);
+  }
+  .game .deck .spin-button, .game .deck .fast-forward { grid-column: 1 / -1; grid-row: 2; }
+  .cabinet-display output { font-size: clamp(.64rem,1.35vw,.86rem); }
+}
+.shell[data-size="mini"] .game { width: min(100%, 342px); }
+.shell[data-size="mini"] .game .deck .spin-button { min-height: 29px; }
+.shell[data-size="mini"] .cabinet-display,
+.shell[data-size="mini"] .game .deck .stake-tools label { font-size: .59rem; }
+
+.game .deck .stake-tools label { position: relative; }
+.game .deck .stake-tools label::after {
+  content: "";
+  position: absolute;
+  bottom: .42rem;
+  right: .3rem;
+  width: .28rem;
+  height: .28rem;
+  border: solid #c0ffe6;
+  border-width: 0 1px 1px 0;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.game .deck .stake-tools select { appearance: none; padding-inline: 1px .58rem; }
+.shell[data-size="mini"] .game .deck .controls,
+.shell[data-size="mini"] .game .deck .controls:has(.spin-button:not([hidden])):has(.fast-forward:not([hidden])) {
+  grid-template-columns: minmax(41px,1fr) minmax(106px,1.7fr) minmax(42px,1fr) minmax(42px,1fr) minmax(55px,1fr);
+  gap: 3px;
+}
+.shell[data-size="mini"] .game .deck .spin-button,
+.shell[data-size="mini"] .game .deck .fast-forward { grid-column: 5; grid-row: 1; }
+.shell[data-size="mini"] .game .deck .spin-button { font-size: .73rem; }
+
+@media(max-width:360px) {
+  .game .deck .stake-tools select { font-size: .68rem; }
+}

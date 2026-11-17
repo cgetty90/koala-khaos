@@ -1,0 +1,27 @@
+
+.scatter-demo { width: min(560px,calc(100% - 16px)); padding: 10px; }
+.scatter-demo h2 { margin: 0; color: #ffe0a7; font-size: 1.15rem; }
+.scatter-demo p { margin: 5px 0; }
+.fixture-stage { position:relative; display:grid; grid-template-columns:minmax(0,3fr) minmax(51px,1fr); gap:5px; align-items:center; }
+.fixture-machine { position:relative; isolation:isolate; overflow:hidden; border:2px solid #d49358; border-radius:9px; background:#1e1032; }
+#fixture-board { aspect-ratio:6 / 5; width:100%; }
+#fixture-board canvas { display:block; width:100% !important; height:100% !important; }
+.fixture-curtains,.fixture-marks { position:absolute; inset:0; pointer-events:none; }
+.fixture-curtains { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); }
+.fixture-curtains i { background:linear-gradient(165deg,#3b235b,#100d26 78%); box-shadow:inset 1px 0 #8a67be61; }
+.fixture-scatter { position:absolute; width:calc(100% / 6); height:20%; left:calc(var(--col) * 100% / 6); top:calc(var(--row) * 20%); object-fit:contain; filter:drop-shadow(0 0 5px #ffb148); }
+.fixture-stage[data-phase="suspense"] .fixture-scatter { filter:drop-shadow(0 0 7px #ffe288) drop-shadow(0 0 11px #b06cff); }
+.fixture-stage[data-phase="suspense"] .fixture-machine { border-color:#ffe6ac; box-shadow:0 0 13px #be75ee88; }
+.fixture-stage[data-phase="suspense"] #fixture-mochi { filter:drop-shadow(0 0 6px #d604fa); }
+#fixture-mochi { transform:scaleX(-1); width:100%; height:auto; filter:drop-shadow(0 5px 4px #140924); }
+.fixture-buttons { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
+.fixture-buttons button, .fixture-tools button { min-height:31px; }
+.fixture-tools { display:flex; align-items:center; justify-content:space-between; margin-top:5px; gap:6px; font-size:.75rem; }
+.fixture-result { position:absolute; inset:2px; z-index:2; display:grid; place-items:center; pointer-events:none; background:linear-gradient(#28174435,#1c0a2ed8),var(--fixture-world) center / cover; color:#ffe7ac; border-radius:8px; }
+.fixture-result strong { font-size:clamp(1.2rem,6vw,2.3rem); text-shadow:0 3px 6px #210a46; }
+#fixture-heading { min-height:1.3em; color:#ffe2ab; }
+@media (max-height:450px) {
+  .scatter-demo { width:min(425px,calc(100% - 12px)); padding:7px; }
+  .fixture-stage { width: min(100%,259px); margin-inline:auto; }
+}
+

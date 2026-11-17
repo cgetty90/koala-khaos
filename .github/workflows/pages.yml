@@ -1,0 +1,63 @@
+name: Verify and publish GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: koala-khaos-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      VITE_KHAOS_API_ORIGIN: ${{ vars.KHAOS_PUBLIC_API_ORIGIN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+      - name: Require an approved public game API
+        run: node scripts/pages-gate.mjs preflight
+      - name: Build Pages asset paths
+        run: npx vite build --mode pages
+      - name: Audit Pages artifact
+        run: node scripts/pages-gate.mjs
+      - run: npx playwright install --with-deps chromium
+      - name: Verify production asset paths and fail-closed behavior
+        run: node scripts/pages-static-smoke.mjs
+      - name: Verify hosted fictional-credit API before publishing
+        if: vars.KHAOS_PAGES_RELEASE_READY == 'true'
+        run: node scripts/pages-api-smoke.mjs
+      - name: Verify production gameplay in a browser against HTTPS settlement
+        if: vars.KHAOS_PAGES_RELEASE_READY == 'true'
+        run: node scripts/pages-browser-live.mjs
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    if: github.ref == 'refs/heads/main' && vars.KHAOS_PAGES_RELEASE_READY == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish validated Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
+

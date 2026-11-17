@@ -1,0 +1,179 @@
+.game .deck {
+  background: linear-gradient(180deg, #4d2464, #271434 45%, #190f27);
+  border-color: #bc824c;
+  box-shadow: inset 0 0 0 1px #793e55, inset 0 2px 0 #ffcf8050, 0 5px 14px #100719a0;
+}
+.game .deck .controls > :is(.cabinet-display, .stake-tools) {
+  border-color: #946046;
+  background: linear-gradient(160deg, #4a2458, #25142e 68%);
+  box-shadow: inset 0 1px #e7b37236, inset 0 -2px #110a19;
+}
+.game .deck .controls .spin-button {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0;
+  align-self: center;
+  justify-self: center;
+  width: 45px;
+  height: 45px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid #f8cd80;
+  background: radial-gradient(circle at 30% 20%, #cc76dd, #79339c 53%, #391449 90%);
+  color: #fff3c6;
+  box-shadow: inset 0 0 0 2px #743841, inset 0 2px 8px #ffd6986b, 0 0 0 2px #502936, 0 3px 9px #170c24;
+}
+.game .deck .controls .spin-button:not(:disabled):hover {
+  background: radial-gradient(circle at 35% 18%, #efadee, #993bbb 55%, #4f195f 90%);
+}
+.game .deck .spin-button .spin-glyph { font-size: 1.45rem; line-height: .88; }
+.game .deck .spin-button .spin-text { font-size: .52rem; letter-spacing: .06em; text-transform: uppercase; }
+.game .deck .deck-actions { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.game .deck .deck-actions button {
+  background: linear-gradient(#512b64, #321a41 58%, #291636);
+  border-color: #9d6954;
+  box-shadow: inset 0 1px #debc7b3b;
+  padding-inline: .25em;
+  white-space: nowrap;
+}
+.game .deck .deck-actions button span[aria-hidden] { color: #efbb76; }
+.game .deck #auto-stop { background: #754054; color: #fff0cd; border-color: #ecb473; }
+.game .deck .ante-control {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: .35em;
+  padding: .18em .52em;
+  border: 1px solid #9d7048;
+  border-radius: 7px;
+  background: linear-gradient(#493054, #2c1c3a);
+  color: #ffdfa1;
+  white-space: nowrap;
+  font-size: clamp(.54rem, 1vw, .72rem);
+}
+.ante-control b { color: #fff0c3; background: #644d53; padding: .12em .38em; border-radius: 3px; }
+.ante-control img { width: 1.35em; height: .85em; object-fit: cover; }
+.game .deck :is(button, select):focus-visible { outline: 2px solid #fcde98; outline-offset: 2px; }
+.leaf-spotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+  --spot-wave: 0;
+  --spot-progress: 0;
+  --leaf-glow: #ffce70;
+  background: radial-gradient(ellipse at center, #ffe18a25, #2008257d 72%, #1c0a29a1);
+}
+.leaf-spotlight[hidden] { display: none; }
+.leaf-spotlight[data-intensity="medium"] { --leaf-glow: #ffe0a2; }
+.leaf-spotlight[data-intensity="large"] { --leaf-glow: #ffe5a0; }
+.leaf-spotlight .leaf-prism {
+  width: min(54%, 300px);
+  aspect-ratio: 2/1;
+  display: grid;
+  place-items: center;
+  background: url('/art/production/gumleaf.webp') center/contain no-repeat;
+  filter: drop-shadow(0 0 calc(5px + 21px * var(--spot-wave)) var(--leaf-glow));
+  transform: scale(calc(.86 + .18 * var(--spot-wave)));
+}
+.leaf-prism strong {
+  font-size: clamp(1.15rem, 5.2vw, 3.75rem);
+  font-weight: 950;
+  color: #fff7da;
+  -webkit-text-stroke: .024em #50206a;
+  text-shadow: 0 2px #42244b, 0 1px 12px #33132a;
+}
+.leaf-spotlight i {
+  position: absolute;
+  width: 48%;
+  aspect-ratio: 1;
+  border: 2px solid var(--leaf-glow);
+  border-radius: 50%;
+  opacity: calc(.62 * (1 - var(--spot-progress)));
+  transform: scale(calc(.3 + var(--spot-progress)));
+  box-shadow: 0 0 10px var(--leaf-glow), inset 0 0 8px var(--leaf-glow);
+}
+.leaf-spotlight i::before {
+  content: '';
+  position: absolute;
+  inset: 5%;
+  background:
+    radial-gradient(circle at 15% 26%, var(--leaf-glow) 0 1px, transparent 3px),
+    radial-gradient(circle at 79% 11%, var(--leaf-glow) 0 2px, transparent 4px),
+    radial-gradient(circle at 88% 68%, var(--leaf-glow) 0 2px, transparent 4px),
+    radial-gradient(circle at 37% 89%, var(--leaf-glow) 0 1px, transparent 3px);
+}
+.leaf-spotlight[data-static="true"] i { display: none; }
+.leaf-spotlight[data-static="true"] .leaf-prism { transform: none; }
+.spotlight-announcement { position: absolute; height: 1px; width: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (min-width: 1200px) and (min-height: 800px) {
+  .game .deck .controls .spin-button { width: 62px; height: 62px; }
+  .game .deck .spin-button .spin-glyph { font-size: 2.1rem; }
+  .game .deck .spin-button .spin-text { font-size: .65rem; }
+}
+.shell[data-size="mini"] .game .deck .controls .spin-button { width: 39px; height: 39px; }
+.shell[data-size="mini"] .game .deck .deck-actions button { font-size: .59rem; }
+.shell[data-size="mini"] .leaf-prism strong { font-size: 1rem; }
+
+.game .deck .stake-tools button {
+  background: linear-gradient(150deg, #764074, #472652 55%, #382043);
+  border-color: #bd875d;
+  color: #ffe5ad;
+}
+.game .deck .cabinet-display output { color: #fff0b8; }
+.game .deck .controls .spin-button:active:not(:disabled) { box-shadow: inset 0 0 0 3px #683742, inset 0 3px 9px #27112c; }
+.leaf-spotlight i b {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 4px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff3af;
+  box-shadow: 0 0 7px #ffc16b;
+  transform: translate(calc(145px * var(--sx) * var(--spot-progress)), calc(110px * var(--sy) * var(--spot-progress)));
+}
+@media (max-width: 700px) {
+  .leaf-spotlight i b {
+    transform: translate(calc(68px * var(--sx) * var(--spot-progress)), calc(50px * var(--sy) * var(--spot-progress)));
+  }
+}
+.game .deck .stake-tools label {
+  white-space: nowrap;
+  color: #ffe4aa;
+  background: linear-gradient(155deg, #522b64, #2d193b);
+}
+.game .deck .controls > .stake-tools { box-shadow: none; background: none; }
+.game .deck .ante-control {
+  gap: .4em;
+  padding-block: 0;
+  line-height: 1;
+  border-color: #ad7c56;
+}
+.ante-control b { padding-block: 0; }
+.cabinet-notes { align-items: center; }
+.ante-dialog dl { display: flex; flex-wrap: wrap; gap: 12px; }
+.ante-dialog dl div { flex: 1 1 105px; padding: 8px; border: 1px solid #ad7c56; border-radius: 8px; }
+.ante-dialog dd { margin: 4px 0 0; color: #ffdfa1; font-weight: 850; font-variant-numeric: tabular-nums; }
+@media (max-width: 1040px) {
+  .game .deck .ante-pending { display: none; }
+  .game .deck .deck-actions { grid-template-columns: 1.2fr 1.2fr 1fr .8fr .8fr; }
+  .game .deck .deck-actions button {
+    white-space: normal;
+    padding-inline: 2px;
+  }
+  .game .deck .deck-actions :is(#bonus, #autoplay) span[aria-hidden] { display: none; }
+}
+@media (max-width: 480px) {
+  .game .deck .controls .spin-button { width: 44px; height: 44px; }
+  .game .deck .stake-tools label { font-size: .57rem; padding-inline: 2px; }
+}
+@media (min-width: 1100px) {
+  .game .deck .controls .cabinet-display { border-color: #b67a51; }
+}

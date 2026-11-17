@@ -1,0 +1,9 @@
+.reel-frame:has(.bonus-scatter-layer[data-presentation="cinematic-only-purchase"]:not([hidden])) #board {
+  visibility: hidden;
+}
+.bonus-scatter-layer[data-presentation="cinematic-only-purchase"] {
+  background:
+    linear-gradient(90deg, #e4b67938 1px, transparent 1px) 0 0 / calc(100% / 6) 100%,
+    linear-gradient(#e4b67938 1px, transparent 1px) 0 0 / 100% 20%,
+    radial-gradient(ellipse, #49275b, #1a0b2b 85%);
+}

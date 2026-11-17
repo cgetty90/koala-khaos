@@ -1,0 +1,234 @@
+:root {
+  --ui-ink: #f9eefb;
+  --ui-muted: #d2bcd9;
+  --ui-gold: #ffdb97;
+  --ui-line: #b7877770;
+  --ui-face: "Segoe UI", system-ui, sans-serif;
+}
+
+.game .deck .controls :is(.cabinet-display, .stake-tools label) {
+  background: linear-gradient(170deg, #331c44, #180d26 72%);
+  box-shadow: inset 0 0 0 1px #bc8d7049;
+  border-radius: 7px;
+}
+.game .deck .cabinet-display > span,
+.game .deck .stake-tools label {
+  color: #e3c6a4;
+  font-family: var(--ui-face);
+  font-weight: 650;
+}
+.game .deck .cabinet-display output,
+.game .deck .stake-tools select {
+  font-family: var(--ui-face);
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+  text-shadow: none;
+}
+.game .deck .controls :is(.deck-actions button, .stake-tools button, .fast-forward) {
+  font-family: var(--ui-face);
+  font-weight: 700;
+  color: var(--ui-ink);
+  background: linear-gradient(165deg, #563962, #2a1c39 58%, #22152e);
+  border: 1px solid #bd968265;
+  box-shadow: inset 0 1px #eed0ec20, 0 1px 2px #13091d;
+}
+.game .deck .controls .deck-actions #bonus {
+  background: linear-gradient(160deg, #70406d, #3d2449 70%);
+  border-color: #dfa584;
+  color: #fff0c7;
+}
+.game .deck .controls .deck-actions #ante-open[data-enabled="true"] {
+  border-color: #9ae6c3;
+  color: #d9ffeb;
+}
+.game .deck .controls #ante-open[data-enabled="true"] b {
+  background: #1a403a;
+  color: #cbffe5;
+  border-color: #6bbb9f;
+}
+.game .deck .controls .deck-actions #deck-sound[aria-pressed="false"] {
+  color: #c5aecf;
+}
+.game .deck .controls button:disabled {
+  box-shadow: inset 0 1px #eed0ec10;
+}
+.game .deck .controls :is(button,select):focus-visible,
+.feature-dialog :is(button,select,summary,input):focus-visible {
+  outline: 2px solid var(--ui-gold);
+  outline-offset: -2px;
+}
+.game .deck .status {
+  font-family: var(--ui-face);
+  font-weight: 650;
+  color: #f5e4c8;
+}
+.game .deck .cabinet-notes {
+  background: #140a20eb;
+  color: var(--ui-muted);
+  box-shadow: inset 0 1px #c78e704a;
+}
+.spin-win-counter {
+  background: linear-gradient(155deg, #623e76, #332145 52%, #28152e);
+  box-shadow: inset 0 0 0 2px #cb9ab139, 0 2px 5px #100518a0;
+}
+
+.feature-dialog {
+  color: var(--ui-ink);
+  font-family: var(--ui-face);
+  padding: clamp(14px, 3.5vw, 26px);
+}
+.feature-dialog p { color: var(--ui-muted); }
+.feature-dialog :is(button,select) { font-family: var(--ui-face); }
+.feature-dialog .secondary {
+  border-color: #d4a5c17a;
+  background: linear-gradient(155deg, #553663, #30203d);
+  color: var(--ui-ink);
+}
+.feature-dialog .primary {
+  border-color: #fff0b4;
+  background: linear-gradient(175deg, #ffe3a1, #f0b65c);
+  color: #2b132f;
+  box-shadow: inset 0 1px #fff7d6, 0 2px 3px #14091c9c;
+}
+@media (hover: hover) {
+  .feature-dialog :is(.primary,.secondary):hover:not(:disabled) { filter: brightness(1.13); }
+}
+.feature-dialog :is(.primary,.secondary):active:not(:disabled) { filter: brightness(.92); }
+.feature-dialog select {
+  min-height: 32px;
+  max-width: 100%;
+  color: var(--ui-ink);
+  background: #352046;
+  border: 1px solid #c394b8a3;
+  border-radius: 7px;
+  color-scheme: dark;
+}
+.feature-dialog .confirmation-actions { gap: 8px; }
+.feature-dialog .confirmation-actions :is(.primary,.secondary) { min-width: 74px; }
+.dialog-metrics {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  margin: 10px 0;
+  gap: 7px;
+}
+.dialog-metrics > div {
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  background: #251632;
+}
+.dialog-metrics dt { color: var(--ui-muted); font-size: .76rem; }
+.dialog-metrics dd {
+  color: var(--ui-gold);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+.dialog-setting, .feature-dialog .auto-option {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 8px;
+  border: 1px solid #b68cbd4d;
+  background: #2b1c3b;
+  border-radius: 7px;
+}
+.dialog-setting { justify-content: space-between; }
+.feature-dialog input:is([type="checkbox"],[type="range"]) { accent-color: #efba74; }
+#ante-heading {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  color: var(--ui-gold);
+  background: #33203c;
+  font-size: .83rem;
+}
+#shop-options button { border-width: 1px; }
+#shop-options button::before { opacity: .69; }
+#shop-options strong {
+  font: 750 clamp(.73rem,2.4vw,1.13rem)/1.12 var(--ui-face);
+  text-transform: none;
+}
+#shop-options small { color: #f1d2e3; font-weight: 650; }
+#shop-options span { font-weight: 750; }
+#shop-confirmation { padding-block-start: 8px; }
+#shop:has(#shop-confirmation:not([hidden])) .shop-intro { display: none; }
+#shop-status {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #bf8a754b;
+  background: #22142e;
+  font-size: .8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+#utility[open] {
+  background: linear-gradient(115deg, #201128f5, #20132bee 62%, #351f3be8),
+    url('/art/production/cabinet-fascia-v16.webp') center / cover;
+}
+#utility .guide-nav button { color: var(--ui-ink); }
+#utility .guide-nav button[aria-pressed="true"] {
+  color: #ffebb9;
+  border-color: #efbe83;
+  box-shadow: inset 3px 0 #edb77a;
+}
+#utility #guide-settings {
+  grid-template-columns: minmax(0,1.35fr) minmax(0,1fr);
+  grid-template-areas: "settings practice" "settings history";
+  align-content: start;
+  align-items: start;
+  gap: 9px;
+}
+#utility #guide-settings .settings { grid-area: settings; }
+#utility #guide-settings .rules { grid-area: practice; }
+#utility #guide-settings .activity { grid-area: history; }
+#utility #guide-settings .panel,
+#utility .guide-card {
+  margin: 0;
+  background: linear-gradient(155deg, #332343, #22172e);
+  border: 1px solid #b58aa466;
+  box-shadow: inset 0 1px #efcfed1c;
+}
+#utility #guide-settings .panel {
+  min-width: 0;
+  padding: clamp(10px,2.4vw,19px);
+  border-radius: 10px;
+}
+#utility .settings h3,
+#utility .activity h2 {
+  font-size: clamp(1rem,2.25vw,1.44rem);
+  margin-bottom: 4px;
+}
+#utility .settings label:not(.sound-controls label) {
+  border-bottom: 1px solid #bb97c12b;
+}
+#utility .settings .sound-controls label {
+  grid-template-columns: minmax(78px,auto) minmax(0,1fr) 38px;
+}
+#utility .rules[open] summary { margin-block-end: 4px; }
+#utility .rules .qa-buttons { margin-block-start: 8px; }
+#utility .guide-card figcaption strong { color: #ffdfa3; }
+#utility .guide-card :is(p,figcaption) { color: var(--ui-muted); }
+#utility #paytable thead { background: #4b3357; color: #ffe3a7; }
+#utility #paytable tbody tr:nth-child(even) { background: #452e533f; }
+.game .bonus-track {
+  color: #ffefd7;
+  background: #2b173e;
+  border-color: #c69673a6;
+}
+@media (max-width: 700px) {
+  #utility[open]:has(#guide-settings:not([hidden])) { height: auto; }
+  #utility #guide-settings {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-areas: "settings" "practice" "history";
+  }
+  #utility .guide-nav button { font-weight: 700; }
+}
+@media (max-height: 390px) and (min-width: 480px) {
+  #utility .guide-cards { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .feature-dialog { padding: 10px 13px; }
+}

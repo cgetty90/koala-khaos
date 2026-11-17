@@ -1,0 +1,123 @@
+:root {
+  --cabinet-edge: #e2b17d;
+  --cabinet-rim: #815651;
+  --cabinet-ink: #1e122c;
+}
+
+.game .reel-frame {
+  background: linear-gradient(120deg,#ffe5aa,#a46942 24%,#4c2a50 45%,#8d5260 72%,#f6c98c 91%,#825138);
+  border-color: var(--cabinet-edge);
+  box-shadow: 0 0 0 1px #48233f, 0 4px 12px #14091ccc, inset 0 0 0 1px #ffedac9c;
+}
+.game .deck {
+  background: linear-gradient(174deg,#694359 0,#35223d 13%,#24172f 73%,#35233e);
+  box-shadow: inset 0 1px #f6cc9e69;
+}
+.game .deck .controls .cabinet-display,
+.game .deck .controls .stake-tools label {
+  background: linear-gradient(180deg,#21122c,#30203d);
+  box-shadow: inset 0 1px 3px #100818, inset 0 0 0 1px #ac7f7169;
+}
+.game .deck .controls .spin-button {
+  background: radial-gradient(ellipse at 45% -8%,#ffe3ff 0,transparent 56%),
+    linear-gradient(165deg,#c256d4,#8a299e 53%,#391253);
+  border-color: #f8ccac;
+  box-shadow: inset 0 0 0 2px #edbdb859,0 3px #321533,0 0 15px #db6bcf63;
+  text-shadow: 0 1px 3px #410d5e;
+}
+.game .deck .controls .spin-stop {
+  background: linear-gradient(#a5326b,#661d49 78%,#481b37);
+}
+.game .deck .controls button:not(:disabled) { touch-action: manipulation; }
+.game .deck .controls button:not(:disabled):active {
+  filter: brightness(.92);
+  translate: 0 1px;
+}
+.game .deck .status { color: #f0dded; }
+.spin-win-counter {
+  background: linear-gradient(162deg,#764c81 0,#432754 38%,#23142f 78%);
+  border-color: var(--cabinet-edge);
+  box-shadow: inset 0 1px #ffdfb48c,inset 0 0 0 2px #a476ab3d,0 3px 7px #100518b0;
+}
+.spin-win-counter output {
+  color: #ffe3a1;
+  text-shadow: 0 2px #54224a,0 0 11px #d4898452;
+}
+
+.feature-dialog:not(#feature-dialog) {
+  background: radial-gradient(ellipse at 60% 0%,#53325d,transparent 64%),var(--cabinet-ink);
+  border-color: var(--cabinet-rim);
+  box-shadow: inset 0 1px #ffe3ad8c,0 22px 56px #0a0413d9;
+}
+.feature-dialog:not(#feature-dialog)::backdrop { background: #0b0416c9; }
+.feature-dialog h2 { color: #ffdfa9; }
+.feature-dialog .panel {
+  background: #21152f;
+  border-color: #88638291;
+}
+.feature-dialog #guide-nav button[aria-pressed="true"] {
+  background: #513357;
+  color: #ffe5b6;
+  border-color: #e8ac84;
+}
+#shop-options button::before { opacity: .93; }
+#shop-options button img { filter: drop-shadow(0 7px 8px #170818c9); }
+#shop-options button:not(:disabled):focus-visible { outline-offset: 2px; }
+#shop-options button :is(strong,small) { text-shadow: 0 1px 3px #1b0b25,0 0 9px #1b0b25; }
+
+#celebration[open] {
+  --cinema-world: url('/art/cinematic/jungle-violet.webp');
+  --tier-aura: #ffc181;
+}
+#celebration[data-tier="mega"] { --tier-aura: #61d3ee; }
+#celebration[data-tier="epic"] { --tier-aura: #ed72d6; }
+.win-depth::after {
+  background: radial-gradient(ellipse at 50% 42%, transparent 12%, #12081fa0 85%),
+    linear-gradient(0deg,#150a23 3%,transparent 38%);
+}
+.win-depth :is(i,b) {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+.win-depth i {
+  inset: 1% 0 12%;
+  background: conic-gradient(from -86deg at 50% 60%,
+    transparent 12deg, color-mix(in srgb,var(--tier-aura) 26%,transparent) 38deg, transparent 67deg,
+    transparent 110deg, color-mix(in srgb,var(--tier-aura) 24%,transparent) 138deg, transparent 161deg);
+  mask-image: radial-gradient(ellipse at 50% 53%, transparent 4%, black 31%, transparent 71%);
+  animation: jungle-aurora 2s ease-out both;
+}
+.win-depth b {
+  inset: 48% -8% -23%;
+  background: radial-gradient(ellipse at center,#c08eaa3d 0%,#1c0d3300 57%);
+  border-radius: 50%;
+  animation: jungle-aurora 1.2s ease-out both;
+}
+.win-body::before {
+  top: 39%;
+  border-color: color-mix(in srgb,var(--tier-aura) 86%,transparent);
+  box-shadow: 0 0 28px color-mix(in srgb,var(--tier-aura) 55%,transparent);
+}
+#celebration #win-title {
+  color: var(--cinema-rim);
+  text-shadow: 0 2px #995b68,0 4px #753b59,0 7px #351437,0 13px 30px #170926;
+}
+#celebration #win-counter {
+  padding-inline: .15em;
+  color: #fff0c0;
+  text-shadow: 0 2px #93545a,0 5px #4c214a,0 8px 19px #1a0e26;
+}
+#feature-dialog .feature-caption {
+  background: linear-gradient(0deg,#13091bea,#2a143dd9 73%,transparent);
+  border-top: 1px solid color-mix(in srgb,var(--feature-rim) 34%,transparent);
+}
+@keyframes jungle-aurora {
+  from { opacity: 0; transform: scale(.84) translateY(4%); }
+  to { opacity: 1; transform: none; }
+}
+html[data-paused="true"] .win-depth :is(i,b) { animation-play-state: paused; }
+html[data-motion="instant"] .win-depth :is(i,b) { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .win-depth :is(i,b) { animation: none; }
+}

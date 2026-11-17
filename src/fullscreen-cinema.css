@@ -1,0 +1,236 @@
+.game .deck .cabinet-notes {
+  justify-content: center;
+}
+#celebration:not([open]) { display: none; }
+
+#celebration[open], #feature-dialog[open] {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  isolation: isolate;
+  background: #170b25;
+  box-shadow: none;
+  pointer-events: auto;
+  perspective: 850px;
+  color: #fff1cc;
+}
+#celebration::backdrop, #feature-dialog::backdrop { background: #100716; }
+
+#celebration[open] {
+  grid-template-rows: minmax(0,1fr) auto;
+  --cinema-glow: #c65a85;
+  --cinema-rim: #ffd183;
+  --cinema-world: url('/art/concept/regular.webp');
+  padding:
+    max(14px,env(safe-area-inset-top))
+    max(14px,env(safe-area-inset-right))
+    max(14px,env(safe-area-inset-bottom))
+    max(14px,env(safe-area-inset-left));
+}
+#celebration[data-tier="mega"] {
+  --cinema-glow: #598deb;
+  --cinema-rim: #a7f8f0;
+  --cinema-world: url('/art/concept/super.webp');
+}
+#celebration[data-tier="epic"] {
+  --cinema-glow: #c159dc;
+  --cinema-rim: #ffdb86;
+  --cinema-world: url('/art/concept/epic.webp');
+}
+.win-depth, .feature-depth {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.win-depth::before, .feature-depth::before {
+  content: '';
+  position: absolute;
+  inset: -5%;
+  background:
+    radial-gradient(ellipse at 50% 39%, transparent 9%, #160a24a8 66%, #0f0619 96%),
+    var(--cinema-world) center / cover;
+  transform: scale(1.06);
+  animation: cinema-push .85s cubic-bezier(.15,.65,.25,1) both;
+}
+.win-depth::after, .feature-depth::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 38%, color-mix(in srgb,var(--cinema-glow) 55%,transparent), transparent 52%),
+    linear-gradient(180deg, #0906115c, transparent 28%, transparent 54%, #100719ec);
+}
+@keyframes cinema-push {
+  from { transform: scale(1.19) translateX(calc(var(--scene-x,0px) * .3)); opacity: .55; }
+  to { transform: scale(1.06); opacity: 1; }
+}
+.win-body {
+  position: relative;
+  isolation: isolate;
+  align-self: center;
+  display: grid;
+  justify-items: center;
+  row-gap: clamp(3px,1dvh,10px);
+  min-width: 0;
+  text-align: center;
+  animation: cinema-title .55s cubic-bezier(.16,.8,.25,1) both;
+}
+.win-body::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset-inline: 10%;
+  top: 34%;
+  height: min(22dvh,180px);
+  border: 2px solid color-mix(in srgb,var(--cinema-rim) 62%,transparent);
+  border-radius: 50%;
+  transform: perspective(430px) rotateX(67deg);
+  background: radial-gradient(ellipse, transparent 43%, color-mix(in srgb,var(--cinema-glow) 38%,transparent) 68%, transparent);
+  box-shadow: 0 0 28px color-mix(in srgb,var(--cinema-rim) 43%,transparent);
+}
+.win-body canvas {
+  width: auto;
+  height: clamp(88px,33dvh,310px);
+  max-width: 54vw;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 17px #1a052b);
+}
+#win-title, #feature-dialog #feature-title {
+  color: var(--cinema-rim, var(--feature-rim, #ffd78d));
+  font: 1000 italic clamp(2rem,9vw,7.8rem)/.97 var(--ui-face);
+  margin: 0;
+  letter-spacing: -.055em;
+  text-transform: uppercase;
+  text-shadow: 0 2px #7b3163, 0 5px #301037, 0 0 32px #2a102e;
+}
+#win-counter {
+  color: #fff2c9;
+  font: 850 clamp(2.15rem,7vw,6rem)/1 var(--ui-face);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 3px #481d47, 0 0 22px #f0a26677;
+}
+.win-body small { color: #f7dfcb; font-weight: 650; }
+.cinema-actions {
+  justify-self: center;
+  align-self: end;
+}
+.cinema-actions button {
+  min-width: 104px;
+  min-height: 42px;
+  color: #fff1d2;
+  background: #2d1b40;
+  border: 1px solid #e6bb92;
+  border-radius: 9px;
+}
+.cinema-actions button:focus-visible { outline: 2px solid #fff1ca; outline-offset: 2px; }
+#celebration .win-particles { color: var(--cinema-rim); z-index: -1; }
+@media (min-width: 850px) {
+  #celebration .win-particles { transform: scale(1.55); }
+}
+@keyframes cinema-title {
+  from { transform: translate3d(0,22px,-140px) rotateX(9deg); opacity: .5; }
+  to { transform: translate3d(0,0,0); opacity: 1; }
+}
+
+#feature-dialog[open] {
+  --cinema-world: var(--feature-world);
+  --cinema-glow: var(--feature-rim, #aa62cc);
+  grid-template-rows: minmax(0,1fr) auto;
+  align-content: stretch;
+  justify-items: stretch;
+}
+#feature-dialog[open] .cinematic-art {
+  align-self: stretch;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  overflow: hidden;
+}
+#feature-dialog .cinematic-art::before { background: none; }
+#feature-dialog .cinematic-art:has(.kart-cinematic:not([hidden])) {
+  height: auto;
+}
+#feature-dialog .kart-cinematic {
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+#feature-dialog .kart-route {
+  text-shadow: 0 2px 7px #120719, 0 0 15px #321246;
+}
+#feature-dialog .cinematic-art:has(.kart-cinematic:not([hidden])) :is(.cinematic-emblem,.cinematic-mochi) {
+  visibility: hidden;
+}
+#feature-dialog .cinematic-emblem {
+  width: min(42vw,34dvh,270px);
+  max-height: 58%;
+  object-fit: contain;
+  filter: drop-shadow(0 9px 20px #1b062c);
+}
+#feature-dialog .feature-caption {
+  z-index: 1;
+  padding: 8px max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+  text-align: center;
+}
+#feature-dialog #feature-title {
+  font-size: clamp(1.65rem,7vw,6.3rem);
+  animation: cinema-title .5s ease-out both;
+}
+#feature-dialog #feature-copy {
+  max-width: 48ch;
+  margin: 7px auto 10px;
+  color: #fff0e5;
+  font-size: clamp(.79rem,2.3vw,1.08rem);
+}
+#feature-dialog .feature-caption button { margin-inline: 3px; }
+@media (orientation: portrait) {
+  #feature-dialog .kart-cinematic {
+    display: grid;
+    place-content: center stretch;
+    background: radial-gradient(ellipse at center, #321947b0, transparent 64%);
+  }
+  #feature-dialog .kart-cinematic[hidden] { display: none; }
+  #feature-dialog .kart-cinematic canvas {
+    height: auto;
+    aspect-ratio: 640 / 270;
+    mask-image: linear-gradient(transparent,black 13%,black 87%,transparent);
+  }
+  #feature-dialog .kart-route { top: calc(50% - 24vw); }
+  #feature-dialog .cinematic-emblem { bottom: 22%; height: 48%; }
+  #feature-dialog .cinematic-mochi { bottom: 6%; height: 62%; width: 52%; }
+}
+@media (max-height: 430px) {
+  #celebration .win-body canvas { height: clamp(48px,29dvh,120px); }
+  #feature-dialog #feature-title { font-size: clamp(1.4rem,6dvh,2.75rem); }
+  #feature-dialog #feature-copy { margin-block: 4px 6px; }
+  #celebration .cinema-actions button, #feature-dialog .feature-caption button { min-height: 34px; }
+}
+html[data-paused="true"] :is(.win-body,#feature-title,.win-particles i),
+html[data-paused="true"] .win-depth::before,
+html[data-paused="true"] .feature-depth::before {
+  animation-play-state: paused;
+}
+html[data-motion="instant"] :is(.win-body,#feature-title,.win-particles i),
+html[data-motion="instant"] .win-depth::before,
+html[data-motion="instant"] .feature-depth::before {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.win-body,#feature-title,.win-particles i), .win-depth::before, .feature-depth::before { animation: none; }
+}

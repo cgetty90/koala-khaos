@@ -1,0 +1,108 @@
+.feature-dialog, #utility[open], #feature-dialog[data-mode] {
+  --dialog-gold: var(--feature-rim, #e9ad70);
+  border: 1px solid var(--dialog-gold);
+  background:
+    linear-gradient(180deg, #231039a8, #180d2bed 33%, #180d2bf7 74%, #240f3edb),
+    url('/art/production/cabinet-fascia-v16.webp') center / cover;
+  box-shadow: inset 0 0 0 3px #8d54864f, inset 0 0 0 4px #bb84633d, 0 12px 42px #0f061ddf;
+}
+.game .cabinet-round {
+  margin: 1px 0 0;
+  align-self: stretch;
+}
+.spin-win-counter {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: clamp(7px, 1.3cqw, 14px);
+  padding: 1px clamp(15px, 3.5cqw, 35px) 3px;
+  min-inline-size: min(39%, 180px);
+  border: 1px solid #edb367;
+  border-radius: 6px 6px 14px 14px;
+  background: radial-gradient(ellipse at 50% 10%, #77488b, #311847 59%, #1b0f30);
+  box-shadow: inset 0 0 0 2px #a8518960, 0 2px 5px #100518d4;
+  color: #ffe2a1;
+}
+.spin-win-counter::before, .spin-win-counter::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 9px;
+  width: 5px;
+  height: 5px;
+  transform: rotate(45deg);
+  background: #ffd991;
+  box-shadow: 0 0 6px #ef81cd;
+}
+.spin-win-counter::before { inset-inline-start: 6px; }
+.spin-win-counter::after { inset-inline-end: 6px; }
+.spin-win-counter span {
+  font: 750 clamp(8px, 2.2cqw, 12px)/1.05 Georgia, serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.cabinet-round .spin-win-counter output {
+  color: #ffda83;
+  font: 900 clamp(18px, 5cqw, 31px)/1 Georgia, serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  text-shadow: 0 1px #ee9c3b, 0 3px #3e183e, 0 0 11px #ed8a4947;
+}
+.spin-win-sparks {
+  position: absolute;
+  z-index: 0;
+  inset: 2px 5px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 13% 32%, #fff4b0 0 1px, transparent 2px),
+    radial-gradient(circle at 24% 79%, #ffc588 0 1px, transparent 2px),
+    radial-gradient(circle at 85% 25%, #fff4b0 0 1px, transparent 2px),
+    radial-gradient(circle at 92% 69%, #ffab69 0 1px, transparent 2px);
+  animation: spin-credit-sparks .28s ease-out both;
+}
+@keyframes spin-credit-sparks {
+  from { opacity: .2; transform: scale(.6); }
+  42% { opacity: 1; }
+  to { opacity: 0; transform: scale(1.07); }
+}
+html[data-paused="true"] .spin-win-sparks { animation-play-state: paused; }
+@media (max-height: 450px) {
+  .cabinet-round .spin-win-counter output { font-size: clamp(15px, 4.4cqw, 23px); }
+}
+.feature-dialog :is(h2, h3), #utility :is(h2,h3,h4) {
+  color: #ffe3af;
+  text-shadow: 0 2px #623052, 0 0 18px #c365a94f;
+}
+.feature-dialog::backdrop { background: #100720c2; }
+.feature-dialog button:focus-visible {
+  outline: 2px solid #ffe8ad;
+  outline-offset: -3px;
+}
+#utility .guide-nav button {
+  background: linear-gradient(160deg, #52305f, #241337 79%);
+  border-color: #b579727d;
+}
+#utility .guide-nav button[aria-pressed="true"] {
+  background: linear-gradient(155deg, #814678, #3a204c 90%);
+}
+#shop-confirmation {
+  border-block-start: 1px solid #d1977966;
+  background: radial-gradient(ellipse at center top, #78446e72, transparent 75%);
+}
+#feature-dialog .cinematic-art {
+  outline: 1px solid var(--dialog-gold);
+  outline-offset: -2px;
+}
+.game .celebration:not([hidden]) {
+  border: 1px solid #efb67d;
+  box-shadow: inset 0 0 0 3px #e9a47b48, inset 0 0 41px #2e063c;
+}
+.fixture-stage[data-phase="suspense"] .fixture-machine {
+  box-shadow: 0 0 14px #dda759b0, 0 0 30px #aa51e781;
+}
+.game[data-storm="active"] .reel-frame {
+  box-shadow: 0 0 0 1px #ffdea69c, 0 0 24px #ad62f078, inset 0 0 12px #ffe6ae97;
+}
+html[data-effects="reduced"] .game[data-storm="active"] .reel-frame {
+  box-shadow: inset 0 0 0 1px #ffe6ae97;
+}

@@ -1,0 +1,150 @@
+
+.scenery .world {
+  background-image: linear-gradient(90deg,#08041436,#0c06231a 46%,#05051255), url('/art/production/world.webp');
+}
+.scenery .foreground { opacity: .12; }
+@media (max-width: 680px) {
+  .scenery .world { background-image: linear-gradient(#1305241a,#13052448),url('/art/production/world-mobile.webp'); }
+}
+.jungle-glints, .scenery-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.jungle-glints {
+  opacity: .52;
+  background:
+    radial-gradient(circle at 20% 32%,#fff5c6 0 1px,#fecb7566 2px,transparent 6px),
+    radial-gradient(circle at 79% 74%,#f9cdf4 0 1px,#f9a4fc5e 2px,transparent 6px),
+    radial-gradient(circle at 33% 78%,#acfff5 0 1px,#66dfcb48 2px,transparent 6px),
+    radial-gradient(circle at 84% 31%,#ffde9e 0 1px,#ffbc6144 2px,transparent 7px);
+  animation: firefly-drift 9s ease-in-out infinite alternate;
+}
+.scenery-light {
+  opacity: 0;
+  background: radial-gradient(ellipse at 53% 41%,transparent 38%,var(--event-color,#ffd88d) 120%);
+  mix-blend-mode: screen;
+}
+@keyframes firefly-drift {
+  0% { transform: translate3d(-5px,8px,0); opacity:.2; }
+  55% { opacity:.8; }
+  100% { transform: translate3d(11px,-14px,0); opacity:.34; }
+}
+html[data-paused="true"] .jungle-glints { animation-play-state: paused; }
+html[data-motion="instant"] .jungle-glints { animation: none; }
+
+.intro h1 { display: grid; justify-items: center; width: 100%; }
+.intro .stage-logo { width: min(112%,280px); margin-inline: 0; }
+.intro p { text-align: center; max-width: 24ch; align-self: center; }
+.gumleaf-relic {
+  position: relative;
+  align-self: center;
+  width: min(88%, 188px);
+  flex: 0 0 auto;
+  aspect-ratio: 2 / 1;
+  display: grid;
+  place-items: center;
+  margin: clamp(2px, .7vh, 9px) 0 0;
+}
+.gumleaf-relic img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 9px #190620) drop-shadow(0 0 9px #f2b25754);
+}
+.gumleaf-relic span {
+  z-index: 1;
+  font: 950 1rem/1 system-ui,sans-serif;
+  font-size: clamp(1.03rem, 13cqw, 2.2rem);
+  color: #fff6bb;
+  text-shadow: 0 2px #511382, 0 0 12px #edbc74b0;
+  font-variant-numeric: tabular-nums;
+  margin: 1% 0 0 8%;
+}
+.mascot { position:relative; flex-basis: clamp(80px, 33dvh, 330px); }
+.mascot::before {
+  content: "";
+  position:absolute;
+  inset: 80% 4% -6%;
+  z-index: -1;
+  background: radial-gradient(ellipse, #c680dc6f 0%,#633e7354 36%,transparent 68%);
+}
+.game {
+  background: linear-gradient(155deg,#291437,#120e25 58%,#29132c);
+  border-color: #cf8d57;
+  box-shadow: inset 0 0 0 2px #553052, 0 11px 34px #080511b5;
+}
+.game .reel-frame {
+  background: linear-gradient(138deg,#ffe6a0 0,#b47236 16%,#41264a 30%,#60324f 62%,#ffca71 88%,#744023);
+  border-color: #f6ce8a;
+  box-shadow: 0 0 0 1px #6c3c4e,0 0 14px #d16aa34f,inset 0 0 0 1px #fff0a6;
+}
+.game .deck {
+  background: linear-gradient(160deg,#5c3355,#33213c 18%,#1f152b 72%,#321b39);
+}
+.game .deck .spin-button {
+  background: linear-gradient(165deg,#c557d7,#8618a1 50%,#461365);
+  box-shadow: inset 0 1px 2px #ffc3f6,inset 0 0 0 2px #ba5e97,0 2px 0 #642449,0 0 11px #c533b966;
+}
+.burst[data-tone="leaf"]::before {
+  background-image: url('/art/production/gumleaf.webp');
+  width: clamp(120px,30vw,320px);
+}
+.burst[data-tone="leaf"] #burst-value { transform: none; }
+#feature-dialog[data-mode="regular"] { --feature-rim:#ff9ad3; }
+#feature-dialog[data-mode="super"] { --feature-rim:#8bedff; }
+#feature-dialog[data-mode="epic"] { --feature-rim:#ffe193; }
+#feature-dialog[data-mode] .cinematic-art {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb,var(--feature-rim) 65%,transparent), inset 0 0 26px #21072c;
+}
+#feature-dialog[data-stage="reveal"] .cinematic-emblem {
+  animation: emblem-shot 1.08s cubic-bezier(.18,.7,.24,1) both;
+}
+@keyframes emblem-shot {
+  from { opacity:.25; transform: translateY(10px) scale(.88); }
+  58% { opacity:1; transform: translateY(-2px) scale(1.05); }
+  to { opacity:1; transform: none; }
+}
+.game .celebration:not([hidden]) canvas { animation: win-focus .72s cubic-bezier(.17,.62,.31,1) both; }
+.game .celebration canvas {
+  height: clamp(74px,18vw,210px);
+  max-width:43%;
+  object-fit: contain;
+}
+@keyframes win-focus {
+  from { opacity: .25; transform: translateY(15%) scale(.74); }
+  62% { opacity:1; transform: translateY(-3%) scale(1.08); }
+  to { opacity:1; transform:none; }
+}
+@media (min-width: 1100px) and (min-height: 800px) {
+  .shell[data-layout="landscape"] .game { width: min(100%,clamp(650px,calc(125dvh - 400px),900px)); }
+  .shell[data-layout="landscape"] .game .reel-frame { padding: 1px 4px 4px; }
+}
+.shell[data-size="mini"] .intro p { display: none; }
+.shell[data-size="mini"] .gumleaf-relic { width: min(70%,92px); margin-top: 2px; }
+.shell[data-size="mini"] .gumleaf-relic span { font-size: clamp(.8rem,12cqw,1.28rem); }
+.shell[data-size="mini"] .intro .mascot { flex-basis: 100px; height: 100px; }
+.shell[data-layout="portrait"] .intro {
+  grid-template-rows: 37px 28px;
+  grid-template-columns:minmax(0,1.3fr) minmax(0,.92fr) 66px;
+  column-gap: 6px;
+}
+.shell[data-layout="portrait"] .intro h1,
+.shell[data-layout="portrait"] .intro .mascot { grid-row: 1 / 3; }
+.shell[data-layout="portrait"] .intro .gumleaf-relic {
+  grid-area: 1 / 2;
+  justify-self: center;
+  width: min(100%,86px);
+  max-height: 40px;
+  margin:0;
+}
+.shell[data-layout="portrait"] .intro .gumleaf-relic span { font-size: .97rem; }
+@media (prefers-reduced-motion: reduce) {
+  .jungle-glints,
+  #feature-dialog[data-stage="reveal"] .cinematic-emblem,
+  .game .celebration:not([hidden]) canvas { animation: none; }
+}
+html[data-motion="instant"] #feature-dialog[data-stage="reveal"] .cinematic-emblem { animation: none; }
+

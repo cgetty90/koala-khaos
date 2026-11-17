@@ -1,0 +1,132 @@
+{
+  "frames": {
+    "berry": {
+      "frame": {
+        "x": 8,
+        "y": 8,
+        "w": 224,
+        "h": 195
+      },
+      "sourceSize": {
+        "w": 224,
+        "h": 195
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 224,
+        "h": 195
+      },
+      "trimmed": false,
+      "rotated": false
+    },
+    "lemon": {
+      "frame": {
+        "x": 248,
+        "y": 8,
+        "w": 224,
+        "h": 209
+      },
+      "sourceSize": {
+        "w": 224,
+        "h": 209
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 224,
+        "h": 209
+      },
+      "trimmed": false,
+      "rotated": false
+    },
+    "mint": {
+      "frame": {
+        "x": 488,
+        "y": 8,
+        "w": 224,
+        "h": 124
+      },
+      "sourceSize": {
+        "w": 224,
+        "h": 124
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 224,
+        "h": 124
+      },
+      "trimmed": false,
+      "rotated": false
+    },
+    "grape": {
+      "frame": {
+        "x": 8,
+        "y": 248,
+        "w": 224,
+        "h": 224
+      },
+      "sourceSize": {
+        "w": 224,
+        "h": 224
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 224,
+        "h": 224
+      },
+      "trimmed": false,
+      "rotated": false
+    },
+    "peach": {
+      "frame": {
+        "x": 248,
+        "y": 248,
+        "w": 224,
+        "h": 193
+      },
+      "sourceSize": {
+        "w": 224,
+        "h": 193
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 224,
+        "h": 193
+      },
+      "trimmed": false,
+      "rotated": false
+    },
+    "toffee": {
+      "frame": {
+        "x": 488,
+        "y": 248,
+        "w": 224,
+        "h": 172
+      },
+      "sourceSize": {
+        "w": 224,
+        "h": 172
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 224,
+        "h": 172
+      },
+      "trimmed": false,
+      "rotated": false
+    }
+  },
+  "meta": {
+    "image": "candies.webp",
+    "scale": "1",
+    "size": {
+      "w": 720,
+      "h": 480
+    }
+  }
+}

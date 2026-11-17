@@ -1,0 +1,84 @@
+html,body { width:100%; height:100%; overflow:hidden; }
+:root { --trim:#d4a567; --console:#121c2e; }
+.shell { width:100%; max-width:1360px; height:100dvh; padding:clamp(6px,1vw,15px); display:grid; grid-template-rows:auto minmax(0,1fr); gap:7px; }
+.top { margin:0; padding:2px 3px 6px; min-width:0; }
+.brand { font:900 clamp(.82rem,1.7vw,1.3rem)/1 Georgia,serif; letter-spacing:.04em; white-space:nowrap; }
+.demo { white-space:nowrap; font-size:clamp(.48rem,1vw,.67rem); padding:5px 7px; }
+.layout { min-height:0; display:grid; align-items:stretch; gap:clamp(5px,1vw,14px); grid-template-columns:minmax(0,.62fr) minmax(0,2.5fr) minmax(0,.85fr); grid-template-areas:"intro game deck"; }
+.intro,.game,.deck { min-height:0; min-width:0; }
+.intro { display:flex; flex-direction:column; align-self:stretch; justify-content:center; padding:0 5px 2px; }
+.intro h1 { font-family:Georgia,serif; line-height:.86; margin:0; }
+.intro h1 span { font-size:clamp(1.2rem,4.5vw,4.5rem); }
+.intro h1 em { font-size:clamp(1.55rem,5.3vw,5.5rem); color:#ffcd87; }
+.intro p { font-size:clamp(.61rem,1.1vw,.86rem); margin:8px 0 0; }
+.mascot { position:static; flex:0 1 260px; min-height:0; width:100%; height:auto; }
+.mascot canvas { width:100%; height:100%; object-fit:contain; display:block; filter:drop-shadow(0 9px 10px #05111e); }
+.game { display:flex; flex-direction:column; justify-content:flex-start; gap:4px; padding:clamp(3px,1vw,10px); border:1px solid #c39462; border-radius:clamp(8px,1.6vw,19px); background:#142036eb; }
+.scoreboard { margin:0; gap:4px; }
+.scoreboard div { padding:3px; gap:1px; border-radius:7px; }
+.scoreboard span { font-size:clamp(.45rem,1.15vw,.63rem); letter-spacing:.065em; }
+.scoreboard output { font-size:clamp(.83rem,2.1vw,1.25rem); }
+.board-space { flex:1; min-height:0; width:100%; container-type:size; display:grid; place-items:center; }
+.reel-frame { width:min(calc(100cqw - 3px),calc((100cqh - 3px) * 1.2)); padding:clamp(2px,.5vw,6px); border-radius:clamp(6px,1.3vw,14px); }
+#board { border-radius:clamp(4px,.9vw,10px); }
+.bonus-track { margin:0; padding:3px 4px; font-size:clamp(.56rem,1.1vw,.72rem); border-radius:6px; }
+.progression { grid-template-columns:repeat(10,minmax(0,1fr)); gap:2px; }
+.progression li { min-width:10px; font-size:.51rem; padding:2px 1px; }
+.deck { grid-area:deck; align-self:center; display:grid; gap:8px; border:1px solid #ad8258; border-radius:15px; padding:clamp(5px,1vw,12px); background:#102033ee; box-shadow:0 6px 16px #061322; }
+.deck .status { margin:0; min-height:2.4em; text-align:left; font:700 clamp(.61rem,1.25vw,.86rem)/1.2 "Trebuchet MS",sans-serif; }
+.deck .controls,.deck .controls:has(.spin-button:not([hidden])):has(.fast-forward:not([hidden])) { grid-template-columns:minmax(0,1fr); gap:6px; }
+.deck .controls button { min-height:35px; font-size:.92rem; }
+.deck .controls .stake-tools button { min-width:22px; min-height:27px; font-size:1rem; }
+.deck .stake-tools { grid-template-columns:minmax(22px,1fr) minmax(56px,1.65fr) minmax(22px,1fr); gap:3px; }
+.deck .stake-tools select { min-width:0; min-height:27px; padding:2px 1px; font-size:.75rem; }
+.deck-actions { display:flex; flex-wrap:wrap; gap:4px; }
+.deck-actions button,.auto-track button { min-height:30px; flex:1; padding:3px 5px; border-radius:6px; font:800 .68rem/1.1 "Trebuchet MS",sans-serif; cursor:pointer; }
+.deck-actions button:disabled,.auto-track button:disabled { opacity:.55; cursor:default; }
+.fictional { margin:0; color:#e6d2b6; font-size:clamp(.53rem,.9vw,.65rem); line-height:1.2; }
+.auto-track { display:flex; align-items:center; gap:4px; font-size:.72rem; font-weight:800; justify-content:space-between; }
+.auto-track output { white-space:nowrap; }
+.auto-track button { background:#ffb2a9; border-color:#ffdad5; flex:0 0 auto; }
+.auto-option { display:flex; gap:6px; align-items:center; margin:12px 0; }
+.utility-dialog .activity { margin:8px 0; }
+.utility-dialog { width:min(440px,calc(100% - 16px)); }
+.feature-dialog { max-height:calc(100dvh - 14px); overflow:auto; }
+#feature-dialog .cinematic-art { height:clamp(86px,39dvh,300px); perspective:570px; }
+.scenery .world { transition:background-image .35s linear, transform .25s ease-out; }
+body[data-world="regular"] .world { background-image:url('/art/khaos/regular.webp'); }
+body[data-world="super"] .world { background-image:url('/art/khaos/super.webp'); }
+body[data-world="epic"] .world { background-image:url('/art/khaos/epic.webp'); }
+
+.shell[data-layout="portrait"] .layout { grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto; grid-template-areas:"intro" "game" "deck"; }
+.shell[data-layout="portrait"] .intro { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,.74fr) 63px; align-items:center; column-gap:7px; min-height:51px; padding:0 3px; }
+.shell[data-layout="portrait"] .intro h1 { line-height:.87; }
+.shell[data-layout="portrait"] .intro h1 span { font-size:clamp(1.02rem,5.2vw,2rem); }
+.shell[data-layout="portrait"] .intro h1 em { font-size:clamp(1.22rem,6.5vw,2.45rem); }
+.shell[data-layout="portrait"] .mascot { grid-column:3; grid-row:1; height:65px; }
+.shell[data-layout="portrait"] .intro p { display:none; }
+.shell[data-layout="portrait"] .deck { gap:5px; }
+.shell[data-layout="portrait"] .deck .status { min-height:1.2em; }
+.shell[data-layout="portrait"] .fast-forward { grid-column:1 / -1; }
+.shell[data-layout="portrait"] .deck .fast-forward { min-height:27px; }
+.shell[data-size="mini"] .layout { grid-template-columns:minmax(0,.59fr) minmax(0,2.1fr) minmax(0,.96fr); }
+.shell[data-size="mini"] .intro h1 span { font-size:clamp(1.05rem,3.5vw,2rem); }
+.shell[data-size="mini"] .intro h1 em { font-size:clamp(1.25rem,4.2vw,2.4rem); }
+.shell[data-size="mini"] .intro .mascot { height:112px; flex:0 1 112px; }
+.shell[data-size="mini"] .deck { gap:4px; }
+.shell[data-size="mini"] .deck .controls button { min-height:29px; }
+.shell[data-size="mini"] .deck-actions button,.shell[data-size="mini"] .auto-track button { min-height:25px; }
+.shell[data-size="mini"] .progression { display:none; }
+@media (max-width:350px) { .scoreboard span { font-size:.45rem; } }
+
+
+.intro { container-type:inline-size; }
+.shell:not([data-layout="portrait"]) .intro h1 span { font-size:min(23cqw,4.5rem); }
+.shell:not([data-layout="portrait"]) .intro h1 em { font-size:min(26.5cqw,5.1rem); }
+.shell[data-layout="portrait"] .game { align-self:center; height:min(100%,428px); }
+.shell[data-layout="portrait"] .layout { max-height:710px; align-self:center; height:100%; }
+.shell[data-layout="portrait"] .intro { align-self:end; }
+
+@media (min-width:375px) and (max-width:700px) and (min-height:690px) {
+  .shell[data-layout="portrait"] .deck .controls button { min-height:42px; }
+  .shell[data-layout="portrait"] .deck .stake-tools select { min-height:39px; }
+  .shell[data-layout="portrait"] .deck-actions button { min-height:38px; }
+}

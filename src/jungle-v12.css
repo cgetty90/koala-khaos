@@ -1,0 +1,95 @@
+
+.jungle-canopy, .jungle-embers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.jungle-canopy {
+  background: url('/art/cinematic/foliage.webp') top center / cover;
+  opacity: .11;
+  mask-image: linear-gradient(#000,transparent 35%);
+  transform-origin: center top;
+  animation: canopy-drift 12s ease-in-out alternate infinite;
+}
+.jungle-embers {
+  background:
+    radial-gradient(circle at 19% 70%,#ffcf7c 0 1px,transparent 3px),
+    radial-gradient(circle at 92% 49%,#f8bcf4 0 2px,transparent 5px),
+    radial-gradient(circle at 83% 79%,#aaf3ee 0 1px,transparent 4px),
+    radial-gradient(ellipse at 12% 50%,#c875ff33,transparent 33%);
+  animation: jungle-shimmer 19s ease-in-out infinite;
+}
+@keyframes canopy-drift { from { transform:translate(calc(var(--scene-x,0px) * .54),calc(var(--scene-y,0px) * .42)) scale(1.04) rotate(-.5deg) } to { transform:translate(calc(var(--scene-x,0px) * .54),calc(var(--scene-y,0px) * .42)) scale(1.04) rotate(.5deg) } }
+@keyframes jungle-shimmer {
+  0%,61%,100% { opacity:.16; transform:translateY(5px) }
+  77% { opacity:.45; transform:translateY(-7px) }
+  86% { opacity:.23; transform:translateY(-9px) }
+}
+html[data-paused="true"] :is(.jungle-canopy,.jungle-embers) { animation-play-state:paused; }
+html[data-motion="instant"] :is(.jungle-canopy,.jungle-embers),
+html[data-effects="reduced"] :is(.jungle-canopy,.jungle-embers,.jungle-glints) { animation:none; }
+html[data-effects="reduced"] :is(.scenery-light,.jungle-embers) { visibility:hidden; }
+html[data-effects="reduced"] :is(.cinematic-rays,.win-particles) { visibility:hidden; }
+@media(prefers-reduced-motion:reduce) {
+  :is(.jungle-canopy,.jungle-embers) { animation:none }
+}
+@media(max-width:680px) {
+  .jungle-canopy { background-image:url('/art/cinematic/foliage-mobile.webp'); }
+}
+.kart-cinematic {
+  position:absolute;
+  inset:0;
+  z-index:5;
+  overflow:hidden;
+  background:#201031;
+}
+.kart-cinematic canvas { width:100%; height:100%; object-fit:contain; display:block; }
+.kart-route {
+  position:absolute;
+  left:4%;
+  top:6%;
+  color:#ffe4b0;
+  font-size:clamp(.92rem,3vw,1.56rem);
+  text-shadow:0 2px 5px #23102e,0 0 10px #4a206d;
+}
+
+.jungle-embers::before {
+  content:"";
+  position:absolute;
+  top:14%;
+  left:73%;
+  width:45px;
+  height:66px;
+  background:#d4baff;
+  clip-path:polygon(63% 0,32% 46%,53% 46%,35% 100%,78% 38%,53% 39%,79% 0);
+  opacity:0;
+  animation:distant-magic 31s ease-in-out infinite;
+}
+@keyframes distant-magic {
+  0%,76%,89%,100% { opacity:0; }
+  82% { opacity:.38; }
+}
+html[data-paused="true"] .jungle-embers::before { animation-play-state:paused; }
+html[data-effects="reduced"] .jungle-embers::before,
+html[data-motion="instant"] .jungle-embers::before { animation:none; }
+@media(prefers-reduced-motion:reduce) { .jungle-embers::before { animation:none; } }
+
+@media (max-width:600px) {
+  #feature-dialog .cinematic-art:has(.kart-cinematic:not([hidden])) {
+    height: auto;
+    aspect-ratio: 640 / 270;
+  }
+}
+
+#waterfall-field {
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+body:is([data-world="regular"],[data-world="super"],[data-world="epic"]) #waterfall-field,
+html[data-motion="instant"] #waterfall-field { visibility:hidden; }
+@media(prefers-reduced-motion:reduce) { #waterfall-field { visibility:hidden; } }
+.mascot::before { background:radial-gradient(ellipse,#110822bb 0%,#75418175 40%,transparent 71%); }
+.game { box-shadow:0 12px 35px #070514b3,inset 0 0 0 2px #522c54; }
