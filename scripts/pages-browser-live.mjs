@@ -15,15 +15,20 @@ const credits = new Intl.NumberFormat('en', {minimumFractionDigits:2,maximumFrac
 
 try {
   for (const viewport of [{width:1280,height:720},{width:390,height:844}]) {
-    const page = await browser.newPage({viewport,reducedMotion:'reduce'});
+    const mobile = viewport.width < 450;
+    const page = await browser.newPage({viewport,isMobile:mobile,hasTouch:mobile,reducedMotion:'reduce'});
     const errors = [];
+    let droppedId;
     page.on('request', request => {
       const url = new URL(request.url());
       if (/^(https?:)$/.test(url.protocol) && ![site, api.origin].includes(url.origin)) errors.push('Unexpected request: '+url.href);
       if (url.pathname.startsWith('/__khaos/') && url.origin !== api.origin) errors.push('Settlement used wrong origin: '+url.href);
     });
     page.on('pageerror',error => errors.push(error.message));
-    page.on('requestfailed',request => errors.push(request.url()+' '+request.failure()?.errorText));
+    page.on('requestfailed', request => {
+      if (droppedId && request.url() === api.origin+'/__khaos/round' && request.postDataJSON()?.id === droppedId) return;
+      errors.push(request.url()+' '+request.failure()?.errorText);
+    });
     // Fulfil static requests under the future Pages origin. API traffic stays on the network.
     if (process.env.KHAOS_PAGES_VERIFY_DEPLOYED !== '1') await page.route(frontend+'**',async route => {
       const relative = new URL(route.request().url()).pathname.slice('/koala-khaos/'.length) || 'index.html';
@@ -37,7 +42,12 @@ try {
       await route.fulfill({path:file});
     });
     await page.goto(frontend);
-    await page.getByRole('button', { name:'Enter the Khaos' }).click();
+    const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+'audio/koala-khaos-music-1.ogg');
+    const welcome = page.getByRole('button', { name:'Enter the Khaos' });
+    if (mobile) await welcome.tap();
+    else await welcome.click();
+    await song;
+    await expect(page.locator('#audio-status')).toHaveAttribute('data-state','playing');
     const spin = page.locator('#drop');
     await expect(spin).toBeEnabled();
     await expect(page.locator('#credits')).toHaveText('500.00');
@@ -57,6 +67,8 @@ try {
       assert(reply.ok(),mode+' failed over the real API');
       const {receipt} = await reply.json();
       assert.equal(receipt.mode,mode);
+      if (mode === 'normal' && !receipt.record.spec.tier) assert.equal(receipt.id.version,'khaos-3.0-offline-b.1');
+      else assert.equal(receipt.id.version,'khaos-1.9-scatter-candidate.1');
       assert.equal(receipt.cost,costs[mode]);
       assert.equal(receipt.balance, initialBalance - receipt.cost + receipt.credit);
       initialBalance = receipt.balance;
@@ -112,6 +124,7 @@ try {
           if (!receipt.record.spec.tier && (naturalScatterCount === 1 || naturalScatterCount === 2)) seen.add(naturalScatterCount);
           expected.push(...events.flatMap(event => event.scatterLandings ?? []));
           assert.equal(receipt.mode,'normal');
+          if (!receipt.record.spec.tier) assert.equal(receipt.id.version,'khaos-3.0-offline-b.1');
           assert.equal(receipt.cost,20);
           assert.equal(receipt.balance,balance-receipt.cost+receipt.credit);
           balance = receipt.balance;
@@ -123,6 +136,35 @@ try {
       console.log('Remote autoplay, exact ledger and recorded scatter landings passed. Observed non-bonus counts: '+[...seen].sort().join(', '));
       assert.equal(seen.size, 2, 'Sample did not contain both non-bonus scatter counts.');
     }
+    // Settle once on the real gateway and withhold that reply from the client.
+    const roundUrl = api.origin+'/__khaos/round';
+    let settleDropped;
+    const dropped = new Promise(resolve => { settleDropped = resolve; });
+    await page.route(roundUrl, async route => {
+      droppedId = route.request().postDataJSON().id;
+      const upstream = await route.fetch();
+      assert(upstream.ok(), 'Interrupted round did not settle');
+      const original = await upstream.json();
+      await route.abort('connectionreset');
+      settleDropped(original);
+    }, {times:1});
+    await spin.click();
+    const original = await dropped;
+    const retry = page.getByRole('button',{name:'Retry pending round'});
+    await expect(retry).toBeVisible();
+    await expect(page.locator('#credits')).toHaveText('—');
+    await expect(spin).toBeDisabled();
+    const retried = page.waitForResponse(reply => reply.url() === roundUrl);
+    if (mobile) await retry.tap();
+    else await retry.click();
+    const saved = await (await retried).json();
+    assert.deepEqual(saved,original);
+    if (saved.receipt.record.spec.tier) {
+      await page.locator('#feature-continue').click({timeout:30000});
+      await page.locator('#feature-action').click({timeout:30000});
+    }
+    await expect(spin).toBeEnabled({timeout:30000});
+    await expect(page.locator('#credits')).toHaveText(credits.format(saved.receipt.balance / 100));
     assert.deepEqual(errors,[]);
     await page.close();
     console.log(viewport.width + 'px Pages build played and recovered five modes over HTTPS.');

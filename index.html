@@ -45,7 +45,7 @@
         </div>
         </div><section class="deck" aria-label="Game controls">
         <div class="controls">
-          <div class="cabinet-display"><span>Balance</span><output id="credits" aria-label="Fake credits balance">500.00</output></div>
+          <div class="cabinet-display"><span>Balance</span><output id="credits" aria-label="Fake credits balance">—</output></div>
           <div class="stake-tools" role="group" aria-label="Stake controls">
             <button id="stake-down" type="button" aria-label="Decrease stake" disabled>−</button>
             <label for="stake">Base Bet<select id="stake" aria-label="Stake" disabled></select></label>
@@ -71,6 +71,7 @@
           <output id="auto-remaining" aria-label="Auto spins remaining"></output><button id="auto-stop" class="secondary" type="button" hidden>STOP</button>
         </div>
         <p id="status" class="status" role="status" data-phase="loading">Loading the candy jungle…</p>
+        <button type="button" id="settlement-retry" class="secondary" hidden>Retry pending round</button>
         <div class="cabinet-notes">
           <small class="fictional">Fictional credits · non-redeemable</small>
         </div>

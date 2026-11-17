@@ -111,7 +111,9 @@ let ante = sessionStorage.getItem(anteKey) === 'true';
 const chargedStake = () => stake() * (ante ? 3 : 1);
 let busy = true;
 let purchaseReveal = false;
-let lastSkipInteraction = -Infinity;
+let awaitingReceipt = false;
+let skipCooldownUntil = 0;
+const settlementRetry = get<HTMLButtonElement>('settlement-retry');
 const mascot = get<HTMLCanvasElement>('mascot');
 const cinematicMochi = get<HTMLCanvasElement>('cinematic-mochi');
 const featureAction = get<HTMLButtonElement>('feature-action');
@@ -343,8 +345,9 @@ mountScatterDemo(audio, utility, atlas, () => reducedMotion.matches ? 0 : Number
 
 function skip() {
   if (!busy || purchaseReveal || feature.open || shop.open || autoDialog.open || anteDialog.open || utility.open) return;
-  lastSkipInteraction = performance.now();
   if (!motion.skipCurrent()) return;
+  skipCooldownUntil = performance.now() + 320;
+  window.setTimeout(refreshSpinButton, 325);
   audio.setSuspense(false);
   audio.silence();
 }
@@ -406,10 +409,11 @@ function refreshControls() {
   get('ante-heading').textContent = ante ? 'ON · 3× Base Bet' : 'OFF · 1× Base Bet';
   get<HTMLOutputElement>('ante-price').value = fmt(selectedStake * 3);
   get<HTMLOutputElement>('ante-base').value = fmt(selectedStake);
-  anteOpen.disabled = busy;
-  deckSpeed.disabled = busy;
-  total.value = fmt(balance);
-  const locked = busy || feature.open || shop.open;
+  anteOpen.disabled = busy || awaitingReceipt;
+  deckSpeed.disabled = busy || awaitingReceipt;
+  total.value = awaitingReceipt ? '—' : fmt(balance);
+  settlementRetry.hidden = busy || !awaitingReceipt;
+  const locked = busy || awaitingReceipt || feature.open || shop.open;
   refreshSpinButton();
   buy.disabled = locked || Boolean(session);
   autoButton.disabled = buy.disabled || balance < chargedStake();
@@ -422,7 +426,8 @@ function refreshControls() {
 function refreshSpinButton() {
   const blocked = purchaseReveal || feature.open || shop.open || utility.open || anteDialog.open || autoDialog.open;
   const canSkip = busy && !blocked && motion.skippable;
-  const ready = !busy && !blocked && !session && balance >= chargedStake();
+  const ready = !busy && !blocked && !session && !awaitingReceipt &&
+    performance.now() >= skipCooldownUntil && balance >= chargedStake();
   spin.dataset.spinState = ready ? 'ready' : canSkip ? 'skip' : busy
     ? motion.skipping ? 'skipping' : 'spinning' : 'disabled';
   spin.disabled = !ready && (!canSkip || celebration.open);
@@ -542,7 +547,6 @@ function cinematicAction() {
     : feature.dataset.stage === 'summary' ? featureAction : undefined;
   return action && !action.hidden && !action.disabled ? action : undefined;
 }
-featureAction.addEventListener('click', () => { lastSkipInteraction = performance.now(); }, { capture:true });
 feature.addEventListener('click', event => {
   if (event.target instanceof Element && !event.target.closest('button')) cinematicAction()?.click();
 });
@@ -914,9 +918,14 @@ async function playPaid(mode: PaidMode, stakeMinor: number) {
   const paidOpening = mode === 'normal' || mode === 'ante';
   const storm = paidOpening && !motion.instant;
   const duration = auto?.turbo ? Number(speed.value) * 2.5 * 145 : 350;
-  if (paidOpening) status.textContent = 'Starting spin…';
+  awaitingReceipt = true;
+  total.value = '—';
+  status.dataset.phase = 'pending';
+  status.textContent = 'Settlement pending · confirming this round…';
   const ready = accept(mode, stakeMinor).then(accepted => {
     const spins = splitReceipt(accepted);
+    awaitingReceipt = false;
+    delete status.dataset.phase;
     balance = accepted.receipt.balance - accepted.receipt.credit;
     total.value = fmt(balance);
     return { ...accepted, ...spins };
@@ -957,7 +966,16 @@ async function runSequence(task: () => Promise<void>) {
   } catch (error) {
     console.error(error);
     if (feature.open) feature.close();
-    status.textContent = 'Playback was interrupted. Any settled credits are shown above.';
+    awaitingReceipt = Boolean(pending());
+    if (awaitingReceipt) {
+      status.dataset.phase = 'pending';
+      status.textContent = 'Settlement pending · balance unavailable. Retry this round to confirm.';
+      spinWin.value = '—';
+      delete spinWin.dataset.confirmed;
+      get<HTMLOutputElement>('last-win').value = '—';
+    } else {
+      status.textContent = 'Playback was interrupted.';
+    }
   } finally {
     session = undefined;
     purchaseReveal = false;
@@ -1012,14 +1030,24 @@ get('auto-start').addEventListener('click', () => {
 });
 
 
+function resumePendingRound() {
+  if (busy || !awaitingReceipt) return;
+  const round = pending();
+  if (!round) return;
+  stakeSelect.value = String(round.stake);
+  if (round.mode === 'normal' || round.mode === 'ante') ante = round.mode === 'ante';
+  void runSequence(async () => { await playPaid(round.mode, round.stake); });
+}
+
 async function start() {
   const fallPace = () => speed.value === '0.65' && !auto?.turbo ? 1.8 : 1;
   const paint = mountBoard(host, motion.tween, true, fallPace).then(board => {
     display = board;
     display.draw(makeBoard(fresh()));
   });
-  const [, restoredBalance] = await Promise.all([paint, currentBalance()]);
-  balance = restoredBalance;
+  awaitingReceipt = Boolean(pending());
+  const [, restoredBalance] = await Promise.all([paint, awaitingReceipt ? undefined : currentBalance()]);
+  if (restoredBalance !== undefined) balance = restoredBalance;
   const gumleaf = new Image();
   gumleaf.fetchPriority = 'low';
   gumleaf.src = art('gumleaf');
@@ -1033,15 +1061,12 @@ async function start() {
   status.textContent = 'Choose a stake, then spin.';
   busy = false;
   refreshControls();
-  const unplayed = pending();
-  if (unplayed) {
-    stakeSelect.value = String(unplayed.stake);
-    if (unplayed.mode === 'normal' || unplayed.mode === 'ante') ante = unplayed.mode === 'ante';
-    void runSequence(async () => { await playPaid(unplayed.mode, unplayed.stake); });
-  }
+  settlementRetry.addEventListener('click', resumePendingRound);
+  window.addEventListener('online', resumePendingRound);
+  resumePendingRound();
   spin.addEventListener('click', () => {
     if (busy) { skip(); return; }
-    if (performance.now() - lastSkipInteraction < 320 || feature.open || shop.open || balance < chargedStake()) return;
+    if (spin.dataset.spinState !== 'ready') return;
     void runSequence(async () => {
       await playPaid(ante ? 'ante' : 'normal', stake());
     });

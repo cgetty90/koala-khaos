@@ -19,7 +19,7 @@ export type Presentation = { schemaVersion: string; bonusTier: BonusMode | null;
   classification: string; landings: Landing[]; scatterCount: number; kartCinematic: string | null; timings: RevealTiming | null;
 } };
 export type Accepted = {
-  receipt: { id: { version: string }; mode: PaidMode; stake: number; cost: number; credit: number; balance: number;
+  receipt: { requestId: string; id: { version: string }; mode: PaidMode; stake: number; cost: number; credit: number; balance: number;
     record: { naturalScatterCount?: number; spec: { tier: BonusMode | null }; events: Event[] } };
   presentation: Presentation;
 };
@@ -36,7 +36,7 @@ function sessionId() {
 }
 async function api<T>(action: string, payload: object): Promise<T> {
   const response = await fetch(apiOrigin + '/__khaos/' + action, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session: sessionId(), ...payload }),
+    method: 'POST', signal: AbortSignal.timeout(15000), headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session: sessionId(), ...payload }),
   });
   const result = await response.json();
   if (!response.ok) throw Error(result.error);
@@ -54,14 +54,22 @@ export async function accept(mode: PaidMode, stake: number): Promise<Accepted> {
     request = { id: crypto.randomUUID(), mode, stake, fixture: branch === null ? undefined : Number(branch) };
     sessionStorage.setItem(pendingKey, JSON.stringify(request));
   }
-  return api<Accepted>('round', request);
+  const payload = apiOrigin ? {...request, profile:'friend-v31'} : request;
+  const accepted = await api<Accepted>('round', payload);
+  const receipt = accepted.receipt;
+  if (receipt.requestId !== request.id || receipt.mode !== request.mode || receipt.stake !== request.stake) {
+    throw Error('Settlement receipt does not match the pending request.');
+  }
+  return accepted;
 }
 export function complete() { sessionStorage.removeItem(pendingKey); }
 export async function currentBalance() { return (await api<{ balance: number }>('state', {})).balance; }
 export function splitReceipt(accepted: Accepted) {
   const { receipt, presentation } = accepted;
   const known = receipt.id.version === 'khaos-1.9-private-checkpoints.1' && presentation.schemaVersion === 'khaos.presentation.1'
-    || receipt.id.version === 'khaos-1.9-scatter-candidate.1' && presentation.schemaVersion === 'khaos.presentation.2';
+    || (receipt.id.version === 'khaos-1.9-scatter-candidate.1'
+      || receipt.id.version === 'khaos-3.0-offline-b.1')
+      && presentation.schemaVersion === 'khaos.presentation.2';
   if (!known ||
       presentation.bonusTier !== receipt.record.spec.tier) throw Error('Unrecognized receipt version or tier.');
   const spins: RecordedSpin[] = [];

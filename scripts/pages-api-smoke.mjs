@@ -40,13 +40,15 @@ for (const [mode, factor] of Object.entries({normal:1,ante:3,regular:100,super:3
   const session = randomUUID();
   const {balance:opening} = await post('state',{session});
   assert.equal(opening,independent);
-  const params = {session,id:randomUUID(),mode,stake:20};
+  const params = {session,id:randomUUID(),mode,stake:20,profile:'friend-v31'};
   assert.equal((await request('round',{...params,fixture:1})).status,400);
   const accepted = await post('round',params);
   const {receipt} = accepted;
   assert.equal(receipt.requestId,params.id);
   assert.deepEqual(Object.keys(receipt.id),['version']);
   assert.equal(receipt.cost,20*factor);
+  if (mode === 'normal' && !receipt.record.spec.tier) assert.equal(receipt.id.version,'khaos-3.0-offline-b.1');
+  else assert.equal(receipt.id.version,'khaos-1.9-scatter-candidate.1');
   assert(Number.isSafeInteger(receipt.credit) && receipt.credit>=0 && receipt.credit<=120000);
   const awards = receipt.record.events.filter(event=>event.type==='award');
   if (factor >= 100) assert.equal(awards.length,10);
