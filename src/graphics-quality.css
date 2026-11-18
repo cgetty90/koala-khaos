@@ -1,5 +1,11 @@
 .graphics-help,#graphics-status{font-size:12px;line-height:1.45;color:#d9ceb9;margin:6px 10px}
 #graphics-quality{max-width:100%;min-height:44px}
+/* The painted landscape never follows the pointer or drifts. Local water remains alive. */
+.scenery :is(.world,.foreground,.jungle-canopy){transform:none!important;transition:none!important;animation:none!important;will-change:auto!important}
+.scenery :is(.jungle-glints,.jungle-embers,.jungle-embers::before){animation:none!important;will-change:auto!important}
+html[data-scene-covered="true"] .scenery *{animation-play-state:paused!important}
+html[data-scene-covered="true"] .scenery-light{visibility:hidden}
+.waterfall-patch{pointer-events:none;contain:strict}
 html[data-quality="balanced"] :is(.jungle-canopy,.jungle-glints){animation-duration:24s}
 html[data-quality="performance"] :is(.jungle-canopy,.jungle-glints,.jungle-embers,.foreground){animation:none!important;will-change:auto!important}
 html[data-quality="performance"] .scenery .world{animation:none!important;transform:none!important;filter:none!important}

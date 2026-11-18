@@ -26,6 +26,7 @@ import './visual-v34.css';
 import './graphics-quality.css';
 import { mountGraphicsQuality } from './graphics-quality';
 import { mountLivingWorld } from './living-world-v32';
+import { mountAmbientState } from './ambient-state';
 import { mountScatterDemo } from './scatter-demo';
 import { conceptArt as art, presentationCandyNames as candyNames } from './art';
 import { mountMascot } from './mascot';
@@ -156,14 +157,15 @@ const cinematicPose = mountMascot(cinematicMochi, introClock.tween, atlas);
 const winPose = mountMascot(get<HTMLCanvasElement>('win-mochi'), introClock.tween, atlas);
 const welcome = get<HTMLDialogElement>('welcome');
 mountMascot(get<HTMLCanvasElement>('welcome-mochi'), introClock.tween, atlas);
-mountWaterfall(get<HTMLCanvasElement>('welcome-water'), welcome);
+mountAmbientState();
+mountWaterfall(get('welcome-water'), welcome);
 const gumleafValue = get('gumleaf-value');
 const effects = get<HTMLInputElement>('reduced-effects');
 mountGraphicsQuality(get<HTMLSelectElement>('graphics-quality'), effects,
   get<HTMLInputElement>('adaptive-quality'), get('graphics-status'));
 const reducedEffects = () => document.documentElement.dataset.effects === 'reduced' || reducedMotion.matches;
 const kartIntro = createKartIntro(get<HTMLCanvasElement>('kart-canvas'), introClock, audio, reducedEffects);
-const brightenFalls = mountWaterfall(get<HTMLCanvasElement>('waterfall-field'));
+const brightenFalls = mountWaterfall(get('waterfall-field'));
 const stageSignal = mountPresentation(get('scenery-light'), get('gumleaf-relic'),
   () => motion.instant || reducedEffects());
 function signal(event: Parameters<typeof stageSignal>[0]) {
@@ -373,17 +375,6 @@ for (let i = 0; i < 24; i++) {
   fleck.style.setProperty('--delay', String((i % 4) * 44) + 'ms');
   particles.append(fleck);
 }
-
-let sceneFrame = 0;
-document.addEventListener('pointermove', event => {
-  if (event.pointerType !== 'mouse' || document.hidden || motion.instant) return;
-  cancelAnimationFrame(sceneFrame);
-  sceneFrame = requestAnimationFrame(() => {
-    const root = document.documentElement;
-    root.style.setProperty('--scene-x', ((event.clientX / innerWidth - .5) * 18).toFixed(1) + 'px');
-    root.style.setProperty('--scene-y', ((event.clientY / innerHeight - .5) * 12).toFixed(1) + 'px');
-  });
-}, { passive: true });
 
 async function flash(message: string, tone: string) {
   if (motion.instant) return;

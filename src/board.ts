@@ -81,25 +81,7 @@ export async function mountBoard(host: HTMLElement, animate: Tween, living = fal
   const phase = createBoardTimeline(host, animate, render);
   const compactTouch = matchMedia('(pointer: coarse) and (max-width: 720px)');
   const restoreRestingPositions = () => sprites.forEach((sprite, i) => { sprite.y = rowY(rowAt(i)); });
-  if (living) {
-    const preference = matchMedia('(prefers-reduced-motion: reduce)');
-    const root = document.documentElement;
-    let drifting = false;
-    const timer = setInterval(() => {
-      if (document.hidden || host.dataset.phase !== 'idle' || compactTouch.matches || !sprites.length) return;
-      const enabled = !preference.matches && root.dataset.effects !== 'reduced'
-        && root.dataset.motion !== 'instant' && currentBudget().ambientFPS === 30;
-      if (!enabled) {
-        if (drifting) { restoreRestingPositions(); render(); drifting = false; }
-        return;
-      }
-      const time = performance.now() / 560;
-      sprites.forEach((sprite, i) => { sprite.y = rowY(rowAt(i)) + Math.sin(time + i * 1.48) * .85; });
-      render();
-      drifting = true;
-    }, 120);
-    window.addEventListener('pagehide', event => { if (!event.persisted) clearInterval(timer); });
-  }
+  // A resting board is already painted. Only genuine animation/resize events redraw it.
 
   async function fall(board: readonly BoardSymbol[], moves: readonly BoardMove[], duration: number, opening = false,
     reveal?: ScatterReveal, openingPace = 1) {

@@ -2,9 +2,9 @@ export type GraphicsQuality = 'high' | 'balanced' | 'performance';
 export const qualities: readonly GraphicsQuality[] = ['high','balanced','performance'];
 export const validQuality = (value: unknown): value is GraphicsQuality => qualities.includes(value as GraphicsQuality);
 export const graphicsBudget = (quality: GraphicsQuality) => ({
- high: { ambientFPS:30, ambientDPR:1.5, leaves:14, lights:22, boardDPR:2, waterfallFPS:24 },
- balanced: { ambientFPS:20, ambientDPR:1, leaves:8, lights:10, boardDPR:1.5, waterfallFPS:16 },
- performance: { ambientFPS:0, ambientDPR:.5, leaves:0, lights:0, boardDPR:1, waterfallFPS:0 },
+ high: { ambientFPS:12, ambientDPR:1, leaves:5, lights:4, boardDPR:2, waterfallFPS:16 },
+ balanced: { ambientFPS:8, ambientDPR:1, leaves:3, lights:2, boardDPR:1.5, waterfallFPS:12 },
+ performance: { ambientFPS:0, ambientDPR:1, leaves:1, lights:0, boardDPR:1, waterfallFPS:8 },
 })[quality];
 // Ambient detail only. Samples while hidden/idle never trigger a downgrade.
 export class AdaptiveGraphics {

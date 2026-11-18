@@ -1,4 +1,5 @@
 import type { Tween } from './motion';
+import { sceneCovered } from './ambient-state';
 
 export type Pose = 'idle' | 'ready' | 'curious' | 'watch' | 'reset' | 'win' | 'big' | 'mega' | 'epic' | 'bonus' | 'complete';
 type Keyframe = readonly [position: number, atlasFrame: number];
@@ -31,12 +32,15 @@ export function mountMascot(canvas: HTMLCanvasElement, animate: Tween, sheetUrl:
   let nextGesture = 0;
   let gesture = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let inView = true;
+  let wanted = 0;
   const instant = () => motionPreference.matches || document.documentElement.dataset.motion === 'instant';
-  const visible = () => !document.hidden && (!dialog || dialog.open) && !canvas.closest('[hidden]');
+  const visible = () => !document.hidden && inView && (!dialog ? !sceneCovered() : dialog.open) && !canvas.closest('[hidden]');
   const full = () => document.documentElement.dataset.effects !== 'reduced';
 
   function draw(index: number, breath = 0) {
-    if (!sheet.naturalWidth) return;
+    wanted = index;
+    if (!sheet.naturalWidth || !visible()) return;
     if (frame === index && painted === breath) return;
     // One opaque authored pose: crossfading different silhouettes produces ghost limbs.
     // Alpha bounds keep the feet and body scale consistent across the nine poses.
@@ -70,9 +74,10 @@ export function mountMascot(canvas: HTMLCanvasElement, animate: Tween, sheetUrl:
     const index = gesture % 4 === 3 && full() && goggles.naturalWidth && phase < 630 ? gogglesFrame
       : gesture % 2 === 0 && phase < 150 ? 2
       : gesture % 2 === 1 && phase < 590 ? 1 : 0;
-    const breath = full() ? .0025 * (1 - Math.cos(now / 650)) : 0;
-    draw(index, index === gogglesFrame ? 0 : breath);
-    timer = setTimeout(idleTick, full() ? 54 : 95);
+    draw(index);
+    // Schedule only an authored pose boundary, never a continuous canvas breath.
+    const boundary = phase < 150 ? 150 - phase : phase < 630 ? 630 - phase : nextGesture - now;
+    timer = setTimeout(idleTick, Math.max(40, boundary));
   }
 
   function react(action: Pose, returnToIdle = false) {
@@ -109,10 +114,15 @@ export function mountMascot(canvas: HTMLCanvasElement, animate: Tween, sheetUrl:
   if (dialog) observer?.observe(dialog, { attributeFilter:['open'] });
   document.addEventListener('visibilitychange', idleTick);
   motionPreference.addEventListener('change', idleTick);
+  const wake = () => { if (pose === 'idle') idleTick(); else { frame = -1; draw(wanted); } };
+  const intersection = new IntersectionObserver(entries => { inView = entries[0].isIntersecting; wake(); });
+  intersection.observe(canvas);
+  document.addEventListener('ambientvisibilitychange',wake);
+  document.addEventListener('graphics-qualitychange',wake);
   document.querySelector('#speed')?.addEventListener('change', () => queueMicrotask(idleTick));
   window.addEventListener('pagehide', event => {
     clearTimeout(timer);
-    if (!event.persisted) observer?.disconnect();
+    if (!event.persisted) { observer?.disconnect(); intersection.disconnect(); document.removeEventListener('ambientvisibilitychange',wake); document.removeEventListener('graphics-qualitychange',wake); }
   });
   window.addEventListener('pageshow', idleTick);
   return react;
