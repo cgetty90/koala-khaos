@@ -2,6 +2,7 @@ import { Application, Assets, Container, Graphics, Sprite, type Texture } from '
 import { loadCandyArt, type BoardSymbol } from './art';
 import { columns, rows, type Movement } from './game';
 import { createBoardTimeline, type Tween } from './motion';
+import { currentBudget } from './graphics-quality';
 
 const cell = 96;
 const width = columns * cell;
@@ -48,7 +49,7 @@ export async function mountBoard(host: HTMLElement, animate: Tween, living = fal
   let resolution = 1;
   const render = () => app.render();
   function resize() {
-    const pixels = host.clientWidth * Math.min(devicePixelRatio, 2);
+    const pixels = host.clientWidth * Math.min(devicePixelRatio, currentBudget().boardDPR);
     const next = Math.max(.4, Math.min(2, Math.round(pixels / width * 8) / 8));
     if (next === resolution) return;
     resolution = next;
@@ -59,6 +60,7 @@ export async function mountBoard(host: HTMLElement, animate: Tween, living = fal
   const observer = new ResizeObserver(resize);
   observer.observe(host);
   window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('graphics-qualitychange', resize);
 
   function create(candy: BoardSymbol, index: number) {
     const sprite = candyArt(candy);
@@ -85,7 +87,8 @@ export async function mountBoard(host: HTMLElement, animate: Tween, living = fal
     let drifting = false;
     const timer = setInterval(() => {
       if (document.hidden || host.dataset.phase !== 'idle' || compactTouch.matches || !sprites.length) return;
-      const enabled = !preference.matches && root.dataset.effects !== 'reduced' && root.dataset.motion !== 'instant';
+      const enabled = !preference.matches && root.dataset.effects !== 'reduced'
+        && root.dataset.motion !== 'instant' && currentBudget().ambientFPS === 30;
       if (!enabled) {
         if (drifting) { restoreRestingPositions(); render(); drifting = false; }
         return;

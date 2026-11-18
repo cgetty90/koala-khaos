@@ -23,6 +23,8 @@ import './responsive-v27.css';
 import './visual-v32.css';
 import './visual-v33.css';
 import './visual-v34.css';
+import './graphics-quality.css';
+import { mountGraphicsQuality } from './graphics-quality';
 import { mountLivingWorld } from './living-world-v32';
 import { mountScatterDemo } from './scatter-demo';
 import { conceptArt as art, presentationCandyNames as candyNames } from './art';
@@ -157,10 +159,9 @@ mountMascot(get<HTMLCanvasElement>('welcome-mochi'), introClock.tween, atlas);
 mountWaterfall(get<HTMLCanvasElement>('welcome-water'), welcome);
 const gumleafValue = get('gumleaf-value');
 const effects = get<HTMLInputElement>('reduced-effects');
-const reducedEffects = () => effects.checked || reducedMotion.matches;
-effects.addEventListener('change', () => {
-  document.documentElement.dataset.effects = effects.checked ? 'reduced' : 'full';
-});
+mountGraphicsQuality(get<HTMLSelectElement>('graphics-quality'), effects,
+  get<HTMLInputElement>('adaptive-quality'), get('graphics-status'));
+const reducedEffects = () => document.documentElement.dataset.effects === 'reduced' || reducedMotion.matches;
 const kartIntro = createKartIntro(get<HTMLCanvasElement>('kart-canvas'), introClock, audio, reducedEffects);
 const brightenFalls = mountWaterfall(get<HTMLCanvasElement>('waterfall-field'));
 const stageSignal = mountPresentation(get('scenery-light'), get('gumleaf-relic'),

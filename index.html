@@ -115,6 +115,10 @@
           <button type="button" class="secondary" id="welcome-open">Reopen welcome screen</button>
           <label for="speed">Animation speed<select id="speed"><option value="0.65" selected>Gentle</option><option value="1">Normal</option><option value="2">Turbo</option><option value="0">Instant</option></select></label>
                     <label for="sound">Sound <input id="sound" type="checkbox" role="switch" aria-describedby="audio-status"></label>
+          <label for="graphics-quality">Graphics quality<select id="graphics-quality"><option value="high">High — full detail</option><option value="balanced">Balanced — lighter effects</option><option value="performance">Performance — minimal ambient effects</option></select></label>
+          <p id="graphics-status" role="status"></p>
+          <label for="adaptive-quality">Adaptive ambient quality <input id="adaptive-quality" type="checkbox"></label>
+          <p class="graphics-help">Optional: lower ambient detail during sustained frame drops. Spin speed and game results stay the same.</p>
           <label for="reduced-effects">Reduced effects <input id="reduced-effects" type="checkbox"></label><div class="sound-controls" aria-label="Audio mixer">
             <label for="music-volume">Music volume <input id="music-volume" type="range" min="0" max="100" step="1" value="44"><output id="music-volume-value" for="music-volume">44%</output></label>
             <label for="sfx-volume">SFX volume <input id="sfx-volume" type="range" min="0" max="100" step="1" value="68"><output id="sfx-volume-value" for="sfx-volume">68%</output></label>

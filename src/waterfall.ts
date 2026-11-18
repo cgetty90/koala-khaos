@@ -1,3 +1,4 @@
+import { currentBudget } from './graphics-quality';
 
 const WIDTH = 800;
 const HEIGHT = 450;
@@ -104,7 +105,7 @@ export function mountWaterfall(canvas: HTMLCanvasElement, dialog?: HTMLDialogEle
       last = 0;
       return;
     }
-    const frameTime = compact.matches || root.dataset.effects === 'reduced' ? 62 : 41;
+    const frameTime = 1000 / Math.min(currentBudget().waterfallFPS || 12, compact.matches || root.dataset.effects === 'reduced' ? 16 : 24);
     if (last && now - last < frameTime) return;
     if (last) phase += Math.min(.09,(now-last)/1000);
     last = now;
@@ -115,7 +116,8 @@ export function mountWaterfall(canvas: HTMLCanvasElement, dialog?: HTMLDialogEle
   function visibility() {
     cancelAnimationFrame(request);
     last = 0;
-    if (!document.hidden && !closing && (!dialog || dialog.open)) request = requestAnimationFrame(tick);
+    if (!document.hidden && !closing && (!dialog || dialog.open) && baseWorld() && !motion.matches && root.dataset.motion !== 'instant' && currentBudget().waterfallFPS) request = requestAnimationFrame(tick);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
   }
   const visibilityObserver = dialog ? new MutationObserver(visibility) : undefined;
   if (dialog) visibilityObserver?.observe(dialog, { attributeFilter:['open'] });
@@ -124,6 +126,11 @@ export function mountWaterfall(canvas: HTMLCanvasElement, dialog?: HTMLDialogEle
   fit();
   visibility();
   document.addEventListener('visibilitychange', visibility);
+  document.addEventListener('graphics-qualitychange', visibility);
+  motion.addEventListener('change', visibility);
+  const stateObserver=new MutationObserver(visibility);
+  stateObserver.observe(root,{attributes:true,attributeFilter:['data-motion']});
+  stateObserver.observe(document.body,{attributes:true,attributeFilter:['data-world']});
   window.addEventListener('pageshow', visibility);
   window.addEventListener('pagehide', event => {
     cancelAnimationFrame(request);
@@ -131,6 +138,9 @@ export function mountWaterfall(canvas: HTMLCanvasElement, dialog?: HTMLDialogEle
       closing = true;
       resize.disconnect();
       visibilityObserver?.disconnect();
+      stateObserver.disconnect();
+      document.removeEventListener('graphics-qualitychange',visibility);
+      motion.removeEventListener('change',visibility);
       document.removeEventListener('visibilitychange', visibility);
       window.removeEventListener('pageshow', visibility);
     }

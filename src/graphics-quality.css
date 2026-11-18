@@ -1,0 +1,6 @@
+.graphics-help,#graphics-status{font-size:12px;line-height:1.45;color:#d9ceb9;margin:6px 10px}
+#graphics-quality{max-width:100%;min-height:44px}
+html[data-quality="balanced"] :is(.jungle-canopy,.jungle-glints){animation-duration:24s}
+html[data-quality="performance"] :is(.jungle-canopy,.jungle-glints,.jungle-embers,.foreground){animation:none!important;will-change:auto!important}
+html[data-quality="performance"] .scenery .world{animation:none!important;transform:none!important;filter:none!important}
+html[data-quality="performance"] .game .deck .controls #drop{animation:none!important}

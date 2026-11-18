@@ -244,7 +244,10 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
   }
 
   function setup() {
-    const context = new AudioContext();
+    // Avoid decoding the full soundtrack at a 96 kHz output-device rate.
+    let context: AudioContext;
+    try { context = new AudioContext({ sampleRate:48000 }); }
+    catch { context = new AudioContext(); }
     const limiter = context.createDynamicsCompressor();
     limiter.threshold.value = -12;
     limiter.ratio.value = 3;
