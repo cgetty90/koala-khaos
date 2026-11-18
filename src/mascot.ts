@@ -1,15 +1,18 @@
 import type { Tween } from './motion';
 
-export type Pose = 'idle' | 'ready' | 'curious' | 'watch' | 'reset' | 'win' | 'big' | 'bonus';
+export type Pose = 'idle' | 'ready' | 'curious' | 'watch' | 'reset' | 'win' | 'big' | 'mega' | 'epic' | 'bonus' | 'complete';
 type Keyframe = readonly [position: number, atlasFrame: number];
 const clips: Record<Exclude<Pose, 'idle'>, { duration: number; keys: readonly Keyframe[] }> = {
   ready: { duration: 330, keys: [[0,1],[.37,3]] },
   curious: { duration: 540, keys: [[0,3],[.24,1],[.68,3]] },
   watch: { duration: 620, keys: [[0,3],[.25,4]] },
-  reset: { duration: 730, keys: [[0,1],[.48,2],[.65,0]] },
+  reset: { duration: 730, keys: [[0,1],[.35,5],[.82,0]] },
   win: { duration: 640, keys: [[0,3],[.22,6],[.76,1]] },
   big: { duration: 1100, keys: [[0,4],[.17,7],[.39,8],[.79,6]] },
+  mega: { duration: 1250, keys: [[0,3],[.14,6],[.31,7],[.62,8],[.88,6]] },
+  epic: { duration: 1500, keys: [[0,4],[.18,7],[.43,8],[.72,7],[.9,8]] },
   bonus: { duration: 1200, keys: [[0,4],[.15,6],[.31,7],[.57,8]] },
+  complete: { duration: 1300, keys: [[0,6],[.18,7],[.5,8]] },
 };
 const gogglesFrame = 9;
 
@@ -33,20 +36,22 @@ export function mountMascot(canvas: HTMLCanvasElement, animate: Tween, sheetUrl:
   const full = () => document.documentElement.dataset.effects !== 'reduced';
 
   function draw(index: number, breath = 0) {
-    if (!sheet.naturalWidth || (frame === index && painted === breath)) return;
+    if (!sheet.naturalWidth) return;
+    if (frame === index && painted === breath) return;
+    // One opaque authored pose: crossfading different silhouettes produces ghost limbs.
+    // Alpha bounds keep the feet and body scale consistent across the nine poses.
+    const bounds = [[39,25,314,404],[432,27,309,404],[824,30,314,400],
+      [38,470,312,406],[429,478,315,399],[825,485,321,392],
+      [37,904,319,417],[422,904,321,360],[808,908,353,413]];
     const adjusting = index === gogglesFrame && goggles.naturalWidth;
     const image = adjusting ? goggles : sheet;
-    const cellWidth = image.naturalWidth / (adjusting ? 1 : 3);
-    const cellHeight = image.naturalHeight / (adjusting ? 1 : 3);
-    const scale = Math.min(width / cellWidth, height / cellHeight) * (adjusting ? .90 : 1);
-    const sourceIndex = index === gogglesFrame ? 0 : index;
-    // Feet stay planted. Only a shallow breathing motion runs while idle.
-    const w = cellWidth * scale;
-    const h = cellHeight * scale;
-    const lift = h * breath;
+    const [sx,sy,sw,sh] = adjusting ? [0,0,image.naturalWidth,image.naturalHeight] : bounds[index];
+    const scale = adjusting ? Math.min(width / sw,height / sh) * .9 : Math.min(width / 353,height / 417) * .97;
+    const w = sw * scale, h = sh * scale;
+    const lift = height * breath + (index === 7 ? height * .08 : 0);
     ctx.clearRect(0, 0, width, height);
-    ctx.drawImage(image, sourceIndex % 3 * cellWidth, Math.floor(sourceIndex / 3) * cellHeight, cellWidth, cellHeight,
-      (width - w) / 2, height - h - lift, w, h + lift);
+    ctx.globalAlpha = 1;
+    ctx.drawImage(image,sx,sy,sw,sh,(width-w)/2,height-h-lift,w,h);
     frame = index;
     painted = breath;
   }
@@ -65,7 +70,7 @@ export function mountMascot(canvas: HTMLCanvasElement, animate: Tween, sheetUrl:
     const index = gesture % 4 === 3 && full() && goggles.naturalWidth && phase < 630 ? gogglesFrame
       : gesture % 2 === 0 && phase < 150 ? 2
       : gesture % 2 === 1 && phase < 590 ? 1 : 0;
-    const breath = full() ? .0035 * (1 - Math.cos(now / 540)) : 0;
+    const breath = full() ? .0025 * (1 - Math.cos(now / 650)) : 0;
     draw(index, index === gogglesFrame ? 0 : breath);
     timer = setTimeout(idleTick, full() ? 54 : 95);
   }
@@ -98,7 +103,8 @@ export function mountMascot(canvas: HTMLCanvasElement, animate: Tween, sheetUrl:
 
   sheet.addEventListener('load', () => { if (frame === -1) react(pose); }, { once:true });
   sheet.src = sheetUrl;
-  goggles.src = import.meta.env.BASE_URL + 'art/identity/mochi-goggles.webp';
+  // Keep every gesture on the same character model and outfit.
+  if (!sheetUrl.includes('/v33/')) goggles.src = import.meta.env.BASE_URL + 'art/identity/mochi-goggles.webp';
   const observer = dialog ? new MutationObserver(idleTick) : undefined;
   if (dialog) observer?.observe(dialog, { attributeFilter:['open'] });
   document.addEventListener('visibilitychange', idleTick);

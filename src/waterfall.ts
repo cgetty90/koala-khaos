@@ -4,10 +4,10 @@ const HEIGHT = 450;
 
 // Coordinates on the existing production jungle plate, including the ledges and plunge pools.
 const falls = [
-  { x: .299, y: .330, w: .057, h: .188, slant: -.023, speed: .48 },
-  { x: .310, y: .594, w: .030, h: .072, slant: .017, speed: .62 },
-  { x: .362, y: .687, w: .061, h: .068, slant: -.016, speed: .53 },
-  { x: .302, y: .731, w: .038, h: .061, slant: .032, speed: .61 },
+  { x: .168, y: .300, w: .075, h: .298, slant: .004, speed: .48 },
+  { x: .218, y: .545, w: .020, h: .081, slant: .006, speed: .62 },
+  { x: .375, y: .781, w: .055, h: .053, slant: -.010, speed: .53 },
+  { x: .286, y: .756, w: .043, h: .029, slant: .012, speed: .61 },
 ];
 const seed = (n: number) => ((Math.sin(n * 147.79 + 31.46) * 47289.177) % 1 + 1) % 1;
 

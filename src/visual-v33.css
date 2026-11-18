@@ -1,0 +1,111 @@
+/* v3.3 sculpted deck. Named regions retain each control's existing event wiring. */
+.shell[data-stage] .game .deck {
+ padding:10px 12px 6px;
+ background:linear-gradient(175deg,#44324e 0,#261d33 25%,#151623 100%);
+ border:1px solid #cfaa6e;border-radius:0 0 14px 14px;
+ box-shadow:inset 0 2px 0 #ffe0a470,inset 0 -3px 0 #080b14,0 12px 24px #10202244;
+}
+.shell[data-stage] .game .deck .controls {
+ display:grid;grid-template-columns:minmax(56px,.95fr) minmax(110px,1.5fr) minmax(94px,1.15fr) minmax(58px,.85fr) minmax(58px,.85fr) var(--spin-size);
+ grid-template-rows:minmax(48px,auto) minmax(44px,auto);gap:4px;
+}
+.shell[data-stage] .game .deck .controls .cabinet-display:has(#credits){grid-area:1/1}
+.shell[data-stage] .game .deck .controls .stake-tools{grid-area:1/2;min-width:0}
+.shell[data-stage] .game .deck .controls #ante-open{grid-area:1/3}
+.shell[data-stage] .game .deck .controls .cabinet-display:has(#total-bet){grid-area:1/4}
+.shell[data-stage] .game .deck .controls .cabinet-display:has(#last-win){grid-area:1/5}
+.shell[data-stage] .game .deck .controls #drop{
+ grid-area:1/6/3/7;align-self:center;isolation:isolate;
+ box-shadow:0 0 0 5px #211d2d,0 0 0 6px #b38a56,0 0 0 9px #141522,0 4px 16px #080a15,0 0 20px #dfb26635;
+}
+.shell[data-stage] .game .deck .controls .deck-actions{grid-area:2/1/3/6;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;border-top:1px solid #d1b27b25;padding-top:3px}
+.shell[data-stage] .game .deck .controls .cabinet-display{padding:3px;justify-content:center}
+.shell[data-stage] .game .deck .controls .cabinet-display > span {font-size:clamp(9px,1vw,12px);font-weight:600;color:#c9bea8;letter-spacing:.04em}
+.shell[data-stage] .game .deck .controls .cabinet-display output{font:750 clamp(14px,2.6cqw,23px)/1.2 var(--ui-face);letter-spacing:-.02em;color:#fff2ce;font-variant-numeric:tabular-nums}
+.shell[data-stage] .game .deck .controls .stake-tools{display:grid;grid-template-columns:28px minmax(0,1fr) 28px;gap:0;border-radius:6px!important}
+.shell[data-stage] .game .deck .controls .stake-tools button{padding:0;min-height:44px;background:transparent;border:0;box-shadow:none;font-size:22px}
+.shell[data-stage] .game .deck .controls .stake-tools label{background:transparent!important;box-shadow:none!important}
+.shell[data-stage] .game .deck .controls .stake-tools select{font-size:clamp(14px,2.3cqw,21px);min-height:30px}
+.shell[data-stage] .game .deck .controls .deck-actions button{min-height:44px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:clamp(10px,1.1cqw,13px);padding:3px}
+.shell[data-stage] .game .deck .deck-icon{width:18px;height:18px}
+.shell[data-stage] .game .deck #ante-open{
+ display:grid;grid-template-columns:22px 1fr auto;align-content:center;align-items:center;gap:2px 4px;
+ min-height:48px;padding:4px 6px;border:1px solid #b69c6266!important;border-radius:8px;
+ background:linear-gradient(145deg,#504136,#2b2631)!important;
+ font-size:10px;white-space:normal;color:#e6d5ae;box-shadow:inset 0 1px #fff2c32a!important;
+}
+.shell[data-stage] .game .deck #ante-open img{display:block;width:24px;height:21px;object-fit:contain;grid-row:1/3}
+.shell[data-stage] .game .deck #ante-open strong{font-size:11px;line-height:1.1;text-align:left}
+.shell[data-stage] .game .deck #ante-open b{font-size:9px;border-radius:10px;padding:3px 4px;background:#181c23;color:#bcb8ab}
+.shell[data-stage] .game .deck #ante-open .ante-detail{display:block;grid-column:2/4;font-size:9px;line-height:1.2;text-align:left;color:#cdbf9e}
+.shell[data-stage] .game .deck #ante-open[data-enabled="true"]{border-color:#e2c77a!important;background:linear-gradient(140deg,#346e53,#1c382e)!important;box-shadow:inset 0 0 13px #8ce6a81a,0 0 12px #b7e59e24!important}
+.shell[data-stage] .game .deck #ante-open[data-enabled="true"] b{background:#cfe69b;color:#183c28}
+.shell[data-stage] .game .deck #ante-open[data-enabled="true"] .ante-detail{color:#e3f6c6}
+.shell[data-stage="stacked"] .game{--cabinet-trim:227px}
+.shell[data-stage="stacked"] .game .deck{padding:7px}
+.shell[data-stage="stacked"] .game .deck .controls{
+ grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) var(--spin-size);
+ grid-template-rows:minmax(44px,auto) minmax(48px,auto) minmax(44px,auto);
+}
+.shell[data-stage="stacked"] .game .deck .controls .cabinet-display:has(#credits){grid-area:1/1/2/3}
+.shell[data-stage="stacked"] .game .deck .controls .stake-tools{grid-area:1/3/2/5;grid-template-columns:24px minmax(0,1fr) 24px}
+.shell[data-stage="stacked"] .game .deck .controls #ante-open{grid-area:2/1/3/3}
+.shell[data-stage="stacked"] .game .deck .controls .cabinet-display:has(#total-bet){grid-area:2/3}
+.shell[data-stage="stacked"] .game .deck .controls .cabinet-display:has(#last-win){grid-area:2/4}
+.shell[data-stage="stacked"] .game .deck .controls #drop{grid-area:1/5/3/6}
+.shell[data-stage="stacked"] .game .deck .controls .deck-actions{grid-area:3/1/4/6}
+.shell[data-stage="stacked"] .game .deck .controls .deck-actions button{flex-direction:column;gap:2px;font-size:10px}
+.shell[data-stage="stacked"] .game .deck .controls .cabinet-display output{font-size:14px}
+.shell[data-stage="sidecar"] .game .deck{padding:5px}
+.shell[data-stage="sidecar"] .game .deck .controls{
+ grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:40px 44px 48px var(--spin-size) auto;row-gap:1px;
+}
+.shell[data-stage="sidecar"] .game .deck .controls .cabinet-display:has(#credits){grid-area:1/1}
+.shell[data-stage="sidecar"] .game .deck .controls .stake-tools{grid-area:1/2;grid-template-columns:22px minmax(0,1fr) 22px}
+.shell[data-stage="sidecar"] .game .deck .controls .cabinet-display:has(#total-bet){grid-area:2/1}
+.shell[data-stage="sidecar"] .game .deck .controls .cabinet-display:has(#last-win){grid-area:2/2}
+.shell[data-stage="sidecar"] .game .deck .controls #ante-open{grid-area:3/1/4/3}
+.shell[data-stage="sidecar"] .game .deck .controls #drop{grid-area:4/1/5/3}
+.shell[data-stage="sidecar"] .game .deck .controls .deck-actions{grid-area:5/1/6/3;grid-template-columns:repeat(3,minmax(0,1fr))}
+.shell[data-stage="sidecar"] .game .deck .controls .deck-actions button{font-size:10px}
+.shell[data-stage="sidecar"] .game .deck #ante-open{grid-template-columns:26px 1fr auto}
+.shell[data-stage="sidecar"] .game .deck #ante-open .ante-detail{font-size:9px}
+.shell[data-stage="sidecar"] .game .deck .controls .cabinet-display output{font-size:14px}
+#celebration[data-tier="mega"] .win-body::before{background-image:url('/art/v33/mega.webp')}
+#celebration[data-tier="epic"] .win-body::before{background-image:url('/art/v33/epic.webp')}
+#celebration[data-tier="mega"] .win-body{width:min(95vw,1120px);padding-top:10vh}
+#celebration[data-tier="epic"] .win-body{width:min(98vw,1280px);padding-top:10vh}
+#celebration[data-tier="epic"] #win-mochi{height:clamp(150px,30vh,290px)}
+#celebration[data-tier="mega"] #win-title{color:#ffe8f9;letter-spacing:.035em}
+#celebration[data-tier="epic"] #win-title{color:#fff2a5;letter-spacing:.06em}
+#celebration[data-tier="epic"] .win-particles i{filter:drop-shadow(0 0 5px #fbea89)}
+@media(max-width:560px) and (orientation:portrait){
+ #celebration:is([data-tier="mega"],[data-tier="epic"]) .win-body{
+  width:98vw;min-height:0;aspect-ratio:1.5;padding:15% 12% 10%;margin:auto;
+ }
+ #celebration:is([data-tier="mega"],[data-tier="epic"]) #win-mochi{
+  position:absolute;bottom:80%;height:140px;max-width:55vw;
+ }
+ #celebration:is([data-tier="mega"],[data-tier="epic"]) #win-title{font-size:clamp(25px,7.2vw,38px)}
+ #celebration:is([data-tier="mega"],[data-tier="epic"]) #win-counter{font-size:clamp(42px,12vw,62px)}
+ #celebration:is([data-tier="mega"],[data-tier="epic"]) .win-body small{font-size:10px}
+}
+.shell[data-stage="cabinet"] .game .deck{--spin-size:clamp(104px,11cqw,114px)}
+.shell[data-stage="cabinet"] .game .deck .controls{grid-template-rows:52px 48px}
+.shell[data-stage="cabinet"] .game .deck .controls #drop{align-self:center}
+.shell[data-stage="sidecar"] .game .deck .controls .stake-tools button{min-height:40px}
+#celebration .win-particles i:nth-child(3n){background: url('/art/production/gumleaf.webp') center/contain no-repeat;width:28px;height:18px;border:0;box-shadow:none}
+#celebration[data-tier="mega"] .win-particles i:nth-child(3n+1),#celebration[data-tier="epic"] .win-particles i:nth-child(3n+1){background:url('/art/identity/khaos-icon.webp') center/contain no-repeat;width:21px;height:26px;border:0;box-shadow:none}
+#celebration[data-tier="epic"] .win-particles i:nth-child(3n+2){background:url('/art/guide/mint.webp') center/contain no-repeat;width:24px;height:24px;border:0;box-shadow:none}
+.shell[data-layout][data-stage="stacked"] .game {--cabinet-trim:236px}
+@media(max-width:360px){
+ .shell[data-layout][data-stage="stacked"] .game{--cabinet-trim:284px}
+ .shell[data-stage="stacked"] .game .deck #ante-open{grid-template-columns:18px 1fr auto;gap:2px;min-height:48px;padding:3px}
+ .shell[data-stage="stacked"] .game .deck #ante-open img{width:18px;height:18px}
+ .shell[data-stage="stacked"] .game .deck #ante-open strong{font-size:9px;white-space:nowrap}
+ .shell[data-stage="stacked"] .game .deck #ante-open .ante-detail{font-size:8px}
+ .shell[data-stage="stacked"] .game .deck .controls{grid-template-rows:44px 48px 44px}
+ .shell[data-stage="stacked"] .game .deck .controls .cabinet-display output{font-size:12px}
+}
+.shell[data-stage="stacked"] .game:has(.bonus-track:not([hidden])) .deck .deck-actions {grid-template-columns:repeat(5,minmax(0,1fr))}
+.shell[data-stage="sidecar"] .game .deck{--spin-size:clamp(50px,13.5dvh,62px)}

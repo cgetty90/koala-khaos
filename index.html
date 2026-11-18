@@ -51,14 +51,15 @@
             <label for="stake">Base Bet<select id="stake" aria-label="Stake" disabled></select></label>
             <button id="stake-up" type="button" aria-label="Increase stake" disabled>+</button>
           </div>
+          <button id="ante-open" class="ante-control" type="button" aria-haspopup="dialog" aria-label="Gumleaf Ante ×3 information" aria-describedby="ante-availability" disabled>
+            <img src="/art/production/gumleaf.webp" alt="">
+            <strong>Gumleaf Ante</strong><b>OFF</b><span id="ante-availability" class="spotlight-announcement">Not yet available</span>
+          <small class="ante-detail">3× stake · 5× bonus chance</small></button>
           <div class="cabinet-display"><span>Total Bet</span><output id="total-bet" aria-label="Total bet">0.20</output></div>
           <div class="cabinet-display"><span>Last Win</span><output id="last-win" aria-label="Last settled spin win">0.00</output></div>
           <button id="drop" class="spin-button" disabled><span class="spin-glyph" aria-hidden="true">↻</span><span class="spin-text">Spin</span></button>
           <div class="deck-actions">
-          <button id="ante-open" class="ante-control" type="button" aria-haspopup="dialog" aria-label="Gumleaf Ante ×3 information" aria-describedby="ante-availability" disabled>
-            <img src="/art/production/gumleaf.webp" alt="">
-            <strong>Ante ×3</strong><b>OFF</b><span id="ante-availability" class="spotlight-announcement">Not yet available</span>
-          </button>
+
           <button id="bonus" class="bonus-button" disabled><svg class="deck-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.8-5.4 2.8 1-6L3.3 8.4l6-.9z"/><path d="M12 7.5v8.3m-4.8-3.2h9.6"/></svg><span>Buy Bonus</span></button>
           <button id="autoplay" class="secondary" disabled><svg class="deck-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10a8 8 0 1 0-1.7 8.7M20 5v5h-5"/><path d="M10 8.5v7l5.5-3.5z"/></svg><span>Autoplay</span></button>
           <button id="deck-speed" class="secondary" type="button" aria-label="Change spin speed" title="Change spin speed" disabled><svg class="deck-icon" id="deck-speed-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18a9 9 0 1 1 18 0H3"/><path id="speed-needle" d="M12 16l-3-5"/><path d="M7 15h.1m5-6h.1m5 6h.1"/></svg><span id="deck-speed-label">Gentle</span></button>
@@ -199,7 +200,7 @@
       <canvas id="cinematic-mochi" class="cinematic-mochi" width="286" height="320"></canvas>
     </div>
     <div class="feature-caption">
-    <h2 id="feature-title"></h2>
+    <h2 id="feature-title"></h2><span id="bonus-result-label">Total bonus win</span><output id="bonus-result" aria-label="Total bonus win"></output>
     <p id="feature-copy"></p>
     <p id="feature-tap-hint">Tap anywhere to continue</p>
     <button id="auto-stop-modal" type="button" class="secondary" hidden>STOP autoplay</button><button id="feature-continue" type="button" class="primary" hidden>CONTINUE</button><button type="button" data-close class="primary" id="feature-action" hidden>Back to base game</button>

@@ -20,6 +20,10 @@ import './jungle-finish.css';
 import './identity-v25.css';
 import './bonus-v26.css';
 import './responsive-v27.css';
+import './visual-v32.css';
+import './visual-v33.css';
+import './visual-v34.css';
+import { mountLivingWorld } from './living-world-v32';
 import { mountScatterDemo } from './scatter-demo';
 import { conceptArt as art, presentationCandyNames as candyNames } from './art';
 import { mountMascot } from './mascot';
@@ -144,7 +148,7 @@ const tracks = {
   epic: 'Golden Gumleaves build a multiplier that stays with you for all ten spins.',
 };
 
-const atlas = import.meta.env.BASE_URL + 'art/production/mochi-poses.webp';
+const atlas = import.meta.env.BASE_URL + 'art/v33/mochi-poses.webp';
 const pose = mountMascot(mascot, introClock.tween, atlas);
 const cinematicPose = mountMascot(cinematicMochi, introClock.tween, atlas);
 const winPose = mountMascot(get<HTMLCanvasElement>('win-mochi'), introClock.tween, atlas);
@@ -403,6 +407,7 @@ function refreshControls() {
   get<HTMLOutputElement>('total-bet').value = fmt(chargedStake());
   anteOpen.querySelector('b')!.textContent = ante ? 'ON' : 'OFF';
   anteOpen.dataset.enabled = String(ante);
+  anteOpen.setAttribute('aria-pressed', String(ante));
   get('ante-availability').textContent = ante ? 'On' : 'Off';
   get('ante-confirm').textContent = ante ? 'Turn Ante off' : 'Confirm Ante · ' + fmt(selectedStake * 3);
   anteDialog.dataset.enabled = String(ante);
@@ -701,7 +706,7 @@ async function animateWin(payout: number, award: number) {
     celebration.showModal();
     audio.setCinematicDuck(true);
     pose('big');
-    winPose(tier === 'epic' ? 'bonus' : 'big');
+    winPose(tier);
     signal('win');
     cue(tier === 'epic' ? 'jackpot' : tier);
     await motion.tween(tier === 'epic' ? 2050 : tier === 'mega' ? 1500 : 1080, progress => {
@@ -904,13 +909,20 @@ async function playBonus(mode: BonusMode, source: Source, locked: number, record
   get('feature-title').textContent = modeNames[mode] + ' complete';
   get('feature-copy').textContent = 'Total ' + fmt(settleCredits(active.board.total, locked)) +
     (source === 'practice' ? ' practice credits. Your live balance is unchanged.' : ' fake credits across ten free spins.');
+  const resultTotal = settleCredits(active.board.total, locked);
+  const resultCounter = get<HTMLOutputElement>('bonus-result');
+  resultCounter.value = fmt(0);
   feature.dataset.stage = 'summary';
   audio.cue('summary');
   feature.style.setProperty('--feature-world', 'url("' + art(mode) + '")');
   get('cinematic-emblem').hidden = false;
-  cinematicPose('bonus');
-  featureAction.hidden = false;
+  cinematicPose('complete');
   feature.showModal();
+  await motion.tween(650, progress => {
+    resultCounter.value = fmt(Math.floor(resultTotal * (1 - (1 - progress) ** 3)));
+  });
+  resultCounter.value = fmt(resultTotal);
+  featureAction.hidden = false;
   featureAction.focus();
 }
 
@@ -1094,3 +1106,5 @@ start().catch(error => {
 
 
 
+
+void mountLivingWorld().catch(() => { /* The painted world remains available without WebGL. */ });

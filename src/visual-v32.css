@@ -1,0 +1,79 @@
+.scenery .world {
+ background-image:url('/art/v32/world.webp') !important;
+ filter:none;
+}
+.scenery .foreground {opacity:.08}
+.jungle-canopy {opacity:.15}
+.scenery::after {content:'';position:absolute;inset:0;background:linear-gradient(90deg,#122b3226,transparent 45%,#12392f12);pointer-events:none}
+.game {box-shadow:0 20px 60px #163c3960,0 0 0 1px #ffdba570!important}
+.intro > p {color:#fff6d7;text-shadow:0 2px 5px #143626}
+.game .deck {background:linear-gradient(180deg,#292036,#171723);border:1px solid #c59b5e;border-top:0;box-shadow:inset 0 1px #fff3be33}
+.game .cabinet-display,.game .stake-tools {border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important}
+.game .cabinet-display {border-right:1px solid #d4b27730!important}
+.game .controls {gap:5px}
+.game .deck-actions {border-top:1px solid #e4bc7930;padding-top:5px;gap:2px}
+.game .deck-actions button {background:transparent!important;box-shadow:none!important;border:1px solid transparent!important;border-radius:6px;color:#ecdfc6}
+.game .deck-actions button:hover:not(:disabled) {background:#f5d68e13!important;border-color:#eac67b44!important}
+.game #ante-open[data-enabled="true"] {background:#2d806647!important;border-color:#71e5ba70!important}
+#celebration[open] {--cinema-world:url('/art/v32/world.webp');background:#15302f}
+#celebration[data-tier="mega"] {--cinema-world:url('/art/concept/super.webp')}
+#celebration[data-tier="epic"] {--cinema-world:url('/art/concept/epic.webp')}
+.win-body {width:min(94vw,1050px);margin:auto;padding:clamp(35px,6vh,85px) 30px;min-height:min(78vh,680px)}
+.win-body::before {inset:0;width:100%;height:100%;border:0;transform:none;background:url('/art/v32/victory.webp') center/contain no-repeat;border-radius:0}
+#win-mochi {height:clamp(120px,24vh,240px);width:auto;position:relative;z-index:1;filter:drop-shadow(0 12px 14px #180b24aa)}
+#win-title {font-family:Georgia,serif;font-size:clamp(28px,5vw,70px);line-height:1.05;margin:0;color:#ffe19c;letter-spacing:.025em;text-shadow:0 3px #75501f,0 7px 18px #000}
+#win-counter {font-family:Georgia,serif;font-weight:900;font-size:clamp(46px,8vw,118px);line-height:1.05;letter-spacing:-.035em;color:#fff0ac;text-shadow:0 4px #805319,0 8px 18px #000}
+#celebration[data-tier="epic"] .win-body {width:min(97vw,1200px)}
+#feature-dialog[data-stage="summary"] {background:#163b39;grid-template-rows:1fr;align-items:center;overflow:hidden}
+#feature-dialog[data-stage="summary"] .feature-depth::before {background:linear-gradient(#112b2844,#14332c44),url('/art/v32/world.webp') center/cover}
+#feature-dialog[data-stage="summary"] .cinematic-art {position:absolute;inset:3% 0 auto;height:34vh;z-index:2;pointer-events:none}
+#feature-dialog[data-stage="summary"] .cinematic-emblem {display:none}
+#feature-dialog[data-stage="summary"] .cinematic-mochi {height:100%;max-height:240px;top:0;bottom:auto}
+#feature-dialog[data-stage="summary"] .feature-caption {position:relative;align-self:center;justify-self:center;width:min(96vw,1040px);min-height:min(85vh,740px);padding:clamp(145px,28vh,255px) 8% clamp(40px,8vh,85px);background:url('/art/v32/victory.webp') center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+#feature-dialog[data-stage="summary"] #feature-title {font:bold clamp(23px,4vw,52px)/1.1 Georgia,serif;color:#ffe3a0}
+#bonus-result-label {font-size:clamp(11px,1.8vw,16px);letter-spacing:.2em;text-transform:uppercase;color:#fff0cf}
+#bonus-result {font:bold clamp(46px,8vw,112px)/1 Georgia,serif;color:#ffeb9b;text-shadow:0 4px #80521e,0 9px 20px #000}
+#feature-dialog:not([data-stage="summary"]) #bonus-result,
+#feature-dialog:not([data-stage="summary"]) #bonus-result-label {display:none}
+#feature-dialog[data-stage="summary"] #feature-copy {font-size:clamp(11px,1.7vw,15px);max-width:440px;color:#e1d4bd}
+#feature-action {min-height:44px;min-width:180px}
+#feature-dialog[data-stage="summary"] .feature-spin-lock {display:none}
+@media(max-width:560px){
+ .win-body {padding:35px 20px;min-height:65vh;width:100%}
+ .win-body::before {background-size:100% 100%}
+ #win-mochi {height:20vh}
+ #feature-dialog[data-stage="summary"] .feature-caption {min-height:75vh;padding:25vh 8% 35px;width:100%}
+ #feature-dialog[data-stage="summary"] .cinematic-art {top:8%;height:25vh}
+}
+@media(max-height:460px){
+ .win-body {min-height:92vh;padding:16px}
+ #win-mochi {height:24vh}
+ #win-title{font-size:26px} #win-counter{font-size:48px}
+ #feature-dialog[data-stage="summary"] .feature-caption {min-height:98vh;padding:12px 8%;gap:7px;width:min(75vw,850px)}
+ #feature-dialog[data-stage="summary"] .cinematic-art{inset:18% auto 0 2%;width:20%;height:60vh}
+ #bonus-result{font-size:54px}
+}
+@media(prefers-reduced-motion:reduce){.win-body,.feature-caption{animation:none!important}}
+.living-world {position:absolute;inset:0;pointer-events:none;opacity:.8}
+#celebration[data-tier="epic"] .win-depth::before {animation:cinema-push 1.4s cubic-bezier(.15,.65,.25,1) both}
+#celebration[data-tier="mega"] .win-depth::before {animation:cinema-push 1.1s cubic-bezier(.15,.65,.25,1) both}
+#celebration .win-body {animation:v32-victory-enter .65s cubic-bezier(.16,.8,.25,1) both}
+@keyframes v32-victory-enter {from{opacity:0;transform:perspective(1000px) translateZ(-180px) rotateX(8deg) translateY(25px)}to{opacity:1;transform:none}}
+#feature-dialog[data-stage="summary"] .feature-caption {animation:v32-victory-enter .7s cubic-bezier(.16,.8,.25,1) both}
+.game .reel-frame {box-shadow:inset 0 0 0 2px #ffe7a266,0 0 0 2px #503619,0 12px 18px #070b1c55}
+@media(prefers-reduced-motion:reduce){#celebration .win-body,#feature-dialog[data-stage="summary"] .feature-caption{animation:none}}
+#feature-dialog[data-stage="summary"] .cinematic-art {pointer-events:auto}
+.game .deck-actions {padding-top:0;border-top:0}
+@media (max-width:560px) and (orientation:portrait){
+ .win-body::before {background-image:url('/art/v32/victory-portrait.webp');background-size:contain}
+ #feature-dialog[data-stage="summary"] .feature-caption {background-image:url('/art/v32/victory-portrait.webp');background-size:100% 100%}
+ #feature-dialog[data-stage="summary"] #feature-title {font-size:clamp(18px,5.5vw,30px);letter-spacing:-.025em;max-width:82%}
+}
+#feature-dialog:not([data-stage="summary"])[data-mode="regular"] .feature-caption {text-shadow:0 3px 14px #003d33}
+#feature-dialog:not([data-stage="summary"])[data-mode="super"] .feature-caption {text-shadow:0 3px 16px #003e76}
+#feature-dialog:not([data-stage="summary"])[data-mode="epic"] .feature-caption {text-shadow:0 3px 18px #6c207d}
+#feature-dialog[data-stage="summary"] .feature-caption {background-size:contain}
+@media(max-width:560px) and (orientation:portrait){
+ #feature-dialog[data-stage="summary"] .feature-caption {background-size:contain}
+}
+.win-body::before {box-shadow:none}
