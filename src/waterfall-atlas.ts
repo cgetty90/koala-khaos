@@ -1,8 +1,8 @@
 import { currentBudget } from './graphics-quality';
 import { sceneCovered } from './ambient-state';
 const WIDTH=800, HEIGHT=450, FRAMES=16;
-const falls=[{x:.097,y:.425,w:.025,h:.244,slant:.014},{x:.112,y:.682,w:.046,h:.038,slant:.008},
- {x:.215,y:.783,w:.040,h:.022,slant:.003},{x:.287,y:.839,w:.022,h:.016,slant:.004}];
+const falls=[{x:.168,y:.300,w:.075,h:.298,slant:.004},{x:.218,y:.545,w:.020,h:.081,slant:.006},
+ {x:.375,y:.781,w:.055,h:.053,slant:-.010},{x:.286,y:.756,w:.043,h:.029,slant:.012}];
 const seed=(n:number)=>((Math.sin(n*147.79+31.46)*47289.177)%1+1)%1;
 type Sheet={image:HTMLCanvasElement;width:number;height:number;left:number;top:number};
 let sheets:Sheet[]|undefined;

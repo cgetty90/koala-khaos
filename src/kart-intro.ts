@@ -6,9 +6,9 @@ import type { createMotion } from './motion';
 import type { createSound } from './sound';
 
 const routes = {
-  regular: { name: 'Bush Dash', duration: 2480, color: '#ff9cd7', accent: 'kart-candy' },
-  super: { name: 'Red Dust Run', duration: 2720, color: '#bba2ff', accent: 'kart-thunder' },
-  epic: { name: 'Opal Run', duration: 3020, color: '#ffe09b', accent: 'kart-portal' },
+  regular: { name: 'Candy Dash', duration: 2480, color: '#ff9cd7', accent: 'kart-candy' },
+  super: { name: 'Thunder Run', duration: 2720, color: '#bba2ff', accent: 'kart-thunder' },
+  epic: { name: 'Khaos Dimension', duration: 3020, color: '#ffe09b', accent: 'kart-portal' },
 } as const;
 
 export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typeof createMotion>,
@@ -28,7 +28,7 @@ export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typ
     assets.set(path, ready);
     return ready;
   }
-  const sheetPath = import.meta.env.BASE_URL + 'art/outback/kart-atlas.webp';
+  const sheetPath = import.meta.env.BASE_URL + 'art/kart/kart-atlas.webp';
 
   return async (mode: BonusMode) => {
     const style = routes[mode];
@@ -138,3 +138,4 @@ export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typ
     return true;
   };
 }
+

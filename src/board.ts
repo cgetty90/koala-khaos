@@ -1,7 +1,7 @@
-import { Application, Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Sprite, type Texture } from 'pixi.js';
 import { loadCandyArt, type BoardSymbol } from './art';
 import { columns, rows, type Movement } from './game';
-import { createBoardTimeline, type Tween,type BoardPresentationEvent } from './motion';
+import { createBoardTimeline, type Tween } from './motion';
 import { currentBudget } from './graphics-quality';
 
 const cell = 96;
@@ -12,33 +12,34 @@ const xAt = (i: number) => (i % columns + .5) * cell;
 const rowY = (r: number) => (r + .5) * cell;
 const clamp = (p: number) => Math.max(0, Math.min(1, p));
 const shardColors: Record<BoardSymbol, number> = {
-  berry: 0xc78552, lemon: 0xe4b861, mint: 0x8ac59b, grape: 0x65dccd, peach: 0xffd15b, toffee: 0x769aaf, scatter: 0xffdb83,
+  berry: 0xff528b, lemon: 0xffc444, mint: 0x74ffc3, grape: 0xd988ff, peach: 0xff6888, toffee: 0x64dfff, scatter: 0xffdb83,
 };
 type BoardMove = Omit<Movement, 'candy'> & { candy: BoardSymbol };
 export type ScatterReveal = { order: readonly number[]; alreadyLanded: number; onLand(cell: number): void };
 
-export async function mountBoard(host: HTMLElement, animate: Tween, living = false, fallPace = () => 1, onColumnLand: (column:number,remainingMs:number)=>void = ()=>{}, onPresentation:(event:BoardPresentationEvent)=>void=()=>{},suppressAudio:()=>boolean=()=>false) {
-  const candyArt = await loadCandyArt();
+export async function mountBoard(host: HTMLElement, animate: Tween, living = false, fallPace = () => 1) {
+  const [candyArt, stone] = await Promise.all([
+    loadCandyArt(),
+    Assets.load<Texture>(import.meta.env.BASE_URL + 'art/identity/obsidian-reel.webp'),
+  ]);
   const app = new Application();
   await app.init({ width, height, backgroundAlpha: 0, preference: 'canvas', autoStart: false, resolution: 1 });
   host.appendChild(app.canvas);
 
-  const surface = new Sprite(Texture.WHITE);
+  const surface = new Sprite(stone);
   surface.setSize(width,height);
-  surface.tint = 0x182126;
   const dividers = new Graphics();
   const pieces = new Container();
-  const trails = new Container();
   const sparks = new Graphics();
-  app.stage.addChild(surface, dividers, trails, pieces, sparks);
-  host.dataset.well = 'outback-slate';
+  app.stage.addChild(surface, dividers, pieces, sparks);
+  host.dataset.well = 'obsidian-stone';
   for (let column = 1; column < columns; column++) {
     const x = column * cell;
-    dividers.rect(x - 1, 0, 2, height).fill({ color:0x02050a, alpha:.08 });
-    dividers.rect(x + 1, 0, 1, height).fill({ color:0xffd394, alpha:.07 });
+    dividers.rect(x - 1, 0, 2, height).fill({ color:0x02050a, alpha:.75 });
+    dividers.rect(x + 1, 0, 1, height).fill({ color:0xffd394, alpha:.31 });
   }
   for (let row = 1; row < rows; row++) {
-    dividers.rect(0, row * cell, width, 1).fill({ color:0xafa1cb, alpha:.025 });
+    dividers.rect(0, row * cell, width, 1).fill({ color:0xafa1cb, alpha:.13 });
   }
   dividers.roundRect(1, 1, width - 2, height - 2, 8)
     .stroke({ color:0x99745e, alpha:.66, width:2 });
@@ -77,8 +78,7 @@ export async function mountBoard(host: HTMLElement, animate: Tween, living = fal
     publish(board);
   }
 
-  const pendingContacts:{cell:number;remainingMs:number}[]=[];
-  const phase = createBoardTimeline(host, animate, ()=>{render();for(const {cell,remainingMs} of pendingContacts.splice(0)){onColumnLand(cell%columns,remainingMs);host.dispatchEvent(new CustomEvent('symbol-landed',{detail:{cell,column:cell%columns,remainingMs,at:performance.now()}}))}},event=>{onPresentation(event);host.dispatchEvent(new CustomEvent('board-presentation',{detail:{...event,at:performance.now()}}))},suppressAudio);
+  const phase = createBoardTimeline(host, animate, render);
   const compactTouch = matchMedia('(pointer: coarse) and (max-width: 720px)');
   const restoreRestingPositions = () => sprites.forEach((sprite, i) => { sprite.y = rowY(rowAt(i)); });
   // A resting board is already painted. Only genuine animation/resize events redraw it.
@@ -100,9 +100,6 @@ export async function mountBoard(host: HTMLElement, animate: Tween, living = fal
     for (const sprite of previous) if (!kept.has(sprite)) sprite.destroy();
     sprites = next;
     const planned = reveal?.order.length ? reveal : undefined;
-    const contacts=new Set<number>();
-    const echoes=opening && document.documentElement.dataset.effects!=='reduced' && document.documentElement.dataset.quality!=='performance'
-      ? falling.map(move=>{const echo=new Sprite(move.sprite.texture);echo.anchor.set(.5);echo.visible=false;trails.addChild(echo);return echo}) : [];
     const schedule = new Map<number, number>();
     let span = duration;
     if (planned) {
@@ -119,30 +116,27 @@ export async function mountBoard(host: HTMLElement, animate: Tween, living = fal
       span = Math.max(duration, 165 + (schedule.get(entering.at(-1)!.to) ?? 0));
     }
     let landed = 0;
-    const phaseDuration=span * fallPace() * openingPace;
     try {
-      await phase(opening ? 'drop' : 'refill', phaseDuration, progress => {
+      await phase(opening ? 'drop' : 'refill', span * fallPace() * openingPace, progress => {
       sparks.clear();
       const fullEffects = !compactTouch.matches && document.documentElement.dataset.effects !== 'reduced';
-      for (const [index,{ to, fromRow, sprite, scale }] of falling.entries()) {
+      for (const { to, fromRow, sprite, scale } of falling) {
         const target = rowAt(to);
         if (target === fromRow) continue;
-        const delay = opening ? (to % columns) * .042 + (rows - 1 - target) * .014 : fromRow < 0 ? .055 : 0;
+        const delay = opening ? (to % columns) * .021 + (rows - 1 - target) * .011 : fromRow < 0 ? .055 : 0;
         const custom = schedule.get(to);
-        const time = custom === undefined ? clamp((progress - delay) / (opening ? .71 : fromRow < 0 ? .945 : 1))
+        const time = custom === undefined ? clamp((progress - delay) / (opening ? .851 : fromRow < 0 ? .945 : 1))
           : clamp((progress * span - custom) / 165);
         const descent = clamp(time / .74);
         const impact = clamp((time - .74) / .26);
         const bounced = Math.abs(Math.sin(impact * Math.PI * 2)) * (1 - impact) ** 2;
-        const compression = impact < .35 ? (1 - impact / .35) * .065 : -bounced * .035;
-        const stretch = descent < 1 ? Math.sin(descent * Math.PI) * .045 : -compression;
+        const compression = impact < .35 ? (1 - impact / .35) * .18 : -bounced * .08;
+        const stretch = descent < 1 ? Math.sin(descent * Math.PI) * .12 : -compression;
         sprite.y = rowY(fromRow + (target - fromRow) * descent ** 2.3) - bounced * 21;
-        sprite.x = xAt(to);
+        const sway = fromRow < 0 ? Math.sin(Math.PI * descent) * (to % 2 ? -5 : 5) : 0;
+        sprite.x = xAt(to) + sway;
         sprite.scale.set(scale * (1 - stretch * .55), scale * (1 + stretch));
-        sprite.rotation = 0;
-        const echo=echoes[index];
-        if(echo){echo.visible=descent>0&&descent<1;echo.position.set(sprite.x,sprite.y-18-Math.sin(descent*Math.PI)*19);echo.scale.set(scale*.98,scale*1.12);echo.alpha=.13*Math.sin(descent*Math.PI)}
-        if(time>=.74&&!contacts.has(to)&&board[to]!=='scatter'){contacts.add(to);pendingContacts.push({cell:to,remainingMs:(1-progress)*phaseDuration})}
+        sprite.rotation = fromRow < 0 ? Math.sin(descent * Math.PI) * (to % 2 ? -.23 : .23) : 0;
         if (custom !== undefined && board[to] === 'scatter' && time >= .74 && time < 1) {
           sparks.circle(sprite.x,sprite.y,36+impact*22).stroke({color:0xffdb83,alpha:1-impact,width:4});
         }
@@ -157,7 +151,7 @@ export async function mountBoard(host: HTMLElement, animate: Tween, living = fal
         planned.onLand(planned.order[landed++]);
       }
       });
-    } finally { sparks.clear();trails.removeChildren().forEach(sprite=>sprite.destroy()); }
+    } finally { sparks.clear(); }
     publish(board);
   }
 
@@ -299,3 +293,5 @@ export async function mountBoard(host: HTMLElement, animate: Tween, living = fal
     },
   };
 }
+
+

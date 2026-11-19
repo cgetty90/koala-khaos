@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
-import { access, mkdir, writeFile } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
+import { access } from 'node:fs/promises';
 import path from 'node:path';
 import { chromium, expect } from '@playwright/test';
 
@@ -43,20 +42,12 @@ try {
       await route.fulfill({path:file});
     });
     await page.goto(frontend);
-    const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+'audio/enchanted-eucalyptus.ogg');
+    const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+'audio/koala-khaos-music-1.ogg');
     const welcome = page.getByRole('button', { name:'Enter the Khaos' });
     if (mobile) await welcome.tap();
     else await welcome.click();
     await song;
     await expect(page.locator('#audio-status')).toHaveAttribute('data-state','playing');
-    const logo = page.locator('.stage-logo');
-    const logoUrl = await logo.evaluate(image => image.currentSrc);
-    assert(logoUrl.endsWith('/art/outback/logo-h-fixed-67a95c14.webp'));
-    assert.equal(createHash('sha256').update(Buffer.from(await page.evaluate(async url => Array.from(new Uint8Array(await (await fetch(url)).arrayBuffer())),logoUrl))).digest('hex'),'67a95c14d743b81da0e3f7ffaa0569ee91ebe95d503c53e71cb566a8a0063be0');
-    if (process.env.KHAOS_EVIDENCE_DIR) {
-      await mkdir(process.env.KHAOS_EVIDENCE_DIR,{recursive:true});
-      await page.screenshot({path:path.join(process.env.KHAOS_EVIDENCE_DIR,'public-'+viewport.width+'.png'),animations:'disabled'});
-    }
     const spin = page.locator('#drop');
     await expect(spin).toBeEnabled();
     await expect(page.locator('#credits')).toHaveText('500.00');
@@ -75,7 +66,6 @@ try {
       const reply = await response;
       assert(reply.ok(),mode+' failed over the real API');
       const {receipt} = await reply.json();
-      if (process.env.KHAOS_EVIDENCE_DIR) await writeFile(path.join(process.env.KHAOS_EVIDENCE_DIR,viewport.width+'-'+mode+'-receipt.json'),JSON.stringify(receipt,null,2));
       assert.equal(receipt.mode,mode);
       if (mode === 'normal' && !receipt.record.spec.tier) assert.equal(receipt.id.version,'khaos-3.0-offline-b.1');
       else assert.equal(receipt.id.version,'khaos-1.9-scatter-candidate.1');
@@ -162,7 +152,7 @@ try {
     const original = await dropped;
     const retry = page.getByRole('button',{name:'Retry pending round'});
     await expect(retry).toBeVisible();
-    await expect(page.locator('#credits')).toHaveText('â€”');
+    await expect(page.locator('#credits')).toHaveText('—');
     await expect(spin).toBeDisabled();
     const retried = page.waitForResponse(reply => reply.url() === roundUrl);
     if (mobile) await retry.tap();
@@ -182,3 +172,4 @@ try {
 } finally {
   await browser.close();
 }
+
