@@ -6,7 +6,7 @@ import { createMotion } from './motion';
 import { scatterColumns, scatterFixtures, type ScatterOutcome } from './scatter-presentation';
 import type { createSound } from './sound';
 
-const titles = { regular: 'Sugar Rush', super: 'Koala Frenzy', epic: 'Koala Mayhem' };
+const titles = { regular: 'Bush Bash', super: 'Outback Frenzy', epic: 'Koala Mayhem' };
 
 export function mountScatterDemo(audio: ReturnType<typeof createSound>, utility: HTMLDialogElement,
   atlas: string, rate: () => number, onSuspense: () => void) {
@@ -96,7 +96,7 @@ export function mountScatterDemo(audio: ReturnType<typeof createSound>, utility:
     }
     stage.dataset.phase = 'settled';
     stage.dataset.tier = outcome.bonus ?? 'none';
-    update(landed + (landed === 1 ? ' scatter' : ' scatters') + ' · ' + (outcome.bonus ? titles[outcome.bonus] : 'No bonus'));
+    update(landed + (landed === 1 ? ' scatter' : ' scatters') + ' Â· ' + (outcome.bonus ? titles[outcome.bonus] : 'No bonus'));
     if (outcome.bonus) {
       result.dataset.tier = outcome.bonus;
       result.style.setProperty('--fixture-world', 'url("' + art(outcome.bonus) + '")');
@@ -165,4 +165,3 @@ export function mountScatterDemo(audio: ReturnType<typeof createSound>, utility:
   }
   get('fixture-auto').addEventListener('click', () => void run([0, 1, 2, 3, 4, 5]));
 }
-

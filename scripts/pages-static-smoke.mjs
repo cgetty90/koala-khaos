@@ -52,7 +52,7 @@ try {
   const page = await browser.newPage();
   await page.route(origin+'/__khaos/state',route=>route.fulfill({status:503,json:{error:'Backend unavailable'}}));
   await page.goto(base+'/koala-khaos/');
-  await page.getByText('The candy grid could not load. Reload to try again.').waitFor();
+  await page.getByText('The symbol grid could not load. Reload to try again.').waitFor();
   assert(await page.locator('#drop').isDisabled());
   console.log('Desktop and mobile Pages asset paths passed with stubbed state. Backend failure correctly disables paid play.');
 } finally {

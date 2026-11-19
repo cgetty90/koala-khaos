@@ -87,17 +87,21 @@ export function createMotion(getRate: () => number, onActivity = () => {}) {
 }
 
 export type BoardPhase = 'drop' | 'refill' | 'pop' | 'anticipation' | 'transform' | 'storm-charge' | 'storm-break';
+export type BoardPresentationEvent={phase:BoardPhase;edge:'start'|'release'|'end';progress:number;completed?:boolean;audioSuppressed?:boolean};
 
-export function createBoardTimeline(host: HTMLElement, tween: Tween, render: () => void) {
+export function createBoardTimeline(host: HTMLElement, tween: Tween, render: () => void,notify:(event:BoardPresentationEvent)=>void=()=>{},suppressAudio:()=>boolean=()=>false) {
   let state: BoardPhase | 'idle' = 'idle';
   host.dataset.phase = state;
   return async (next: BoardPhase, duration: number, frame: (progress: number) => void) => {
     if (state !== 'idle') throw new Error('A board animation is already running');
     state = next;
     host.dataset.phase = state;
+    let started=false,released=false,lastProgress=0,completed=false,audioSuppressed=false;
     try {
-      await tween(duration, progress => { frame(progress); render(); });
+      await tween(duration, progress => {frame(progress);render();lastProgress=progress;audioSuppressed=suppressAudio();if(!started){started=true;notify({phase:next,edge:'start',progress})}if(next==='pop'&&!released&&progress>=.32){released=true;notify({phase:next,edge:'release',progress})}});
+      completed=true;
     } finally {
+      notify({phase:next,edge:'end',progress:lastProgress,completed,audioSuppressed});
       state = 'idle';
       host.dataset.phase = state;
     }

@@ -49,10 +49,11 @@ export function mountMascot(canvas: HTMLCanvasElement, animate: Tween, sheetUrl:
       [37,904,319,417],[422,904,321,360],[808,908,353,413]];
     const adjusting = index === gogglesFrame && goggles.naturalWidth;
     const image = adjusting ? goggles : sheet;
-    const [sx,sy,sw,sh] = adjusting ? [0,0,image.naturalWidth,image.naturalHeight] : bounds[index];
-    const scale = adjusting ? Math.min(width / sw,height / sh) * .9 : Math.min(width / 353,height / 417) * .97;
+    const outback = sheetUrl.includes('/outback/');
+    const [sx,sy,sw,sh] = outback ? [(index%3)*384,Math.floor(index/3)*448,384,448] : adjusting ? [0,0,image.naturalWidth,image.naturalHeight] : bounds[index];
+    const scale = outback ? Math.min(width/384,height/448)*.99 : adjusting ? Math.min(width / sw,height / sh) * .9 : Math.min(width / 353,height / 417) * .97;
     const w = sw * scale, h = sh * scale;
-    const lift = height * breath + (index === 7 ? height * .08 : 0);
+    const lift = height * breath + (!outback && index === 7 ? height * .08 : 0);
     ctx.clearRect(0, 0, width, height);
     ctx.globalAlpha = 1;
     ctx.drawImage(image,sx,sy,sw,sh,(width-w)/2,height-h-lift,w,h);
@@ -109,7 +110,7 @@ export function mountMascot(canvas: HTMLCanvasElement, animate: Tween, sheetUrl:
   sheet.addEventListener('load', () => { if (frame === -1) react(pose); }, { once:true });
   sheet.src = sheetUrl;
   // Keep every gesture on the same character model and outfit.
-  if (!sheetUrl.includes('/v33/')) goggles.src = import.meta.env.BASE_URL + 'art/identity/mochi-goggles.webp';
+  if (!sheetUrl.includes('/v33/') && !sheetUrl.includes('/outback/')) goggles.src = import.meta.env.BASE_URL + 'art/identity/mochi-goggles.webp';
   const observer = dialog ? new MutationObserver(idleTick) : undefined;
   if (dialog) observer?.observe(dialog, { attributeFilter:['open'] });
   document.addEventListener('visibilitychange', idleTick);

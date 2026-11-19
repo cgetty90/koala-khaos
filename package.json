@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node --disable-warning=ExperimentalWarning preview-server.mjs",
     "build": "tsc --noEmit && vite build",
-    "test": "node --disable-warning=ExperimentalWarning --test src/game.test.ts src/scatter-presentation.test.ts src/gumleaf-spotlight.test.ts src/graphics-policy.test.ts",
+    "test": "node --disable-warning=ExperimentalWarning --test src/game.test.ts src/scatter-presentation.test.ts src/gumleaf-spotlight.test.ts src/graphics-policy.test.ts src/audio-policy.test.ts",
     "test:browser": "playwright test"
   },
   "dependencies": {
