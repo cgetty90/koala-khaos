@@ -6,7 +6,7 @@ export async function mountLivingWorld() {
  const budget=currentBudget();await app.init({width:innerWidth,height:innerHeight,backgroundAlpha:0,antialias:false,resolution:Math.min(devicePixelRatio,budget.ambientDPR),autoDensity:true,preference:'webgl',autoStart:false});
  app.canvas.className='living-world';app.canvas.setAttribute('aria-hidden','true');document.querySelector('.scenery')!.append(app.canvas);
  const leaves=new Container(),lights=new Container();app.stage.addChild(leaves,lights);
- const texture=await Assets.load<Texture>(import.meta.env.BASE_URL+'art/production/gumleaf.webp');
+ const texture=await Assets.load<Texture>(import.meta.env.BASE_URL+'art/outback/eucalyptus.webp');
  const objects=Array.from({length:14},(_,i)=>{const s=new Sprite(texture);s.anchor.set(.5);s.width=22+i%4*5;s.height=s.width*.53;s.alpha=.25+i%3*.08;leaves.addChild(s);return s});
  // Geometry is authored once, not cleared/re-tessellated thirty times each second.
  const sparks=Array.from({length:22},(_,i)=>{const s=new Graphics().circle(0,0,1+i%2).fill({color:i%3?0xffe8a8:0x7cecd5});lights.addChild(s);return s});

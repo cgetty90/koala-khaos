@@ -6,7 +6,7 @@ import { createMotion } from './motion';
 import { scatterColumns, scatterFixtures, type ScatterOutcome } from './scatter-presentation';
 import type { createSound } from './sound';
 
-const titles = { regular: 'Sugar Rush', super: 'Koala Frenzy', epic: 'Koala Mayhem' };
+const titles = { regular: 'Bush Bash', super: 'Outback Frenzy', epic: 'Koala Mayhem' };
 
 export function mountScatterDemo(audio: ReturnType<typeof createSound>, utility: HTMLDialogElement,
   atlas: string, rate: () => number, onSuspense: () => void) {

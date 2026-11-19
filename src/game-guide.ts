@@ -1,14 +1,15 @@
+import { modeNames } from './theme';
 import { conceptArt, presentationCandyNames } from './art';
 import { candies, columns, refill, seededRandom, type Candy } from './game';
-import { bands, basis, bonusModes, freeSpins, math, modeNames, mysteryWeights, naturalOdds, payPoints, type Mode } from './math';
+import { bands, basis, bonusModes, freeSpins, math, mysteryWeights, naturalOdds, payPoints, type Mode } from './math';
 
 const fmt = new Intl.NumberFormat('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const sprite = (candy: Candy) => '<img src="' + import.meta.env.BASE_URL + 'art/guide/' + candy + '.webp" alt="" width="36" height="36">';
+const sprite = (candy: Candy) => '<img src="' + import.meta.env.BASE_URL + 'art/outback/' + candy + '.webp" alt="" width="36" height="36">';
 const illustration = (name: string, className = '') =>
   '<img class="' + className + '" src="' + conceptArt(name) + '" alt="">';
 
 function paytable(mode: Mode) {
-  return '<table><caption>' + modeNames[mode] + ' payouts in multiples of the base bet</caption><thead><tr><th scope="col">Candy</th>' +
+  return '<table><caption>' + modeNames[mode] + ' payouts in multiples of the base bet</caption><thead><tr><th scope="col">Symbol</th>' +
     bands.map((min, i) => '<th scope="col">' + min + (bands[i + 1] ? '–' + (bands[i + 1] - 1) : '+') + '</th>').join('') +
     '</tr></thead><tbody>' + candies.map(candy =>
       '<tr><th scope="row"><span class="guide-symbol">' + sprite(candy) + presentationCandyNames[candy] + '</span></th>' +
@@ -22,9 +23,9 @@ function tumbleExample() {
   const board = Array.from({ length: 30 }, (_, i) => winners.has(i) ? 'berry' as const : others[i % others.length]);
   const filled = refill(board, winners, seededRandom(17)).board;
   const stages = [
-    { name: 'Match eight', desc: 'The gold outlines show eight matching candies anywhere on the board.', items: board, marked: true },
-    { name: 'Pop the winners', desc: 'Every matching candy in the winning group disappears together.', items: board.map((candy, i) => winners.has(i) ? null : candy), marked: false },
-    { name: 'Fall and refill', desc: 'Survivors drop down their own columns. New candies arrive from above, then the full board is checked again.', items: filled, marked: false },
+    { name: 'Match eight', desc: 'The gold outlines show eight matching symbols anywhere on the board.', items: board, marked: true },
+    { name: 'Pop the winners', desc: 'Every matching symbol in the winning group disappears together.', items: board.map((candy, i) => winners.has(i) ? null : candy), marked: false },
+    { name: 'Fall and refill', desc: 'Survivors drop down their own columns. New symbols arrive from above, then the full board is checked again.', items: filled, marked: false },
   ];
   return '<div class="guide-cards">' + stages.map(stage => '<figure class="guide-card"><div class="guide-board" aria-hidden="true" style="--columns:' + columns + '">' +
     stage.items.map((candy, i) => '<span' + (stage.marked && winners.has(i) ? ' class="matched"' : '') + '>' + (candy ? sprite(candy) : '') + '</span>').join('') +
@@ -38,19 +39,19 @@ export function mountGameGuide(dialog: HTMLDialogElement, stake: () => number, o
   const scroller = dialog.querySelector<HTMLElement>('.guide-content')!;
   const modes = ['base', ...bonusModes] as const;
   const pages: Record<string, () => string> = {
-    play: () => '<h3>How to Play</h3><p>Match at least eight identical candies anywhere on the 6×5 grid. They can be in separate rows or columns.</p>' +
+    play: () => '<h3>How to Play</h3><p>Match at least eight identical symbols anywhere on the 6×5 grid. They can be in separate rows or columns.</p>' +
       tumbleExample() + '<p>This illustration is an example. A live spin keeps tumbling until no matching group wins.</p>',
     pay: () => '<h3>Paytable</h3><label class="guide-mode">Game mode <select aria-label="Paytable mode">' +
       modes.map(mode => '<option value="' + mode + '">' + modeNames[mode] + '</option>').join('') +
-      '</select></label><div id="paytable" class="paytable">' + paytable('base') + '</div><p>These are nominal candy awards before Gumleaves and caps. Paid round entitlement settles on a 0.10× Base Bet grid, up to 6,000× Base Bet including the opening and feature.</p>',
+      '</select></label><div id="paytable" class="paytable">' + paytable('base') + '</div><p>These are nominal symbol awards before Gumleaves and caps. Paid round entitlement settles on a 0.10× Base Bet grid, up to 6,000× Base Bet including the opening and feature.</p>',
     bonus: () => '<h3>Bonus Features</h3><div class="guide-illustration">' + illustration('scatter') +
-      '<p>BONUS symbols can replace candies on the opening drop or during a refill. Two scatters slow the remaining arrivals in that drop. The spin can still end without a bonus. Three trigger Sugar Rush, four trigger Koala Frenzy, and five trigger Koala Mayhem.</p></div>' +
+      '<p>BONUS symbols can replace symbols on the opening drop or during a refill. Two scatters slow the remaining arrivals in that drop. The spin can still end without a bonus. Three trigger Bush Bash, four trigger Outback Frenzy, and five trigger Koala Mayhem.</p></div>' +
       '<div class="guide-cards">' + bonusModes.map((mode, i) =>
         '<article class="guide-card">' + illustration(mode, 'guide-world') + '<h4>' + modeNames[mode] + '</h4><p>Natural chance ' +
         (naturalOdds[i] / 10_000).toFixed(3) + '% per base spin.</p><p>Feature cap ×' + math[mode].sessionCap.toLocaleString('en') + ' base bet.</p></article>').join('') +
       '</div><p>Watch the introduction, then select Continue to play all ' + freeSpins + ' free spins automatically. Purchased bonuses use a separate reveal and award no base-game win.</p>',
     leaf: () => '<h3>Golden Gumleaf Multipliers</h3><div class="guide-illustration">' + illustration('gumleaf') +
-      '<p>Collected leaves add together, then multiply the candy win. A spin with no applicable leaves uses ×1. The spotlight pauses the tumble briefly when a genuine leaf arrives.</p></div>' +
+      '<p>Collected leaves add together, then multiply the symbol win. A spin with no applicable leaves uses ×1. The spotlight pauses the tumble briefly when a genuine leaf arrives.</p></div>' +
       '<dl class="guide-leaves">' + modes.map(mode => '<div><dt>' + modeNames[mode] + '</dt><dd>' +
         math[mode].values.map(value => '×' + value).join(' · ') + '<br>' +
         (mode === 'epic' ? 'Accumulates across all ten free spins.' : 'Resets on every spin.') + '</dd></div>').join('') + '</dl>',

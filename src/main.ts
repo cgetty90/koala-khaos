@@ -1,3 +1,4 @@
+import { modeNames } from './theme';
 import { accept, complete, currentBalance, pending, splitReceipt, type PaidMode, type RecordedSpin, type Presentation } from './catalogue-client';
 import './style.css';
 import './stage.css';
@@ -24,6 +25,11 @@ import './visual-v32.css';
 import './visual-v33.css';
 import './visual-v34.css';
 import './graphics-quality.css';
+import './outback.css';
+import './reference-stage.css';
+import './simple-deck.css';
+import './separate-controls.css';
+import './premium-controls.css';
 import { mountGraphicsQuality } from './graphics-quality';
 import { mountLivingWorld } from './living-world-v32';
 import { mountAmbientState } from './ambient-state';
@@ -36,10 +42,51 @@ import { createSound, defaultMusic, defaultSfx } from './sound';
 import { mountBoard } from './board';
 import { revealPurchaseScatters } from './scatter-reveal';
 import { candies, finishFreeSpin, makeBoard, newBonus, seededRandom, spinPayout, startSpin, tumble, type Bonus } from './game';
-import { basis, bonusModes, freeSpins, math, maximumStake, modeNames, mysteryWeights, prices, purchaseCost, settleBonusAward, settleCredits, stakeStep, stakes, startingBalance, type BonusMode, type Purchase } from './math';
+import { basis, bonusModes, freeSpins, math, maximumStake, mysteryWeights, prices, purchaseCost, settleBonusAward, settleCredits, stakeStep, stakes, startingBalance, type BonusMode, type Purchase } from './math';
 
 const get = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const host = get('board');
+// Keep the play surface quiet; secondary controls live in the existing menu.
+const menuControls=document.createElement('section');
+menuControls.className='simple-menu-controls';
+menuControls.setAttribute('aria-label','Play options');
+const menuHeading=document.createElement('h3');menuHeading.textContent='Play options';menuControls.append(menuHeading);
+menuControls.append(get('deck-speed'));
+get('autoplay').setAttribute('aria-label','Autoplay');
+get('autoplay').querySelector('span')!.textContent='Auto Spin';
+get('ante-open').querySelector('strong')!.textContent='Gumleaf Ante';
+get('ante-open').querySelector('.ante-detail')!.textContent='3× BET';
+menuControls.append(get('total-bet').closest('.cabinet-display')!);
+get('guide-settings').prepend(menuControls);
+const betNote=document.createElement('small');betNote.id='simple-bet-note';betNote.hidden=true;
+get('stake').parentElement!.append(betNote);
+const stakeCaption=document.createElement('span');stakeCaption.id='stake-caption';stakeCaption.textContent='Bet';
+get('stake').parentElement!.firstChild!.replaceWith(stakeCaption);
+const wagerDisplay=document.createElement('output');wagerDisplay.id='wager-display';wagerDisplay.setAttribute('aria-label','Charged stake per spin');
+get('stake').parentElement!.insertBefore(wagerDisplay,get('stake'));
+get('stake').setAttribute('aria-description','Adjusts Base Bet; Total Bet includes the active Gumleaf Ante.');
+get('last-win').closest('.cabinet-display')!.querySelector('span')!.textContent='Win';
+get('utility-open').querySelector('svg')!.innerHTML='<path d="M4 6h16M4 12h16M4 18h16"/>';
+
+// Move the existing controls, preserving their IDs, handlers and settlement locks.
+const brandActions=document.createElement('div');brandActions.className='brand-actions';
+get('title').before(brandActions);brandActions.append(get('title'));
+const featureControls=document.createElement('aside');featureControls.className='feature-controls';featureControls.setAttribute('aria-label','Bonus options');brandActions.append(featureControls);
+featureControls.append(get('bonus'),get('ante-open'));
+const controls=document.querySelector<HTMLElement>('.deck .controls')!;
+const utilities=document.createElement('div');utilities.className='deck-utilities';utilities.append(get('utility-open'),get('deck-sound'));
+const wagerSummary=document.createElement('div');wagerSummary.className='wager-summary';wagerSummary.append(get('credits').closest('.cabinet-display')!,get('stake').closest('.stake-tools')!,get('last-win').closest('.cabinet-display')!);
+controls.prepend(utilities,wagerSummary);controls.append(get('autoplay'),get('drop'));controls.querySelector('.deck-actions')?.remove();
+const dockFeatures=matchMedia('(max-width:1000px), (max-height:600px)');
+function placeFeatures(){if(dockFeatures.matches)document.querySelector('.deck')!.prepend(featureControls);else brandActions.append(featureControls)}
+dockFeatures.addEventListener('change',placeFeatures);placeFeatures();
+// A single mute button remains interactive in HTML modal top layers.
+const overlayMuteObserver=new MutationObserver(()=>{
+ const overlay=['celebration','feature-dialog'].map(id=>get<HTMLDialogElement>(id)).find(dialog=>dialog.open);
+ const mute=get('deck-sound');mute.dataset.overlay=String(Boolean(overlay));
+ if(mute.parentElement!==(overlay??utilities))(overlay??utilities).append(mute);
+});
+for(const id of ['celebration','feature-dialog'])overlayMuteObserver.observe(get(id),{attributes:true,attributeFilter:['open']});
 
 const game = document.querySelector<HTMLElement>('.game')!;
 const spin = get<HTMLButtonElement>('drop');
@@ -93,7 +140,7 @@ autoStop.addEventListener('click', stopAuto);
 autoStopModal.addEventListener('click', stopAuto);
 get('utility-open').addEventListener('click', () => { if (!busy) { selectGuide('settings'); utility.showModal(); } });
 autoButton.addEventListener('click', () => {
-  if (!busy && !feature.open && !shop.open && !utility.open) autoDialog.showModal();
+  if (!busy && !feature.open && !shop.open) {if(utility.open)utility.close();autoDialog.showModal();}
 });
 for (const button of document.querySelectorAll<HTMLButtonElement>('[data-close]')) {
   button.addEventListener('click', () => button.closest('dialog')?.close());
@@ -151,7 +198,7 @@ const tracks = {
   epic: 'Golden Gumleaves build a multiplier that stays with you for all ten spins.',
 };
 
-const atlas = import.meta.env.BASE_URL + 'art/v33/mochi-poses.webp';
+const atlas = import.meta.env.BASE_URL + 'art/outback/mochi-poses.webp';
 const pose = mountMascot(mascot, introClock.tween, atlas);
 const cinematicPose = mountMascot(cinematicMochi, introClock.tween, atlas);
 const winPose = mountMascot(get<HTMLCanvasElement>('win-mochi'), introClock.tween, atlas);
@@ -191,6 +238,7 @@ const staticSpotlight = createMotion(() => 1);
 let audioUnlocked = false;
 
 function syncMotion() {
+  audio.setPace(reducedMotion.matches?0:Number(speed.value)*(auto?.turbo?2.5:1));
   document.documentElement.dataset.motion = reducedMotion.matches || speed.value === '0' ? 'instant' : 'animated';
   const label = speed.selectedOptions[0].textContent;
   get('deck-speed-label').textContent = label;
@@ -201,6 +249,8 @@ reducedMotion.addEventListener('change', syncMotion);
 function syncSound() {
   deckSound.setAttribute('aria-pressed', String(sound.checked));
   get('deck-sound-label').textContent = sound.checked ? 'On' : 'Off';
+  deckSound.setAttribute('title',sound.checked?'Mute sound':'Unmute sound');
+  deckSound.querySelector('svg')!.innerHTML=sound.checked?'<path d="M3 9h4l5-4v14l-5-4H3zM16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>':'<path d="M3 9h4l5-4v14l-5-4H3zM16 9l6 6m0-6-6 6"/>';
   if (!audioUnlocked) {
     audioStatus.dataset.state = sound.checked ? 'locked' : 'off';
     audioStatus.textContent = sound.checked ? 'Sound on · waiting for an interaction' : 'Sound off';
@@ -219,7 +269,7 @@ document.addEventListener('click', event => {
   if (!event.isTrusted || !(event.target instanceof Element)) return;
   const button = event.target.closest('button');
   if (!button || button.disabled || button.matches('#deck-sound,#drop,#confirm-buy,[data-qa]')) return;
-  audio.cue('ui');
+  audio.cue(button.matches('#ante-open')?'ui-ante':button.matches('#bonus')?'ui-bonus':button.matches('#utility-open')?'ui-menu':button.matches('#deck-speed,#deck-sound')?'ui-setting':'ui');
 }, true);
 function changeSound() {
   preferences.sound = sound.checked;
@@ -228,7 +278,10 @@ function changeSound() {
   activateSound();
 }
 sound.addEventListener('change', changeSound);
-deckSound.addEventListener('click', () => {
+deckSound.addEventListener('click', event => {
+  // Updating the SVG can detach the pointer target before cinematic bubbling.
+  // Muting must never trigger the modal's "tap anywhere to continue" handler.
+  event.stopPropagation();
   sound.checked = !sound.checked;
   changeSound();
 });
@@ -238,7 +291,7 @@ speed.addEventListener('change', () => {
   syncMotion();
 });
 deckSpeed.addEventListener('click', () => {
-  if (busy || utility.open) return;
+  if (busy) return;
   speed.selectedIndex = (speed.selectedIndex + 1) % speed.options.length;
   speed.dispatchEvent(new Event('change'));
   get('speed-announcement').textContent = 'Animation speed: ' + speed.selectedOptions[0].textContent;
@@ -247,8 +300,8 @@ deckSpeed.addEventListener('click', () => {
     deckSpeed.animate([{ filter:'brightness(1.44)' }, { filter:'brightness(1)' }], { duration:370 });
   }
 });
-anteOpen.addEventListener('click', () => { if (!busy && !anteDialog.open) anteDialog.showModal(); });
-anteDialog.addEventListener('close', () => anteOpen.focus());
+anteOpen.addEventListener('click', () => { if (!busy && !anteDialog.open) {if(utility.open)utility.close();anteDialog.showModal();} });
+anteDialog.addEventListener('close', () => get('utility-open').focus());
 function bindVolume(id: string, field: 'music' | 'sfx', initial: number, setVolume: (value: number) => void) {
   const input = get<HTMLInputElement>(id);
   const output = get<HTMLOutputElement>(id + '-value');
@@ -397,6 +450,11 @@ function writeHistory(message: string) {
 function refreshControls() {
   const selectedStake = stake();
   get<HTMLOutputElement>('total-bet').value = fmt(chargedStake());
+  wagerDisplay.value=fmt(chargedStake());
+  stakeCaption.textContent=ante?'Total Bet':'Bet';
+  wagerSummary.dataset.ante=String(ante);
+  betNote.hidden=!ante;
+  betNote.textContent=ante?'Base '+fmt(selectedStake):'';
   anteOpen.querySelector('b')!.textContent = ante ? 'ON' : 'OFF';
   anteOpen.dataset.enabled = String(ante);
   anteOpen.setAttribute('aria-pressed', String(ante));
@@ -590,10 +648,10 @@ stakeUp.addEventListener('click', () => {
   stakeChanged();
 });
 
-const shopNames = { regular: 'Sugar Rush', super: 'Koala Frenzy', mystery: 'Mystery Bonus' };
+const shopNames = { regular: 'Bush Bash', super: 'Outback Frenzy', mystery: 'Mystery Bonus' };
 const purchases = Object.keys(prices) as Purchase[];
 const shopOptions = get('shop-options');
-const shopEmblems = { regular:'chest-regular',super:'chest-super',mystery:'chest-closed' } satisfies Record<Purchase,string>;
+const shopEmblems = { regular:'world-regular',super:'world-super',mystery:'mystery-satchel' } satisfies Record<Purchase,string>;
 const confirmation = get('shop-confirmation');
 const confirmBuy = get<HTMLButtonElement>('confirm-buy');
 const weightSum = mysteryWeights.reduce<number>((a, b) => a + b, 0);
@@ -623,10 +681,10 @@ buy.addEventListener('click', () => {
   for (const purchase of purchases) {
     const option = document.createElement('button');
     const cost = purchaseCost(selectedStake, purchase);
-    option.className = 'secondary';
+    option.className = 'secondary bonus-option';
     option.setAttribute('aria-label', shopNames[purchase] + ' · ' + fmt(cost) + ' credits');
     const image = document.createElement('img');
-    image.src = import.meta.env.BASE_URL + 'art/cinematic/' + shopEmblems[purchase] + '.webp';
+    image.src = import.meta.env.BASE_URL + 'art/outback/' + shopEmblems[purchase] + '.webp';
     image.alt = '';
     const label = document.createElement('strong');
     label.textContent = shopNames[purchase];
@@ -701,7 +759,7 @@ async function animateWin(payout: number, award: number) {
     winPose(tier);
     signal('win');
     cue(tier === 'epic' ? 'jackpot' : tier);
-    await motion.tween(tier === 'epic' ? 2050 : tier === 'mega' ? 1500 : 1080, progress => {
+    await motion.tween(tier === 'epic' ? 3200 : tier === 'mega' ? 2450 : 1750, progress => {
       counter.textContent = fmt(Math.floor(award * (1 - (1 - progress) ** 3)));
     });
   } finally {
@@ -756,7 +814,6 @@ async function playSpin(active?: Session, recorded?: RecordedSpin, openingDurati
   status.textContent = active ? modeNames[active.board.mode] + ' · Free spin ' + (active.board.played + 1) + ' of ' + freeSpins : 'Spinning…';
   pose('ready');
   audio.prepareCinematics();
-  cue('spin');
 
   const simulated = recorded ? undefined : startSpin(rng!, mode);
   const result = recorded?.opening ?? simulated!;
@@ -781,12 +838,11 @@ async function playSpin(active?: Session, recorded?: RecordedSpin, openingDurati
   try {
     await display.drop(result.initial, openingDuration, scatterReveal(recorded?.opening.scatterLandings), openingPace);
   } finally { if (landedScatters >= 2) audio.setSuspense(false); }
-  cue('land');
   signal('land');
   if (result.transformed.length) {
     const target = result.board[result.transformed[0]];
     if (target === 'scatter') throw Error('A scatter cannot be transformed into candy');
-    status.textContent = 'Koala Chaos! Mochi made ' + result.transformed.length + ' ' + candyNames[target] + ' candies.';
+    status.textContent = 'Koala Chaos! Mochi made ' + result.transformed.length + ' ' + candyNames[target] + ' symbols.';
     writeHistory(status.textContent);
     pose('win');
     cue('chaos');
@@ -806,9 +862,7 @@ async function playSpin(active?: Session, recorded?: RecordedSpin, openingDurati
     setLeaf((leaves + carried) || 1);
     const preview = spinPayout(mode, base, leaves + carried, active?.board.total);
     if (!recorded) spinWin.value = fmt(settleBonusAward(active?.board.total ?? 0, preview, locked));
-    cue('tumble');
     signal('tumble');
-    cue('pop');
     await display.pop(stage.removed, 240);
     await updateCounter(cascades - 1, 'connection');
     if (stage.leaf) {
@@ -821,7 +875,6 @@ async function playSpin(active?: Session, recorded?: RecordedSpin, openingDurati
       await display.fall(stage.board, stage.moves, 320,
         scatterReveal('scatterLandings' in stage ? stage.scatterLandings : undefined));
     } finally { if (landedScatters >= 2) audio.setSuspense(false); }
-    cue('refill');
   }
 
   await motion.visible();
@@ -842,9 +895,10 @@ async function playSpin(active?: Session, recorded?: RecordedSpin, openingDurati
     balance += award - locked;
   }
   total.value = fmt(balance);
-  if (!cascades) writeHistory('No group of 8 or more matching candies.');
+  if (!cascades) writeHistory('No group of 8 or more matching symbols.');
   spinWin.value = fmt(award);
   spinWin.dataset.confirmed = String(award);
+  if(award>0&&motion.instant)audio.cue('result');
   const lastWin = get<HTMLOutputElement>('last-win');
   lastWin.value = spinWin.value;
   if (recorded) sessionStorage.setItem(lastCounterKey, String(award));
@@ -855,7 +909,7 @@ async function playSpin(active?: Session, recorded?: RecordedSpin, openingDurati
   }
   const summary = active ? modeNames[active.board.mode] + ' · Free spin ' + active.board.played : '';
   const unit = active?.source === 'practice' ? ' practice credits' : ' fake credits';
-  const resultLabel = award ? active ? '+' + spinWin.value + unit : 'Candy win' : payout ? 'Win below 0.01 credit' : 'No win';
+  const resultLabel = award ? active ? '+' + spinWin.value + unit : 'Symbol win' : payout ? 'Win below 0.01 credit' : 'No win';
   status.textContent = summary ? summary + ' · ' + resultLabel : resultLabel;
   if (landedScatters) status.textContent += ' · ' + landedScatters + (landedScatters === 1 ? ' scatter' : ' scatters');
   if (payout > 0 && (payout === math[mode].spinCap * basis || active?.board.total === math[mode].sessionCap * basis)) {
@@ -942,13 +996,13 @@ async function playPaid(mode: PaidMode, stakeMinor: number) {
     try {
       await motion.stage(() => display.storm(duration * .43, reducedEffects(), () => {
         if (!motion.instant && !reducedEffects()) brightenFalls();
-        cue('storm');
       }, ready));
     } finally {
       delete game.dataset.storm;
     }
   }
   const { receipt, presentation, opening, bonus } = await ready;
+  if(motion.instant)audio.cue('confirm');
   const tier = receipt.record.spec.tier;
   if (opening) {
     const quietSpin = !tier && opening.tumbles.length === 0 && opening.award.credit === 0;
@@ -968,6 +1022,8 @@ async function runSequence(task: () => Promise<void>) {
   try {
     await task();
   } catch (error) {
+    audio.silence();
+    audio.setSuspense(false);
     console.error(error);
     if (feature.open) feature.close();
     awaitingReceipt = Boolean(pending());
@@ -1045,7 +1101,21 @@ function resumePendingRound() {
 
 async function start() {
   const fallPace = () => speed.value === '0.65' && !auto?.turbo ? 1.8 : 1;
-  const paint = mountBoard(host, motion.tween, true, fallPace).then(board => {
+  const paint = mountBoard(host, motion.tween, true, fallPace, (column,remainingMs) => {
+    const rate=Number(speed.value)*(auto?.turbo?2.5:1);
+    if(!motion.instant&&remainingMs/rate>=100)audio.cue('land',column);
+  },event=>{
+    audio.setPace(motion.instant?0:Number(speed.value)*(auto?.turbo?2.5:1));
+    if(motion.instant)return;
+    if(event.edge==='start'){
+      if(event.phase==='drop'){audio.cue('spin');if(session)audio.cue('free-spin')}
+      else if(event.phase==='refill')audio.cue('refill');
+      else if(event.phase==='pop')audio.cue('tumble');
+      else if(event.phase==='storm-charge')audio.cue('storm-charge');
+      else if(event.phase==='storm-break')audio.cue('storm');
+    }else if(event.phase==='pop'&&event.edge==='release')audio.cue('pop');
+    else if(event.edge==='end'&&event.completed&&!event.audioSuppressed&&event.progress===1&&(event.phase==='drop'||event.phase==='refill'))audio.cue('reel-settle');
+  },()=>Boolean(motion.instant)).then(board => {
     display = board;
     display.draw(makeBoard(fresh()));
   });
@@ -1089,7 +1159,7 @@ new ResizeObserver(([entry]) => {
 start().catch(error => {
   console.error(error);
   status.dataset.phase = 'error';
-  status.textContent = 'The candy grid could not load. Reload to try again.';
+  status.textContent = 'The symbol grid could not load. Reload to try again.';
 });
 
 

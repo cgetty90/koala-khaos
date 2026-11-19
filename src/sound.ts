@@ -1,3 +1,6 @@
+import {forestCues} from './forest-cues';
+import {reelCues} from './reel-cues';
+import {CueGate,cuePolicy,type AudioPace} from './audio-policy';
 type Scene = 'base' | 'regular' | 'super' | 'epic';
 type Timbre = 'sine' | 'triangle' | 'square';
 type Note = readonly [frequency: number, target: number, delay: number, duration: number, gain: number, timbre: Timbre];
@@ -61,6 +64,13 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
   let tensionVoice: { source: AudioBufferSourceNode; gain: GainNode } | undefined;
   let jungleBuffer: AudioBuffer | undefined;
   let accentBuffer: AudioBuffer | undefined;
+  let forestBuffer:AudioBuffer|undefined;
+  let pace:AudioPace='normal';
+  const gate=new CueGate();
+  const variants=new Map<string,number>();
+  const priorities=new WeakMap<Set<AudioScheduledSourceNode>,number>();
+  let reelBuffer: AudioBuffer | undefined;
+  const produced = new Map<string, AudioBuffer>();
   const clips = new Map<string, Promise<AudioBuffer>>();
   let sfx: GainNode | undefined;
   let noise: AudioBuffer | undefined;
@@ -87,6 +97,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     for (const group of voices) for (const node of group) stop(node);
     voices.clear();
     lastCue.clear();
+    gate.clear();
   }
 
   async function decodeTrack(url: string, context: AudioContext) {
@@ -101,19 +112,19 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     let buffer = buffers.get(track);
     if (!buffer) {
       const fallback = () => decodeTrack(import.meta.env.BASE_URL + 'audio/' + track + '.ogg', context);
-      buffer = (track === 'base'
-        ? decodeTrack(import.meta.env.BASE_URL + 'audio/koala-khaos-music-1.ogg', context).catch(fallback)
-        : fallback()).catch(error => { buffers.delete(track); throw error; });
+      const files: Record<Scene, string> = {base:'enchanted-eucalyptus',regular:'bush-bash',super:'outback-frenzy',epic:'koala-mayhem'};
+      buffer = decodeTrack(import.meta.env.BASE_URL + 'audio/' + files[track] + '.ogg', context)
+        .catch(fallback).catch(error => { if(buffers.get(track)===buffer) buffers.delete(track); throw error; });
       buffers.set(track, buffer);
     }
     return buffer;
   }
 
 
-  function loadClip(name: 'tension' | 'cinematic-cues' | 'jungle-effects', context: AudioContext) {
+  function loadClip(name: string, context: AudioContext) {
     let buffer = clips.get(name);
     if (!buffer) {
-      buffer = fetch(import.meta.env.BASE_URL + 'audio/' + name + '.ogg', { signal: requests.signal })
+      buffer = fetch(import.meta.env.BASE_URL + 'audio/' + (name==='tension'?'forest-tension':name) + '.ogg', { signal: requests.signal })
         .then(response => {
           if (!response.ok) throw new Error('Cinematic audio unavailable');
           return response.arrayBuffer();
@@ -175,8 +186,9 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
 
   function prepareCinematics() {
     if (!enabled || !ctx || disposed) return;
-    void loadClip('cinematic-cues', ctx).then(buffer => { if (!disposed) accentBuffer = buffer; }).catch(() => {});
+    void loadClip('forest-effects', ctx).then(buffer => { if (!disposed) forestBuffer = buffer; }).catch(() => {});
     void loadClip('tension', ctx).catch(() => {});
+    void loadClip('eucalyptus-reels', ctx).then(buffer=>{if(!disposed)reelBuffer=buffer}).catch(()=>{});
   }
 
   function setTrack(track: Scene, buffer: AudioBuffer, context: AudioContext) {
@@ -197,6 +209,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     source.onended = () => {
       source.disconnect();
       gain.disconnect();
+      source.buffer = null;
       if (active === next) active = undefined;
       if (outgoing === next) outgoing = undefined;
     };
@@ -254,7 +267,10 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     master = context.createGain();
     music = context.createGain();
     bed = context.createGain();
-    bed.connect(music);
+    const warmth=context.createBiquadFilter(),air=context.createBiquadFilter();
+    warmth.type='lowshelf';warmth.frequency.value=160;warmth.gain.value=1.2;
+    air.type='highshelf';air.frequency.value=5200;air.gain.value=-1.8;
+    bed.connect(warmth).connect(air).connect(music);
     sfx = context.createGain();
     music.gain.value = musicVolume * .72;
     sfx.gain.value = sfxVolume * .75;
@@ -328,14 +344,18 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
 
   function cue(name: keyof typeof effects, step = 0) {
     if (!ctx || !sfx || !enabled || document.hidden || ctx.state !== 'running' || sfxVolume === 0) return;
-    const spec = effects[name];
+    const spec = effects[name]??effects.ui;
     if (!spec) return;
+    const selectedReel = name === 'land' || name in reelCues;
+    // Never fall back to the disliked legacy reel timbre while loading B.
+    if (selectedReel && !reelBuffer) return;
     const context = ctx;
     const now = context.currentTime;
-    if (now - (lastCue.get(name) ?? -1) < .085) return;
-    lastCue.set(name, now);
+    if(!gate.accept(name,now,pace))return;
+    const policy=cuePolicy(name,pace);
     if (voices.size >= 7) {
-      const oldest = voices.values().next().value;
+      const oldest=[...voices].sort((a,b)=>(priorities.get(a)??0)-(priorities.get(b)??0))[0];
+      if(oldest&&(priorities.get(oldest)??0)>policy.priority)return;
       if (oldest) {
         for (const node of oldest) stop(node);
         voices.delete(oldest);
@@ -343,12 +363,18 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     }
     const group = new Set<AudioScheduledSourceNode>();
     voices.add(group);
-    function schedule(node: AudioScheduledSourceNode, delay: number, duration: number, level: number, filter?: BiquadFilterNode, offset?: number, clipLength = duration) {
+    priorities.set(group,policy.priority);
+    function schedule(node: AudioScheduledSourceNode, delay: number, duration: number, level: number, filter?: BiquadFilterNode, offset?: number, clipLength = duration, masteredEnvelope = false) {
       const start = now + delay;
       const envelope = context.createGain();
-      envelope.gain.setValueAtTime(.0001, start);
-      envelope.gain.exponentialRampToValueAtTime(level, start + .013);
-      envelope.gain.exponentialRampToValueAtTime(.0001, start + duration);
+      if(masteredEnvelope){
+        envelope.gain.setValueAtTime(level,start);
+        if(duration < .2){envelope.gain.setValueAtTime(level,start+Math.max(0,duration-.012));envelope.gain.linearRampToValueAtTime(0,start+duration)}
+      }else{
+        envelope.gain.setValueAtTime(.0001, start);
+        envelope.gain.exponentialRampToValueAtTime(level, start + .013);
+        envelope.gain.exponentialRampToValueAtTime(.0001, start + duration);
+      }
       if (filter) node.connect(filter).connect(envelope);
       else node.connect(envelope);
       envelope.connect(sfx!);
@@ -365,6 +391,24 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
       stop(node, start + duration + .01);
     }
     const jungleSlot = jungleCues.indexOf(name);
+    const sequence=variants.get(name)??0;variants.set(name,sequence+1);
+    const key=name==='land'?'land-'+sequence%3:name==='scatter-impact'?'scatter-'+Math.min(2,Math.max(0,step)):name;
+    if(selectedReel){
+      const sample=reelCues[key],source=context.createBufferSource();source.buffer=reelBuffer!;
+      const length=Math.min(sample.duration,policy.maxDuration);
+      schedule(source,0,length,.86,undefined,sample.offset,length,name==='reel-settle');
+      return;
+    }
+    const sample=forestCues[key];
+    if(forestBuffer&&sample){
+      const source=context.createBufferSource();source.buffer=forestBuffer;
+      const length=Math.min(sample.duration,policy.maxDuration);
+      schedule(source,0,length,name.startsWith('ui')?.7:policy.priority>=3?1:.86,undefined,sample.offset,length);
+      return;
+    }
+    const authoredName:Record<string,string>={big:'win-big',mega:'win-mega',jackpot:'win-epic',regular:'bonus-regular',super:'bonus-super',epic:'bonus-epic',land:'reel-stop'};
+    const authored=produced.get(authoredName[name]);
+    if(authored){const source=context.createBufferSource();source.buffer=authored;schedule(source,0,authored.duration,.92,undefined,0,authored.duration);return}
     if (jungleBuffer && jungleSlot !== -1) {
       const source = context.createBufferSource();
       source.buffer = jungleBuffer;
@@ -416,6 +460,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     buffers.clear();
     clips.clear();
     accentBuffer = undefined;
+    forestBuffer=undefined;reelBuffer=undefined;produced.clear();
     jungleBuffer = undefined;
     releaseTension();
     void ctx?.close().catch(() => {});
@@ -424,6 +469,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
 
   return {
     cue, silence, prepareCinematics, setKartEngine,
+    setPace(rate:number){pace=rate===0?'instant':rate<1?'gentle':rate>=2?'turbo':'normal'},
     setSuspense(value: boolean) {
       if (tensionWanted === value) return;
       tensionWanted = value;
@@ -440,9 +486,10 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
       try {
         if (enabled && !ctx) {
           setup();
-          void loadClip('jungle-effects', ctx!).then(buffer => {
-            if (!disposed) jungleBuffer = buffer;
+          void loadClip('forest-effects', ctx!).then(buffer => {
+            if (!disposed) forestBuffer = buffer;
           }).catch(() => {});
+          void loadClip('eucalyptus-reels',ctx!).then(buffer=>{if(!disposed)reelBuffer=buffer}).catch(()=>{});
         }
         if (master && ctx) master.gain.setTargetAtTime(value ? 1 : 0, ctx.currentTime, .012);
         void reconcile();
@@ -454,6 +501,9 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     setScene(value: Scene) {
       if (scene === value) return;
       scene = value;
+      // Keep the base bed ready to return, but never cache all long bonus songs.
+      // An outgoing source retains its own buffer only until its crossfade ends.
+      for (const cached of buffers.keys()) if(cached !== 'base' && cached !== value) buffers.delete(cached);
       updateMusicDuck();
       if (scene !== 'base') { tensionRevision++; releaseTension(); }
       if (enabled) void reconcile();

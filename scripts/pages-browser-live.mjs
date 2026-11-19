@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
+import { access, mkdir, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { chromium, expect } from '@playwright/test';
 
@@ -18,6 +19,10 @@ try {
     const mobile = viewport.width < 450;
     const page = await browser.newPage({viewport,isMobile:mobile,hasTouch:mobile,reducedMotion:'reduce'});
     const errors = [];
+    const pendingAssets = new Set();
+    page.on("request",r=>{if(r.url().startsWith(frontend))pendingAssets.add(r)});
+    page.on("requestfinished",r=>pendingAssets.delete(r));
+    page.on("requestfailed",r=>pendingAssets.delete(r));
     let droppedId;
     page.on('request', request => {
       const url = new URL(request.url());
@@ -42,12 +47,22 @@ try {
       await route.fulfill({path:file});
     });
     await page.goto(frontend);
-    const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+'audio/koala-khaos-music-1.ogg');
+    const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+'audio/enchanted-eucalyptus.ogg');
     const welcome = page.getByRole('button', { name:'Enter the Khaos' });
     if (mobile) await welcome.tap();
     else await welcome.click();
     await song;
     await expect(page.locator('#audio-status')).toHaveAttribute('data-state','playing');
+    const logo = page.locator('.stage-logo');
+    const logoUrl = await logo.evaluate(image => image.currentSrc);
+    assert(logoUrl.endsWith('/art/outback/logo-h-fixed-67a95c14.webp'));
+    assert.equal(createHash('sha256').update(Buffer.from(await page.evaluate(async url => Array.from(new Uint8Array(await (await fetch(url)).arrayBuffer())),logoUrl))).digest('hex'),'67a95c14d743b81da0e3f7ffaa0569ee91ebe95d503c53e71cb566a8a0063be0');
+    if (process.env.KHAOS_EVIDENCE_DIR) {
+      await mkdir(process.env.KHAOS_EVIDENCE_DIR,{recursive:true});
+      await page.screenshot({path:path.join(process.env.KHAOS_EVIDENCE_DIR,'public-'+viewport.width+'.png'),animations:'disabled'});
+    }
+    assert.equal(await page.locator('#drop .spin-glyph').textContent(),'↻');
+    assert((await page.locator('.demo').innerText()).includes('—'));
     const spin = page.locator('#drop');
     await expect(spin).toBeEnabled();
     await expect(page.locator('#credits')).toHaveText('500.00');
@@ -66,6 +81,7 @@ try {
       const reply = await response;
       assert(reply.ok(),mode+' failed over the real API');
       const {receipt} = await reply.json();
+      if (process.env.KHAOS_EVIDENCE_DIR) await writeFile(path.join(process.env.KHAOS_EVIDENCE_DIR,viewport.width+'-'+mode+'-receipt.json'),JSON.stringify(receipt,null,2));
       assert.equal(receipt.mode,mode);
       if (mode === 'normal' && !receipt.record.spec.tier) assert.equal(receipt.id.version,'khaos-3.0-offline-b.1');
       else assert.equal(receipt.id.version,'khaos-1.9-scatter-candidate.1');
@@ -80,6 +96,7 @@ try {
       await expect(spin).toBeEnabled({timeout:30000});
       await expect(page.locator('#credits')).toHaveText(credits.format(receipt.balance / 100));
       await page.waitForLoadState('networkidle');
+      await expect.poll(()=>pendingAssets.size,{timeout:30000}).toBe(0);
       await page.reload({waitUntil:'networkidle'});
       await expect(spin).toBeEnabled();
       await expect(page.locator('#credits')).toHaveText(credits.format(receipt.balance / 100));
@@ -165,6 +182,7 @@ try {
     }
     await expect(spin).toBeEnabled({timeout:30000});
     await expect(page.locator('#credits')).toHaveText(credits.format(saved.receipt.balance / 100));
+    await expect.poll(()=>pendingAssets.size,{timeout:30000}).toBe(0);
     assert.deepEqual(errors,[]);
     await page.close();
     console.log(viewport.width + 'px Pages build played and recovered five modes over HTTPS.');
@@ -172,4 +190,3 @@ try {
 } finally {
   await browser.close();
 }
-

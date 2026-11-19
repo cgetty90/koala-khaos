@@ -1,0 +1,70 @@
+/* Floating controls: no shared bottom-panel background. */
+.shell[data-layout][data-stage] .game .deck{width:min(100%,650px);padding:0;background:none!important;border:0!important;box-shadow:none!important;overflow:visible}
+.shell[data-layout][data-stage] .game .deck .controls{position:relative;isolation:isolate;grid-template-columns:36px 78px minmax(55px,1fr) minmax(105px,1.25fr) minmax(55px,1fr) 82px;grid-template-rows:82px;min-height:82px;gap:10px}
+.shell[data-layout][data-stage] .game .deck .controls::before{content:'';grid-area:1/3/2/6;align-self:center;height:52px;border:1px solid #afbb9c66;border-radius:7px;background:#111c1df5;box-shadow:0 3px 8px #17352b44;z-index:-1;pointer-events:none}
+.shell[data-layout][data-stage] .game .deck .controls .deck-actions #utility-open{width:36px;height:44px;background:#152624ef!important;border:1px solid #b2bb9766!important;border-radius:7px}
+.shell[data-layout][data-stage] .game .deck .controls .deck-actions #bonus{min-height:54px;width:78px;padding:7px 5px;border:1px solid #f4e3b4!important;border-radius:8px;background:#d9bd7c!important;color:#233e32;box-shadow:0 3px 0 #7b6c48,0 4px 8px #18362b33!important;font-weight:800;font-size:10px;letter-spacing:.02em}
+.shell[data-layout][data-stage] .game .deck .controls #drop{width:82px;height:82px;border:3px solid #fff4d8;box-shadow:0 3px 0 #aa9464,0 6px 14px #17342d44!important}
+.shell[data-layout][data-stage] .game .deck .controls #drop .spin-glyph{font-size:49px}
+.shell[data-layout][data-stage] .game .deck .controls #drop .spin-text{font-size:9px}
+.shell[data-layout][data-stage] .game .deck .controls .cabinet-display:has(#credits){padding-left:11px}
+.shell[data-layout][data-stage] .game .deck .controls .cabinet-display:has(#last-win){padding-right:11px}
+@media(max-width:450px) and (orientation:portrait){
+ .shell[data-layout][data-stage] .game .deck{width:100%;margin-top:7px}
+ .shell[data-layout][data-stage] .game .deck .controls{grid-template-columns:44px minmax(0,1fr) minmax(0,1fr) 68px;grid-template-rows:44px 68px;gap:7px;min-height:119px}
+ .shell[data-layout][data-stage] .game .deck .controls::before{grid-area:1/1/2/5;height:44px}
+ .shell[data-layout][data-stage] .game .deck .controls .cabinet-display:has(#credits){grid-area:1/1/2/2;min-width:62px;padding-left:7px}
+ .shell[data-layout][data-stage] .game .deck .controls .stake-tools{grid-area:1/2/2/4;justify-self:center;width:110px}
+ .shell[data-layout][data-stage] .game .deck .controls .cabinet-display:has(#last-win){grid-area:1/4/2/5;padding-right:9px}
+ .shell[data-layout][data-stage] .game .deck .controls .deck-actions #utility-open{grid-area:2/1/3/2;width:44px;height:44px}
+ .shell[data-layout][data-stage] .game .deck .controls .deck-actions #bonus{grid-area:2/2/3/4;width:100%;max-width:130px;justify-self:center;min-height:50px;flex-direction:row;gap:6px}
+ .shell[data-layout][data-stage] .game .deck .controls #drop{grid-area:2/4/3/5;width:68px;height:68px}
+ .shell[data-layout][data-stage] .game .deck .controls #drop .spin-glyph{font-size:41px}
+}
+@media(orientation:landscape) and (max-height:550px){
+ .shell[data-layout][data-stage] .game{width:min(100%,max(280px,calc((100cqh - 120px)*1.2)))}
+ .shell[data-layout][data-stage] .game .deck{width:min(calc(100vw - 125px),500px);max-width:none;margin-top:5px;flex-shrink:0}
+ .shell[data-layout][data-stage] .game .deck .controls{grid-template-columns:30px 60px minmax(45px,1fr) minmax(92px,1.2fr) minmax(45px,1fr) 60px;grid-template-rows:60px;min-height:60px;gap:6px}
+ .shell[data-layout][data-stage] .game .deck .controls #drop{width:60px;height:60px}
+ .shell[data-layout][data-stage] .game .deck .controls #drop .spin-glyph{font-size:36px}
+ .shell[data-layout][data-stage] .game .deck .controls .deck-actions #bonus{width:60px;min-height:48px;font-size:9px}
+ .shell[data-layout][data-stage] .game .deck .controls .deck-actions #utility-open{width:30px}
+}
+/* Dedicated Ante and Auto Spin stay on the play surface. */
+.shell[data-layout][data-stage] .game .deck{width:min(100%,780px)}
+.shell[data-layout][data-stage] .game .deck .controls{grid-template-columns:32px 72px 78px minmax(50px,1fr) minmax(100px,1.2fr) minmax(50px,1fr) 48px 82px;gap:8px}
+.shell[data-layout][data-stage] .game .deck .controls::before{grid-area:1/4/2/7}
+.shell[data-layout][data-stage] .game .deck .controls .cabinet-display:has(#credits){grid-area:1/4/2/5}
+.shell[data-layout][data-stage] .game .deck .controls .stake-tools{grid-area:1/5/2/6}
+.shell[data-layout][data-stage] .game .deck .controls .cabinet-display:has(#last-win){grid-area:1/6/2/7}
+.shell[data-layout][data-stage] .game .deck .controls #drop{grid-area:1/8/2/9}
+.shell[data-layout][data-stage] .game .deck .controls .deck-actions #bonus{width:72px}
+.shell[data-layout][data-stage] .game .deck .controls #ante-open{grid-area:1/3/2/4;display:grid;grid-template-columns:1fr auto;grid-template-rows:20px 13px;gap:2px;width:78px;min-height:54px;padding:7px 5px;border:1px solid #b7c899!important;border-radius:8px;background:#244b3d!important;box-shadow:0 3px 0 #142f27!important;color:#eff0cc}
+.shell[data-layout][data-stage] .game .deck .controls #ante-open strong{grid-area:1/1/2/2;font-size:10px;line-height:1.1;white-space:normal}
+.shell[data-layout][data-stage] .game .deck .controls #ante-open b{grid-area:1/2/2/3;font-size:8px;padding:3px;background:#101f1b;border-radius:6px}
+.shell[data-layout][data-stage] .game .deck .controls #ante-open .ante-detail{grid-area:2/1/3/3;font-size:8px;line-height:1.1}
+.shell[data-layout][data-stage] .game .deck .controls #ante-open[data-enabled="true"]{background:#568043!important;border-color:#f7e89a!important;box-shadow:0 0 9px #e2e09655!important}
+.shell[data-layout][data-stage] .game .deck .controls .deck-actions #autoplay{grid-area:1/7/2/8;position:static;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;width:48px;min-height:48px;padding:3px;border:1px solid #c1c8ae99!important;border-radius:50%;background:#1b3530!important;color:#f0e7ca;font-size:8px;line-height:1.1}
+.shell[data-layout][data-stage] .game .deck .controls #autoplay svg{width:21px;height:21px}
+@media(max-width:450px) and (orientation:portrait){
+ .shell[data-layout][data-stage] .game .deck .controls{grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) 44px 68px;grid-template-rows:44px 68px;gap:6px;min-height:118px}
+ .shell[data-layout][data-stage] .game .deck .controls::before{grid-area:1/1/2/6}
+ .shell[data-layout][data-stage] .game .deck .controls .cabinet-display:has(#credits){grid-area:1/1/2/3}
+ .shell[data-layout][data-stage] .game .deck .controls .stake-tools{grid-area:1/3/2/5;width:100px}
+ .shell[data-layout][data-stage] .game .deck .controls .cabinet-display:has(#last-win){grid-area:1/5/2/6}
+ .shell[data-layout][data-stage] .game .deck .controls .deck-actions #utility-open{grid-area:2/1/3/2;width:30px}
+ .shell[data-layout][data-stage] .game .deck .controls .deck-actions #bonus{grid-area:2/2/3/3;width:100%;min-height:52px;font-size:9px;flex-direction:column}
+ .shell[data-layout][data-stage] .game .deck .controls #ante-open{grid-area:2/3/3/4;width:100%;min-height:52px;padding:5px 3px}
+ .shell[data-layout][data-stage] .game .deck .controls #ante-open strong{font-size:9px}
+ .shell[data-layout][data-stage] .game .deck .controls #ante-open .ante-detail{font-size:7px}
+ .shell[data-layout][data-stage] .game .deck .controls .deck-actions #autoplay{grid-area:2/4/3/5;width:44px;min-height:44px;font-size:7px}
+ .shell[data-layout][data-stage] .game .deck .controls #drop{grid-area:2/5/3/6}
+}
+@media(orientation:landscape) and (max-height:550px){
+ .shell[data-layout][data-stage] .game .deck{width:min(calc(100vw - 110px),610px)}
+ .shell[data-layout][data-stage] .game .deck .controls{grid-template-columns:26px 52px 62px minmax(40px,1fr) minmax(75px,1.1fr) minmax(38px,1fr) 42px 60px;gap:5px}
+ .shell[data-layout][data-stage] .game .deck .controls .deck-actions #bonus{width:52px;font-size:8px}
+ .shell[data-layout][data-stage] .game .deck .controls #ante-open{width:62px;min-height:48px;font-size:8px}
+ .shell[data-layout][data-stage] .game .deck .controls #ante-open strong{font-size:9px}
+ .shell[data-layout][data-stage] .game .deck .controls .deck-actions #autoplay{width:42px;min-height:42px;font-size:7px}
+}

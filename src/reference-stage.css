@@ -1,0 +1,88 @@
+/* Reference-led composition: quiet vertical reels, airy outback world, compact deck. */
+.scenery .world,#welcome .welcome-world{background-image:url('/art/outback/fantasy-world.webp')!important}
+.scenery::after{background:linear-gradient(#10283200 65%,#10283222)!important}
+.shell .top .brand{color:#164437;text-shadow:0 1px #fff9}
+.shell[data-layout][data-stage] .layout{width:min(100%,1680px);grid-template-columns:minmax(100px,.22fr) minmax(0,1fr) minmax(135px,.28fr);grid-template-areas:". game intro";gap:clamp(6px,1vw,20px)}
+.shell[data-layout][data-stage] .game{--cabinet-trim:164px;justify-self:center}
+.shell[data-stage] .intro h1{position:fixed;left:max(9px,calc((100vw - 1680px)/2 + 10px));top:17vh;width:clamp(115px,13vw,225px);z-index:2}
+.shell[data-stage] .intro .stage-logo{max-height:none;filter:drop-shadow(0 3px 1px #23473355)}
+.shell[data-layout][data-stage] .intro .mascot{height:min(61cqh,510px);filter:drop-shadow(0 6px 4px #1b463344);order:2}
+.shell[data-stage] .intro .gumleaf-relic{width:115px;height:61px;order:1}
+.shell[data-stage] .intro>p{display:none}
+.shell[data-stage] .game .reel-frame{padding:0;border:10px solid transparent;border-image:url('/art/outback/stage-frame.webp') 140 100 100 100 / 12px 10px 10px 10px;border-radius:0;background:#182126;box-shadow:0 7px 13px #11342866}
+.shell[data-stage] .game .cabinet-round{height:31px;min-height:31px;padding:0 0 3px}
+.shell[data-stage] .game .reel-frame{border-width:9px}
+.shell[data-stage] .spin-win-counter>span{color:#233f34;text-shadow:0 1px #fff8;font-family:Arial,sans-serif}
+.shell[data-stage] #spin-win{font:bold 25px/1 Georgia,serif;color:#fff4cf;text-shadow:0 2px #29523f,0 1px 4px #17382b}
+.shell[data-layout][data-stage] .game .deck{--spin-size:62px;background:#111a1cf5!important;margin-top:6px;border:1px solid #aebf9555;border-radius:5px;padding:5px 8px}
+.shell[data-layout][data-stage] .game .deck .controls{grid-template-rows:34px 29px;gap:1px 6px}
+.shell[data-stage] .game .deck .controls .cabinet-display output{font-size:clamp(13px,2.55cqw,20px)}
+.shell[data-stage] .game .deck .controls .cabinet-display>span{font-size:8px}
+.shell[data-stage] .game .deck .controls #drop .spin-glyph{font-size:37px}
+.shell[data-stage] .game .deck .controls :is(#bonus,#autoplay,#deck-speed,#ante-open){min-height:29px}
+.shell[data-layout][data-stage] .game .deck .status{font-size:9px;min-height:24px;margin-top:0}
+.shell[data-stage] .game .deck .controls .stake-tools button{min-height:34px}
+#shop{background:#17262aeF!important;border-color:#e9e3c1!important}
+#shop #shop-options .bonus-option{background:#f1eddc!important;border-color:#d1bd85!important;color:#173b34;padding-bottom:0!important;gap:8px}
+#shop #shop-options .bonus-option strong{font:bold 22px/1.1 Georgia,serif;color:#183a36}
+#shop #shop-options .bonus-option small{color:#416055;font-size:12px}
+#shop #shop-options .bonus-option span{width:100%;max-width:100%;padding:12px 5px;background:#d6b962;color:#263b2b;font-weight:800;border-radius:0}
+#shop #shop-options .bonus-option img{height:132px;object-fit:cover}
+#shop #shop-options .bonus-option[data-purchase="mystery"] img{background:#e9e1ba}
+#shop #shop-options button.bonus-option{background:#f1eddc!important}
+#shop #shop-options button.bonus-option span{background:#d6b962;color:#263b2b;padding:12px 5px}
+.shell[data-stage="cabinet"] .intro{align-self:end;padding-bottom:8vh}
+.shell[data-stage="cabinet"] .intro .mascot{height:auto!important;aspect-ratio:286/320;width:125%;max-width:340px;flex:none}
+.shell[data-stage="cabinet"] .intro .gumleaf-relic{margin-bottom:15px}
+.shell[data-stage="cabinet"] .intro .mascot canvas{object-position:center bottom}
+#celebration[open],#feature-dialog[open]{background:transparent!important}
+#celebration::backdrop,#feature-dialog::backdrop{background:#07182077;backdrop-filter:none}
+#celebration .win-depth::before,#feature-dialog .feature-depth::before,#feature-dialog[data-stage="summary"] .feature-depth::before{background:#071b2cc7;transform:none;animation:none}
+#celebration .win-depth::after,#feature-dialog .feature-depth::after{background:radial-gradient(ellipse at center,#92cdae12,transparent 65%)}
+#celebration .win-depth::before,#feature-dialog .feature-depth::before,#feature-dialog[data-stage="summary"] .feature-depth::before{background:#071b2c38}
+#celebration .win-body{width:min(96vw,860px);min-height:0;gap:12px;padding:10px 20px}
+#celebration #win-mochi{height:min(28vh,245px);margin-bottom:-18px;z-index:2}
+#celebration #win-title,#feature-dialog #feature-title{font:bold italic clamp(38px,7.5vw,100px)/1 'Trebuchet MS',Arial,sans-serif;letter-spacing:-.045em;color:#fff5d7;text-shadow:0 3px #233c40,0 6px #132a35,0 10px 0 #071c28,0 13px 12px #0006;-webkit-text-stroke:1px #314b4f;paint-order:stroke fill}
+#celebration #win-counter{display:block;width:min(78vw,630px);padding:22px 20px;font:bold clamp(50px,8vw,108px)/1 Georgia,serif;color:#ffe194;text-shadow:0 3px #7d6831,0 5px 5px #0008;background:#162b30;border:12px solid transparent;border-image:url('/art/outback/stage-frame.webp') 140 100 100 100 / 14px}
+#feature-dialog:not([data-stage="summary"]) .cinematic-art{height:54vh;align-self:start}
+#feature-dialog:not([data-stage="summary"]) .cinematic-mochi{height:82%;width:45%;left:12%;bottom:0}
+#feature-dialog:not([data-stage="summary"]) .cinematic-emblem{width:27%;height:55%;right:19%;left:auto;top:30%;object-fit:contain;filter:drop-shadow(0 6px 6px #07182180)}
+#feature-dialog .feature-caption{background:none!important;border:0;gap:14px}
+#feature-dialog:not([data-stage="summary"]) .feature-caption{background:linear-gradient(transparent,#071e2bd9)!important;padding-top:15px}
+body:has(#feature-dialog[open]) .intro .mascot,body:has(#celebration[open]) .intro .mascot{visibility:hidden}
+#feature-dialog:not([data-stage="summary"]) .feature-caption{padding-bottom:18px;align-self:end}
+#feature-dialog[open] .cinematic-art:has(.kart-cinematic:not([hidden])){height:57vh;min-height:170px;align-self:start;position:relative;width:100%}
+#feature-dialog .cinematic-art:has(.kart-cinematic:not([hidden])) .kart-cinematic{inset:0;width:100%;height:100%}
+#feature-dialog #feature-copy{max-width:600px;margin:0 auto;color:#f0efdf;text-shadow:0 1px 3px #000}
+#feature-dialog[data-stage="summary"] .cinematic-art{top:7vh;height:26vh}
+#feature-dialog[data-stage="summary"] .feature-caption{padding-top:31vh;min-height:90vh}
+#feature-dialog[data-stage="summary"] #feature-title{font-size:clamp(30px,6vw,74px)}
+#feature-dialog #bonus-result{display:block;min-width:min(75vw,560px);padding:16px 20px;background:#142a31;border:10px solid transparent;border-image:url('/art/outback/stage-frame.webp') 140 100 100 100 / 13px;font-size:clamp(45px,8vw,99px);line-height:1}
+#feature-dialog .cinematic-rays{display:none}
+#feature-dialog .feature-spin-lock{opacity:.7}
+#feature-dialog .feature-spin-lock{background:#253a37!important;color:#b2bdac;font-size:9px;letter-spacing:.05em}
+@media(max-width:720px){
+ .shell[data-layout][data-stage] .layout{grid-template-columns:1fr;grid-template-rows:88px auto;grid-template-areas:"intro" "game";gap:0}
+ .shell[data-stage] .intro h1{position:static;width:100%;top:auto;left:auto;z-index:auto}
+ .shell[data-layout][data-stage] .intro .mascot{height:88px;width:100%}
+ .shell[data-layout][data-stage] .intro{height:88px;grid-template-rows:88px}
+ .shell[data-stage] .intro .stage-logo{max-height:80px}.shell[data-stage] .intro .gumleaf-relic{width:80px;height:45px}
+ .shell[data-layout][data-stage] .game .deck{--spin-size:60px;padding:6px}
+ .shell[data-layout][data-stage] .game .deck .controls{grid-template-rows:44px 44px}
+ .shell[data-layout][data-stage] .game .deck .controls :is(#bonus,#autoplay,#deck-speed,#ante-open){min-height:44px}
+ .shell[data-layout][data-stage] .game .deck .status{min-height:35px}
+ #shop #shop-options .bonus-option img{height:88px}#shop #shop-options .bonus-option strong{font-size:17px}
+ #feature-dialog:not([data-stage="summary"]) .cinematic-mochi{width:60%;left:0;height:74%}
+ #feature-dialog:not([data-stage="summary"]) .cinematic-emblem{width:38%;right:4%;top:35%}
+ #feature-dialog #feature-title{font-size:clamp(32px,9vw,58px)}
+ #feature-dialog .feature-caption{gap:9px;padding-inline:10px}
+}
+@media(orientation:landscape) and (max-height:550px){
+ .shell[data-layout][data-stage] .layout{grid-template-columns:minmax(58px,.16fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);grid-template-areas:"intro game";gap:8px}
+ .shell[data-stage] .intro h1{position:static;width:100%}
+ .shell[data-layout][data-stage] .intro .mascot{height:40cqh}
+ .shell[data-layout][data-stage] .game .deck{--spin-size:54px;width:188px;margin:0;padding:6px}
+ .shell[data-layout][data-stage] .game .deck .controls{grid-template-rows:40px 38px 39px 39px;gap:3px}
+ .shell[data-stage] .game .deck .controls .cabinet-display output{font-size:13px}
+ #feature-dialog:not([data-stage="summary"]) .cinematic-art{height:48vh}
+}
