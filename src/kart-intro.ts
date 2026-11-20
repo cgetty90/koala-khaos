@@ -1,3 +1,4 @@
+import {optionalArt,warmArt} from './optional-art';
 import {forestBlend,drawForestTrails} from './bonus-polish';
 
 import { conceptArt } from './art';
@@ -17,19 +18,7 @@ export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typ
   const context = canvas.getContext('2d')!;
   const { width, height } = canvas;
   const feature=canvas.closest<HTMLElement>('#feature-dialog')!;
-  const assets = new Map<string, Promise<HTMLImageElement>>();
-  function load(path: string) {
-    const cached = assets.get(path);
-    if (cached) return cached;
-    const bitmap = new Image();
-    bitmap.src = path;
-    const ready = bitmap.decode().then(() => bitmap).catch(error => {
-      assets.delete(path);
-      throw error;
-    });
-    assets.set(path, ready);
-    return ready;
-  }
+  const load=warmArt;
   const sheetPath = import.meta.env.BASE_URL + 'art/outback/kart-atlas.webp';
 
   return async (mode: BonusMode) => {
@@ -39,7 +28,9 @@ export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typ
     if (clock.instant) return false;
     let sheet: HTMLImageElement, world: HTMLImageElement;
     try {
-      [sheet, world] = await Promise.all([load(sheetPath), load(conceptArt(mode))]);
+      const art=await optionalArt(Promise.all([load(sheetPath),load(conceptArt(mode))]),1000);
+      if(!art)return false;
+      [sheet,world]=art;
     } catch {
       return false; // The existing tier title is the fallback when an asset cannot decode.
     }

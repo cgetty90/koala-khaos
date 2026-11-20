@@ -1,3 +1,4 @@
+import {warmBonusArt,warmFeatureArt} from './optional-art';
 import { modeNames } from './theme';
 import { accept, complete, currentBalance, pending, splitReceipt, type PaidMode, type RecordedSpin, type Presentation } from './catalogue-client';
 import './style.css';
@@ -660,7 +661,7 @@ stakeUp.addEventListener('click', () => {
 const shopNames = { regular: 'Bush Bash', super: 'Outback Frenzy', mystery: 'Mystery Bonus' };
 const purchases = Object.keys(prices) as Purchase[];
 const shopOptions = get('shop-options');
-const shopEmblems = { regular:'world-regular',super:'world-super',mystery:'mystery-satchel' } satisfies Record<Purchase,string>;
+const shopEmblems = { regular:'shop-regular',super:'shop-super',mystery:'shop-mystery' } satisfies Record<Purchase,string>;
 const confirmation = get('shop-confirmation');
 const confirmBuy = get<HTMLButtonElement>('confirm-buy');
 const weightSum = mysteryWeights.reduce<number>((a, b) => a + b, 0);
@@ -713,6 +714,7 @@ buy.addEventListener('click', () => {
     }
     option.addEventListener('click', () => {
       if (busy || session || !shop.open || quote || balance < cost) return;
+      warmFeatureArt(purchase);
       quote = { purchase, stake: selectedStake };
       get('confirm-title').textContent = shopNames[purchase];
       get('confirm-price').textContent = fmt(cost) + ' credits';
@@ -1143,6 +1145,8 @@ async function start() {
   status.textContent = 'Choose a stake, then spin.';
   busy = false;
   refreshControls();
+  if('requestIdleCallback' in window)window.requestIdleCallback(()=>warmBonusArt(),{timeout:1800});
+  else setTimeout(warmBonusArt,0);
   settlementRetry.addEventListener('click', resumePendingRound);
   window.addEventListener('online', resumePendingRound);
   resumePendingRound();
@@ -1204,3 +1208,6 @@ const premiumReady=Promise.all([premiumScript('character'),premiumScript('enviro
  const runtime=window as unknown as {premiumCharacterLoads:Promise<unknown>[];premiumEnvironmentReady:Promise<unknown>};
  await Promise.all([...runtime.premiumCharacterLoads,runtime.premiumEnvironmentReady]);
 });
+
+get('bonus').addEventListener('pointerenter',warmBonusArt,{once:true});
+get('bonus').addEventListener('focus',warmBonusArt,{once:true});

@@ -1,3 +1,4 @@
+import {optionalArt} from './optional-art';
 import type { Landing, RevealTiming } from './catalogue-client';
 import './purchase-replay.css';
 
@@ -36,7 +37,11 @@ export async function revealPurchaseScatters(
   }
   ordered.forEach((p,i)=>actor(p.column,p.row,'scatter',i*(timing.dropMs+timing.betweenMs),true,i));
   // Predecode only these small, cached images; never select another outcome or touch the real board.
-  await Promise.all(actors.map(a=>a.image.decode().catch(()=>{})));
+  await optionalArt(Promise.all(actors.map(a=>a.image.decode().catch(()=>{}))),1200);
+  for(const actor of actors)if(!actor.image.complete||!actor.image.naturalWidth){
+    actor.image.alt=actor.scatter?'Bonus scatter':'Symbol';
+    actor.cell.dataset.artPending='true';
+  }
   try{
     await clock.wait(timing.leadMs);
     await clock.tween(span,progress=>{
