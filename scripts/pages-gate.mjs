@@ -13,6 +13,7 @@ assert(!/^(localhost|127\.|0\.|10\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.|\[)/i
   && api.hostname.includes('.') && !api.hostname.endsWith('.local'),
   'Use a public HTTPS API origin. A PC-hosted API requires the PC and tunnel to stay online.');
 if (process.argv[2] === 'preflight') process.exit(0);
+const premiumFiles=JSON.parse(fs.readFileSync('scripts/release-premium.json','utf8'));
 const allowedPublic = /^\/(?:art|audio)\/|^\/index\.html$|^\/assets\//;
 const textTypes = /\.(html|js|css|json|svg)$/i;
 const banned = /BEGIN (?:OPENSSH |RSA |EC )?PRIVATE KEY|github_pat_[a-z0-9_]{30,}|ghp_[a-z0-9]{30,}|AKIA[A-Z0-9]{16}|\.env(?:\.|\/)|v21-preview-ledger|frozen-preview-server|KOALA_KHAOS_v(?:19|20|21|23)|(?:localhost|127\.0\.0\.1):47\d{3}|[A-Za-z]:[\\/]Users[\\/]/i;
@@ -21,7 +22,7 @@ function audit(dir) {
     const name = path.join(dir, file.name);
     if (file.isDirectory()) { audit(name); continue; }
     const relative = '/' + path.relative(root, name).split(path.sep).join('/');
-    assert(!file.isSymbolicLink() && allowedPublic.test(relative) && !/\.(?:map|zip|bin|pem|log|ts|mjs|csv|zst)$/i.test(relative),
+    assert(!file.isSymbolicLink() && (allowedPublic.test(relative)||(relative.startsWith('/premium/')&&Object.hasOwn(premiumFiles,path.basename(relative)))) && !/\.(?:map|zip|bin|pem|log|ts|mjs|csv|zst)$/i.test(relative),
       'Unexpected file in the Pages artifact: ' + relative);
     if (textTypes.test(relative)) assert(!banned.test(fs.readFileSync(name, 'utf8')), 'Review unexpected private marker in ' + relative);
   }
@@ -52,3 +53,6 @@ console.log('Four original soundtrack hashes verified; old recordings and compar
 const publicHtml=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert(!/data-qa|data-fixture-count|scatter-demo|Free practice|music-comparison|local-audio/.test(publicHtml),'Testing controls in public HTML');
 console.log('Public HTML excludes practice, scatter fixtures and music-comparison controls.');
+
+for(const [name,hash] of Object.entries(premiumFiles))assert.equal(createHash('sha256').update(fs.readFileSync(path.join(root,'premium',name))).digest('hex'),hash);
+console.log('Premium allowlist and hashes verified.');

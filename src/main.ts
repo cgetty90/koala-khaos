@@ -206,7 +206,11 @@ const tracks = {
 };
 
 const atlas = import.meta.env.BASE_URL + 'art/outback/mochi-poses.webp';
-const pose = mountMascot(mascot, introClock.tween, atlas);
+const originalPose = mountMascot(mascot, introClock.tween, atlas);
+const pose: typeof originalPose = (...args) => {
+ originalPose(...args);
+ window.dispatchEvent(new CustomEvent('premium-pose',{detail:args[0]}));
+};
 const cinematicPose = mountMascot(cinematicMochi, introClock.tween, atlas);
 const winPose = mountMascot(get<HTMLCanvasElement>('win-mochi'), introClock.tween, atlas);
 const welcome = get<HTMLDialogElement>('welcome');
@@ -1100,6 +1104,8 @@ function resumePendingRound() {
 }
 
 async function start() {
+  await premiumReady;
+  loadingStep('Premium character and environment decoded', 2);
   const fallPace = () => speed.value === '0.65' && !auto?.turbo ? 1.8 : 1;
   const paint = mountBoard(host, motion.tween, true, fallPace, (column,remainingMs) => {
     const rate=Number(speed.value)*(auto?.turbo?2.5:1);
@@ -1118,10 +1124,12 @@ async function start() {
   },()=>Boolean(motion.instant)).then(board => {
     display = board;
     display.draw(makeBoard(fresh()));
+    loadingStep('Reel artwork decoded', 3);
   });
   awaitingReceipt = Boolean(pending());
   const [, restoredBalance] = await Promise.all([paint, awaitingReceipt ? undefined : currentBalance()]);
   if (restoredBalance !== undefined) balance = restoredBalance;
+  loadingStep('Test connection verified', 4);
   const gumleaf = new Image();
   gumleaf.fetchPriority = 'low';
   gumleaf.src = art('gumleaf');
@@ -1156,11 +1164,12 @@ new ResizeObserver(([entry]) => {
   shell.dataset.stage = portrait ? 'stacked' : sidecar ? 'sidecar' : 'cabinet';
 }).observe(shell);
 
-start().catch(error => {
+queueMicrotask(()=>start().catch(error => {
   console.error(error);
   status.dataset.phase = 'error';
   status.textContent = 'The symbol grid could not load. Reload to try again.';
-});
+  loadingText.textContent='Loading failed. Reload to retry.';
+}));
 
 
 
@@ -1170,3 +1179,28 @@ start().catch(error => {
 
 
 void mountLivingWorld().catch(() => { /* The painted world remains available without WebGL. */ });
+
+import './premium-integration.css';
+
+const loading=document.createElement('div');
+loading.className='premium-loading';
+loading.innerHTML='<img src="'+import.meta.env.BASE_URL+'premium/logo-h-fixed-67a95c14.webp" alt="Koala Khaos"><p>B&amp;K Productions</p><progress max="4" value="0" aria-label="Asset loading"></progress><p role="status">Preparing the forest</p>';
+document.body.append(loading);
+const loadingText=loading.querySelector('p[role=status]')!;
+const loadingBar=loading.querySelector('progress')!;
+function loadingStep(label:string,value:number){
+ loadingBar.value=value;loadingText.textContent=label;
+ if(value===4)loading.remove();
+}
+function premiumScript(name:string){
+ return new Promise<void>((resolve,reject)=>{
+  const script=document.createElement('script');script.src=import.meta.env.BASE_URL+'premium/'+name+'.js';
+  script.onload=()=>resolve();script.onerror=()=>reject(Error('Premium asset loader failed'));
+  document.body.append(script);
+ });
+}
+const premiumReady=Promise.all([premiumScript('character'),premiumScript('environment')]).then(async()=>{
+ loadingStep('Premium layers loaded',1);
+ const runtime=window as unknown as {premiumCharacterLoads:Promise<unknown>[];premiumEnvironmentReady:Promise<unknown>};
+ await Promise.all([...runtime.premiumCharacterLoads,runtime.premiumEnvironmentReady]);
+});

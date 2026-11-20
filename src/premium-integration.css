@@ -1,0 +1,20 @@
+
+.premium-environment{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.premium-environment .living-plane,.premium-environment #flow{position:absolute;inset:0;width:100%;height:100%;background-size:cover;background-position:center}
+.living-far{background-image:url('/premium/living-far.webp')}
+.living-mid{background-image:url('/premium/living-mid.webp')}
+.living-edge{background-image:url('/premium/living-edge.webp');z-index:4}
+.premium-environment #flow{z-index:2}
+.mascot{position:relative}
+.mascot canvas[aria-hidden=true]{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.mascot canvas[hidden]{display:none}
+.game{border-color:#c5a65e}
+@media(max-width:900px){.premium-environment .living-plane{background-position:14% center}}
+.scenery>.world{visibility:hidden}
+.premium-environment{z-index:1}
+.scenery>.living-world{z-index:2}
+.premium-environment .living-edge{mask-image:radial-gradient(ellipse 34% 54% at 0% 0%,#000 29%,transparent 100%),radial-gradient(ellipse 24% 47% at 100% 0%,#000 32%,transparent 100%),radial-gradient(ellipse 32% 31% at 0% 100%,#000 38%,transparent 100%),radial-gradient(ellipse 30% 15% at 100% 100%,#000 34%,transparent 100%)}
+
+.premium-loading{position:fixed;inset:0;z-index:2147483647;background:#153c31;display:grid;align-content:center;justify-items:center;gap:12px;color:#fff2c5}
+.premium-loading img{width:min(72vw,390px)}.premium-loading progress{width:min(64vw,320px);accent-color:#e9ce8a}
+#feature-dialog canvas[aria-hidden=true],#celebration canvas[aria-hidden=true],#welcome canvas[aria-hidden=true]{position:absolute;width:100%;height:100%;inset:0;object-fit:contain;pointer-events:none}
