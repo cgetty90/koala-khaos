@@ -111,10 +111,9 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
   function load(track: Scene, context: AudioContext) {
     let buffer = buffers.get(track);
     if (!buffer) {
-      const fallback = () => decodeTrack(import.meta.env.BASE_URL + 'audio/' + track + '.ogg', context);
       const files: Record<Scene, string> = {base:'enchanted-eucalyptus',regular:'bush-bash',super:'outback-frenzy',epic:'koala-mayhem'};
-      buffer = decodeTrack(import.meta.env.BASE_URL + 'audio/' + files[track] + '.ogg', context)
-        .catch(fallback).catch(error => { if(buffers.get(track)===buffer) buffers.delete(track); throw error; });
+      buffer = decodeTrack(import.meta.env.BASE_URL + 'audio/original-v1/' + files[track] + '.ogg', context)
+        .catch(error => { if(buffers.get(track)===buffer) buffers.delete(track); throw error; });
       buffers.set(track, buffer);
     }
     return buffer;

@@ -1,7 +1,7 @@
 import { Assets, Sprite, Spritesheet, type Texture } from 'pixi.js';
 import type { Candy } from './game';
 
-export const conceptArt = (name: string) => import.meta.env.BASE_URL + 'art/outback/' + ({ regular:'world-regular', super:'world-super', epic:'world-epic' }[name] ?? name) + '.webp';
+export const conceptArt = (name: string) => import.meta.env.BASE_URL + 'art/outback/' + ({ scatter:'scatter-amber', regular:'world-regular', super:'world-super', epic:'world-epic' }[name] ?? name) + '.webp';
 export type BoardSymbol = Candy | 'scatter';
 
 export const presentationCandyNames: Record<Candy, string> = {

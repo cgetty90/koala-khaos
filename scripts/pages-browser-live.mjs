@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { access, mkdir, writeFile } from 'node:fs/promises';
+import { access, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { chromium, expect } from '@playwright/test';
@@ -9,13 +9,14 @@ assert.equal(api.protocol,'https:');
 const site = 'https://' + (process.env.GITHUB_REPOSITORY_OWNER || 'cgetty90') + '.github.io';
 const frontend = site + '/koala-khaos/';
 const root = path.resolve(process.env.KHAOS_PAGES_DIST || 'dist');
-const browser = await chromium.launch(process.env.KOALA_BROWSER_CHANNEL ? {channel:process.env.KOALA_BROWSER_CHANNEL} : {});
+const browser = await chromium.launch(process.env.KOALA_BROWSER_EXECUTABLE ? {executablePath:process.env.KOALA_BROWSER_EXECUTABLE,args:['--disable-background-timer-throttling','--disable-renderer-backgrounding','--disable-backgrounding-occluded-windows']} : process.env.KOALA_BROWSER_CHANNEL ? {channel:process.env.KOALA_BROWSER_CHANNEL} : {});
+const release=JSON.parse(await readFile('scripts/release-audio.json','utf8'));
 const costs = { normal:20, ante:60, regular:2000, super:6000, mystery:10000 };
-const modes = Object.keys(costs);
+const modes = Object.keys(costs).filter(mode=>!process.env.KHAOS_VERIFY_MODE||mode===process.env.KHAOS_VERIFY_MODE);
 const credits = new Intl.NumberFormat('en', {minimumFractionDigits:2,maximumFractionDigits:2});
 
 try {
-  for (const viewport of [{width:1280,height:720},{width:390,height:844}]) {
+  for (const viewport of [{width:1280,height:720},{width:390,height:844}].filter(v=>!process.env.KHAOS_VERIFY_MOBILE_ONLY||v.width===390)) {
     const mobile = viewport.width < 450;
     const page = await browser.newPage({viewport,isMobile:mobile,hasTouch:mobile,reducedMotion:'reduce'});
     const errors = [];
@@ -47,7 +48,13 @@ try {
       await route.fulfill({path:file});
     });
     await page.goto(frontend);
-    const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+'audio/enchanted-eucalyptus.ogg');
+    assert.equal(await page.locator('meta[name=koala-release]').getAttribute('content'),release.version);
+    assert.equal(await page.locator('[class*=music-comparison]').count(),0);
+    for(const track of Object.values(release.tracks)) {
+      const bytes=await page.evaluate(async url=>Array.from(new Uint8Array(await(await fetch(url)).arrayBuffer())),frontend+track.path);
+      assert.equal(createHash('sha256').update(Buffer.from(bytes)).digest('hex'),track.sha256);
+    }
+    const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+'audio/original-v1/enchanted-eucalyptus.ogg');
     const welcome = page.getByRole('button', { name:'Enter the Khaos' });
     if (mobile) await welcome.tap();
     else await welcome.click();
@@ -66,17 +73,23 @@ try {
     const spin = page.locator('#drop');
     await expect(spin).toBeEnabled();
     await expect(page.locator('#credits')).toHaveText('500.00');
+    if(process.env.KHAOS_VERIFY_INSTANT==='1') {
+      await page.locator('#utility-open').click();
+      await page.locator('#speed').selectOption('0');
+      await page.getByRole('button',{name:'Close menu'}).click();
+    }
     let initialBalance = 50000;
     for (const [index,mode] of modes.entries()) {
+      console.log(viewport.width+'px: '+mode);
       if (mode === 'ante') {
         await page.locator('#ante-open').click();
         await page.locator('#ante-confirm').click();
-      } else if (index > 1) {
+      } else if (!['normal','ante'].includes(mode)) {
         await page.locator('#bonus').click();
         await page.locator('[data-purchase="'+mode+'"]').click();
       }
       const response = page.waitForResponse(reply => reply.url() === api.origin+'/__khaos/round');
-      if (index > 1) await page.locator('#confirm-buy').click();
+      if (!['normal','ante'].includes(mode)) await page.locator('#confirm-buy').click();
       else await spin.click();
       const reply = await response;
       assert(reply.ok(),mode+' failed over the real API');
@@ -91,7 +104,13 @@ try {
       assert.equal(receipt.record.events.at(-1).credit,receipt.credit);
       if (receipt.record.spec.tier) {
         await page.locator('#feature-continue').click({timeout:30000});
-        await page.locator('#feature-action').click({timeout:30000});
+        await page.locator('#feature-action').waitFor({state:'visible',timeout:30000});
+        await expect(page.locator('#audio-status')).toHaveAttribute('data-scene',receipt.record.spec.tier);
+        await expect(page.locator('#audio-status')).toHaveAttribute('data-state','playing');
+        await page.locator('#feature-action').click({timeout:30000}).catch(async error=>{
+          console.error('Bonus diagnostic',await page.locator('#feature-dialog').innerText(),await page.locator('#status').innerText(),await page.evaluate(()=>({hidden:document.hidden,reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,speed:document.querySelector('#speed').value})));
+          throw error;
+        });
       }
       await expect(spin).toBeEnabled({timeout:30000});
       await expect(page.locator('#credits')).toHaveText(credits.format(receipt.balance / 100));
@@ -185,7 +204,7 @@ try {
     await expect.poll(()=>pendingAssets.size,{timeout:30000}).toBe(0);
     assert.deepEqual(errors,[]);
     await page.close();
-    console.log(viewport.width + 'px Pages build played and recovered five modes over HTTPS.');
+    console.log(viewport.width + 'px Pages build played and recovered '+modes.length+' modes over HTTPS.');
   }
 } finally {
   await browser.close();

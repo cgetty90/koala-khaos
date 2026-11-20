@@ -1,3 +1,4 @@
+import {forestBlend,drawForestTrails} from './bonus-polish';
 
 import { conceptArt } from './art';
 import { kartDetails, kartEvents, kartPose, kartSmoke } from './kart-effects';
@@ -6,15 +7,16 @@ import type { createMotion } from './motion';
 import type { createSound } from './sound';
 
 const routes = {
-  regular: { name: 'Bush Dash', duration: 2480, color: '#ff9cd7', accent: 'kart-candy' },
-  super: { name: 'Red Dust Run', duration: 2720, color: '#bba2ff', accent: 'kart-thunder' },
-  epic: { name: 'Opal Run', duration: 3020, color: '#ffe09b', accent: 'kart-portal' },
+  regular: { name: 'Bush Dash', duration: 2480, color: '#ead29b', accent: 'kart-candy' },
+  super: { name: 'Red Dust Run', duration: 2720, color: '#d9b678', accent: 'kart-thunder' },
+  epic: { name: 'Opal Run', duration: 3020, color: '#8fd5b5', accent: 'kart-portal' },
 } as const;
 
 export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typeof createMotion>,
   audio: ReturnType<typeof createSound>, limited: () => boolean) {
   const context = canvas.getContext('2d')!;
   const { width, height } = canvas;
+  const feature=canvas.closest<HTMLElement>('#feature-dialog')!;
   const assets = new Map<string, Promise<HTMLImageElement>>();
   function load(path: string) {
     const cached = assets.get(path);
@@ -41,6 +43,7 @@ export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typ
     } catch {
       return false; // The existing tier title is the fallback when an asset cannot decode.
     }
+    feature.style.setProperty('--kart-handoff','0');
     canvas.parentElement!.hidden = false;
     canvas.dataset.route = mode;
     const impact = ['kart-mount', 'kart-ignition', 'kart-rev', 'kart-wheelspin',
@@ -52,6 +55,10 @@ export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typ
     try {
       await clock.tween(style.duration, progress => {
         const quiet = limited();
+        const blend=forestBlend(progress);
+        feature.style.setProperty('--kart-arrival',String(blend.arrival));
+        feature.style.setProperty('--kart-handoff',String(blend.handoff));
+        feature.style.setProperty('--kart-opacity',String(blend.arrival*(1-blend.handoff)));
         if (clock.instant) nextCue = cueAt.length;
         while (nextCue < cueAt.length && progress >= cueAt[nextCue]) audio.cue(impact[nextCue++]);
         const pose = kartPose(mode, progress, width, height);
@@ -70,8 +77,9 @@ export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typ
 
         context.clearRect(0, 0, width, height);
         context.drawImage(world, originX, originY, cropWidth, cropHeight, 0, 0, width, height);
+        drawForestTrails(context,progress,width,height,mode,quiet);
         const shade = context.createLinearGradient(0, height * .4, 0, height);
-        shade.addColorStop(0, '#12052700'); shade.addColorStop(1, '#170921aa');
+        shade.addColorStop(0, '#142f2700'); shade.addColorStop(1, '#102b27aa');
         context.fillStyle = shade;
         context.fillRect(0, height * .4, width, height * .6);
         if (!quiet && speed > .08) {
@@ -88,7 +96,7 @@ export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typ
         }
         context.globalAlpha = 1;
         if (!quiet && mode === 'epic' && speed > .59) {
-          const rainbow = ['#ffe0a0b3','#ff9fd08c','#bb9cff9c','#94ffee8c'];
+          const rainbow = ['#f6dfa2b3','#c4d9958c','#81c7ad9c','#daf3cf8c'];
           context.lineWidth = 2;
           for (let i = 0; i < 4; i++) {
             context.strokeStyle = rainbow[i];
@@ -100,7 +108,7 @@ export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typ
         if (!quiet && mode === 'super' && speed > .43 && speed < .79) {
           const strength = Math.sin((speed - .43) / .36 * Math.PI) * .29;
           context.globalAlpha = strength;
-          context.strokeStyle = '#d8c9ff';
+          context.strokeStyle = '#f3dda5';
           context.lineWidth = 2;
           context.beginPath();
           context.moveTo(width * .79, 0);
@@ -133,6 +141,7 @@ export function createKartIntro(canvas: HTMLCanvasElement, clock: ReturnType<typ
       });
     } finally {
       audio.setKartEngine(null);
+      feature.style.setProperty('--kart-handoff','1');
       canvas.parentElement!.hidden = true;
     }
     return true;

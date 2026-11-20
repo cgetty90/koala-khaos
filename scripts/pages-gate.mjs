@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 const root = path.resolve(process.env.KHAOS_PAGES_DIST || 'dist');
@@ -20,7 +21,7 @@ function audit(dir) {
     const name = path.join(dir, file.name);
     if (file.isDirectory()) { audit(name); continue; }
     const relative = '/' + path.relative(root, name).split(path.sep).join('/');
-    assert(!file.isSymbolicLink() && allowedPublic.test(relative) && !/\.(?:map|zip|bin|pem|log|ts|mjs)$/i.test(relative),
+    assert(!file.isSymbolicLink() && allowedPublic.test(relative) && !/\.(?:map|zip|bin|pem|log|ts|mjs|csv|zst)$/i.test(relative),
       'Unexpected file in the Pages artifact: ' + relative);
     if (textTypes.test(relative)) assert(!banned.test(fs.readFileSync(name, 'utf8')), 'Review unexpected private marker in ' + relative);
   }
@@ -31,3 +32,19 @@ audit(root);
 assert(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('/koala-khaos/assets/'));
 console.log('Pages artifact paths and private-marker checks passed.');
 
+
+const release=JSON.parse(fs.readFileSync('scripts/release-audio.json','utf8'));
+const expected=new Set(['audio/forest-effects.ogg','audio/forest-tension.ogg','audio/eucalyptus-reels.ogg']);
+for(const track of Object.values(release.tracks)) {
+ const bytes=fs.readFileSync(path.join(root,track.path));
+ assert.equal(bytes.length,track.bytes);
+ assert.equal(createHash('sha256').update(bytes).digest('hex'),track.sha256);
+ expected.add(track.path);
+}
+function audioAudit(dir){for(const item of fs.readdirSync(dir,{withFileTypes:true})){
+ const file=path.join(dir,item.name);
+ if(item.isDirectory())audioAudit(file);else assert(expected.delete(path.relative(root,file).split(path.sep).join('/')),'Unexpected audio '+file);
+}}
+audioAudit(path.join(root,'audio'));assert.equal(expected.size,0);
+for(const file of fs.readdirSync(path.join(root,'assets')))if(file.endsWith('.js'))assert(!/music-comparison|local-audio|commercial candidate/.test(fs.readFileSync(path.join(root,'assets',file),'utf8')),'Local audio testing control leaked');
+console.log('Four original soundtrack hashes verified; old recordings and comparison control excluded.');

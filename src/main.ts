@@ -30,6 +30,8 @@ import './reference-stage.css';
 import './simple-deck.css';
 import './separate-controls.css';
 import './premium-controls.css';
+import './bonus-polish.css';
+import {mountBonusLeaves,smoothBlend} from './bonus-polish';
 import { mountGraphicsQuality } from './graphics-quality';
 import { mountLivingWorld } from './living-world-v32';
 import { mountAmbientState } from './ambient-state';
@@ -108,6 +110,14 @@ const bonusTotal = get('bonus-total');
 const progression = document.querySelector('.progression')!;
 const shop = get<HTMLDialogElement>('shop');
 const feature = get<HTMLDialogElement>('feature-dialog');
+mountBonusLeaves(feature);
+let featureClosing=false;
+async function closeFeatureSmooth(){
+  if(featureClosing||!feature.open)return;
+  featureClosing=true;featureAction.disabled=true;continueButton.disabled=true;
+  try{await introClock.tween(180,p=>feature.style.setProperty('--departure',String(smoothBlend(p))));feature.close()}
+  finally{feature.style.removeProperty('--departure');featureAction.disabled=false;featureClosing=false}
+}
 const autoButton = get<HTMLButtonElement>('autoplay');
 const autoDialog = get<HTMLDialogElement>('auto-dialog');
 const utility = get<HTMLDialogElement>('utility');
@@ -133,7 +143,7 @@ function renderAuto() {
 function stopAuto() {
   if (!auto) return;
   auto.stopped = true;
-  if (feature.open && feature.dataset.stage === 'summary') feature.close();
+  if (feature.open && feature.dataset.stage === 'summary') void closeFeatureSmooth();
   renderAuto();
 }
 autoStop.addEventListener('click', stopAuto);
@@ -143,7 +153,7 @@ autoButton.addEventListener('click', () => {
   if (!busy && !feature.open && !shop.open) {if(utility.open)utility.close();autoDialog.showModal();}
 });
 for (const button of document.querySelectorAll<HTMLButtonElement>('[data-close]')) {
-  button.addEventListener('click', () => button.closest('dialog')?.close());
+  button.addEventListener('click', () => {const dialog=button.closest('dialog');if(dialog===feature)void closeFeatureSmooth();else dialog?.close()});
 }
 const qa = [...document.querySelectorAll<HTMLButtonElement>('[data-qa]')];
 const formatter = new Intl.NumberFormat('en', { maximumFractionDigits: 2 });
@@ -593,7 +603,7 @@ async function showIntro(active: Session, presentation?: Presentation) {
     resolve();
   }, { once: true }));
   continueButton.hidden = true;
-  feature.close();
+  await closeFeatureSmooth();
   await motion.visible();
 }
 function cinematicAction() {
