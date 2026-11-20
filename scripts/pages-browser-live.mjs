@@ -54,7 +54,7 @@ try {
       const bytes=await page.evaluate(async url=>Array.from(new Uint8Array(await(await fetch(url)).arrayBuffer())),frontend+track.path);
       assert.equal(createHash('sha256').update(Buffer.from(bytes)).digest('hex'),track.sha256);
     }
-    const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+'audio/original-v1/enchanted-eucalyptus.ogg');
+    const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+release.tracks.base.path);
     const welcome = page.getByRole('button', { name:'Enter the Khaos' });
     if (mobile) await welcome.tap();
     else await welcome.click();

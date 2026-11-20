@@ -1,26 +1,38 @@
 {
-  "version": "forest-original-music-20261120",
+  "version": "jungle-acoustic-suite-20261120",
   "tracks": {
     "base": {
-      "path": "audio/original-v1/enchanted-eucalyptus.ogg",
-      "bytes": 1769409,
-      "sha256": "3aa920d07568b87cc74b2a9fa4749d133d12e3b90e07a55f169169dc0ffbfb80"
+      "title": "Jungle Expedition",
+      "path": "audio/jungle-v2/jungle-expedition.ogg",
+      "bytes": 1072864,
+      "sha256": "bdc3e9a42c9b493a6c6f8ec721b4d2709c9761fab2779c13c77ee4dfde161fae",
+      "duration": 55.384625,
+      "bpm": 104
     },
     "regular": {
-      "path": "audio/original-v1/bush-bash.ogg",
-      "bytes": 1273480,
-      "sha256": "9a6f8f0fd89e86065b72ec1d02f1479e3d083b4dc807363348571bd3359704a6"
+      "title": "Jungle Awakening",
+      "path": "audio/jungle-v2/jungle-awakening.ogg",
+      "bytes": 937684,
+      "sha256": "f8217f298be046407504cb33b87cc1915789b9de95fb20fa7da82b2e232369b2",
+      "duration": 48.0,
+      "bpm": 120
     },
     "super": {
-      "path": "audio/original-v1/outback-frenzy.ogg",
-      "bytes": 1427037,
-      "sha256": "b318fe45cf320966977b244faa35db33828294c30c565e7b2e96d88753fc86f1"
+      "title": "Storm Rising",
+      "path": "audio/jungle-v2/storm-rising.ogg",
+      "bytes": 885060,
+      "sha256": "34f905a9753644bc2cb60d79cf19da17ed0a29a979d2ae6eccb49151deee89aa",
+      "duration": 45.0,
+      "bpm": 128
     },
     "epic": {
-      "path": "audio/original-v1/koala-mayhem.ogg",
-      "bytes": 1368489,
-      "sha256": "459a7702438b9a4cb7e444120ad4183fd5233e5dff20d8693891b831a40a3113"
+      "title": "Thunder Khaos",
+      "path": "audio/jungle-v2/thunder-khaos.ogg",
+      "bytes": 1114443,
+      "sha256": "14c7bab4975b2bac53191c15a648de2a36c4763aea2b5a97c96b100c8bac822c",
+      "duration": 56.47058333333333,
+      "bpm": 136
     }
   },
-  "scope": "Original synthesized recordings for fictional-credit, non-monetized public playtest; no Engine commercial clearance or exclusivity claim."
+  "scope": "CC0 acoustic sample-based original compositions for fictional-credit non-monetized hobby playtest; no Engine commercial clearance or exclusivity claim."
 }

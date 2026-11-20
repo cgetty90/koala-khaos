@@ -1,12 +1,16 @@
-# Original soundtrack public-playtest provenance
+# Jungle acoustic soundtrack — public hobby playtest
 
-This release uses four original recordings rendered locally from Codex-assisted scores with oscillators, envelopes, seeded noise and delays. The production source and SHA-256 evidence were reviewed before release. No external audio samples or Suno recordings were used in those recordings. Exact released files are recorded in scripts/release-audio.json.
+New original, Codex-assisted compositions: Jungle Expedition (base), Jungle Awakening (Regular), Storm Rising (Super), Thunder Khaos (Epic). Exact files, sizes, durations and hashes are in `scripts/release-audio.json`.
 
-Scope: public, non-monetized, fictional-credit hobby testing only. No assertion of copyright exclusivity, Engine commercial clearance or real-money-use permission is made. Commercial chain-of-title and Engine grant remain unverified.
+Recorded flute, strings, cello, harp, marimba and percussion use individual CC0 notes/hits from:
 
-The applicable published output-ownership terms support this limited use; they do not guarantee uniqueness or non-infringement:
-- https://openai.com/policies/eu-terms-of-use/
-- https://openai.com/policies/services-agreement/
-- https://openai.com/en-GB/policies/usage-policies/
+- https://github.com/sgossner/VSCO-2-CE/tree/440300901dfe9275fd84e0b7763af1f8443ae62e
+- https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e
 
-The new deployed artifact excludes the previous Suno recordings. This release does not rewrite historical Git commits or previous deployment artifacts. Original local recordings remain preserved outside this release.
+Upstream credits include Versilian Studios/Sam Gossner, Simon Dalzell and sample preparation contributors identified by those repositories. The CC0 licence is retained in `SOUNDTRACK_SAMPLE_LICENSE.txt`. Source files were pinned, Git-blob checked and SHA-256 recorded. Shared samples are not exclusive property. No stock musical loops, Suno recordings or rejected oscillator-preview compositions are imported into these scores.
+
+Air, chirp-like accents, bass, synth layers and thunder-like effects are original signal generation, not authenticated Australian wildlife or storm field recordings. No vocals, paid-generation services or HeyGen credits were used.
+
+Editable source, MIDI, stems, WAV masters and per-sample provenance are preserved in a separate local production archive. They are not runtime dependencies or Pages assets. Only four optimized Ogg tracks are served, lazy-loaded by scene with the existing controls, ducking, looping and crossfades.
+
+Scope: authorized public, non-monetized fictional-credit hobby testing only. Copyright exclusivity, publisher chain of title and Engine commercial clearance remain unverified. No Engine upload or submission is included. Previous audio remains recoverable from the preceding Git commit and a separate local rollback archive; historical commits and artifacts are not rewritten.
