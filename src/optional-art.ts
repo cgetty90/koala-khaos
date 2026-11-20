@@ -24,7 +24,7 @@ export function warmBonusArt(){
 }
 export function warmFeatureArt(mode:string){
  const base=import.meta.env.BASE_URL+'art/outback/';
- const names=['berry','lemon','mint','grape','peach','toffee','scatter-amber','kart-atlas',
+ const names=['berry','lemon','mint','grape','peach','toffee','scatter-amber',
   ...(mode==='mystery'?['world-regular','world-super','world-epic']:['world-'+mode])];
  for(const name of names)void warmArt(base+name+'.webp').catch(()=>{});
 }

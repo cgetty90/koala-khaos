@@ -41,6 +41,11 @@ try {
       return route.fulfill({json:{balance:50000}});
     });
     await page.goto(base+'/koala-khaos/');
+    await page.locator('#startup-continue:enabled').waitFor();
+    assert(await page.locator('.shell').evaluate(element=>element.inert));
+    assert(await page.locator('#drop').isDisabled());
+    assert(await page.locator('#sound').isChecked());
+    await page.locator('#startup-continue').click();
     await page.locator('#drop:not([disabled])').waitFor();
     assert.equal(await page.locator('#credits').innerText(),'500.00');
     assert.equal(await page.locator('#board canvas').count(),1);
@@ -53,6 +58,8 @@ try {
   await page.route(origin+'/__khaos/state',route=>route.fulfill({status:503,json:{error:'Backend unavailable'}}));
   await page.goto(base+'/koala-khaos/');
   await page.getByText('The symbol grid could not load. Reload to try again.').waitFor();
+  assert(await page.locator('#startup-continue').isDisabled());
+  assert(await page.locator('#startup-retry').isVisible());
   assert(await page.locator('#drop').isDisabled());
   console.log('Desktop and mobile Pages asset paths passed with stubbed state. Backend failure correctly disables paid play.');
 } finally {

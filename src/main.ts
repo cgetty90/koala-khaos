@@ -13,7 +13,7 @@ import { loadPreferences, storePreferences } from './preferences';
 import { planGumleafSpotlight } from './gumleaf-spotlight';
 import './jungle-v12.css';
 import { mountWaterfall } from './waterfall';
-import { createKartIntro } from './kart-intro';
+import { mountCinematicScenes } from './cinematic-scenes';
 import './cinematic-v23.css';
 import './interface-polish.css';
 import './fullscreen-cinema.css';
@@ -223,7 +223,7 @@ const effects = get<HTMLInputElement>('reduced-effects');
 mountGraphicsQuality(get<HTMLSelectElement>('graphics-quality'), effects,
   get<HTMLInputElement>('adaptive-quality'), get('graphics-status'));
 const reducedEffects = () => document.documentElement.dataset.effects === 'reduced' || reducedMotion.matches;
-const kartIntro = createKartIntro(get<HTMLCanvasElement>('kart-canvas'), introClock, audio, reducedEffects);
+const cinematicScenes = mountCinematicScenes();
 const brightenFalls = mountWaterfall(get('waterfall-field'));
 const stageSignal = mountPresentation(get('scenery-light'), get('gumleaf-relic'),
   () => motion.instant || reducedEffects());
@@ -273,12 +273,12 @@ function activateSound() {
   audio.setEnabled(sound.checked);
 }
 document.addEventListener('click', event => {
-  if (!event.isTrusted || audioUnlocked || !sound.checked ||
+  if (!event.isTrusted || (event.target instanceof Element && event.target.closest('#cinematic-startup')) || audioUnlocked || !sound.checked ||
       (event.target instanceof Element && event.target.closest('#deck-sound,#sound,label[for="sound"]'))) return;
   activateSound();
 }, true);
 document.addEventListener('click', event => {
-  if (!event.isTrusted || !(event.target instanceof Element)) return;
+  if (!event.isTrusted || !(event.target instanceof Element) || event.target.closest('#cinematic-startup')) return;
   const button = event.target.closest('button');
   if (!button || button.disabled || button.matches('#deck-sound,#drop,#confirm-buy')) return;
   audio.cue(button.matches('#ante-open')?'ui-ante':button.matches('#bonus')?'ui-bonus':button.matches('#utility-open')?'ui-menu':button.matches('#deck-speed,#deck-sound')?'ui-setting':'ui');
@@ -374,10 +374,7 @@ enter.addEventListener('click', async () => {
   else if (!spin.disabled) spin.focus();
   returningFromMenu = false;
 });
-if (!welcomeSeen()) {
-  if (pending()) markWelcomeSeen();
-  else welcome.showModal();
-}
+// The new startup owns first entry. The old welcome remains available from the menu.
 
 const rays = spotlight.querySelector('i')!;
 for (let index = 0; index < 12; index++) {
@@ -553,6 +550,7 @@ function updateBonus(state: Session) {
   });
 }
 async function showIntro(active: Session, presentation?: Presentation) {
+  warmFeatureArt(active.board.mode);
   audio.prepareCinematics();
   const { mode } = active.board;
   const mystery = active.source === 'mystery';
@@ -585,14 +583,9 @@ async function showIntro(active: Session, presentation?: Presentation) {
   cinematicPose('bonus');
   signal(mode);
   audio.setScene(mode);
-  const playedKart = await kartIntro(mode);
   audio.cue(mode);
-  await introClock.tween(playedKart ? 430 : mode === 'epic' ? 1580 : 1230, progress => {
-    const wave = Math.sin(progress * Math.PI);
-    feature.style.setProperty('--charge', String((mode === 'epic' ? .76 : .48) * wave + .22));
-    feature.style.setProperty('--zoom', String(1.06 + progress * .07));
-    feature.style.setProperty('--ray-angle', String(progress * (mode === 'epic' ? 87 : 46)) + 'deg');
-  });
+  await cinematicScenes.transition(mode,mystery,introClock);
+
 
   feature.dataset.stage = 'continue';
   continueButton.disabled = false;
@@ -714,7 +707,6 @@ buy.addEventListener('click', () => {
     }
     option.addEventListener('click', () => {
       if (busy || session || !shop.open || quote || balance < cost) return;
-      warmFeatureArt(purchase);
       quote = { purchase, stake: selectedStake };
       get('confirm-title').textContent = shopNames[purchase];
       get('confirm-price').textContent = fmt(cost) + ' credits';
@@ -1106,8 +1098,7 @@ function resumePendingRound() {
 }
 
 async function start() {
-  await premiumReady;
-  loadingStep('Premium character and environment decoded', 2);
+  startup.task('interface','Game interface initialized');
   const fallPace = () => speed.value === '0.65' && !auto?.turbo ? 1.8 : 1;
   const paint = mountBoard(host, motion.tween, true, fallPace, (column,remainingMs) => {
     const rate=Number(speed.value)*(auto?.turbo?2.5:1);
@@ -1126,12 +1117,14 @@ async function start() {
   },()=>Boolean(motion.instant)).then(board => {
     display = board;
     display.draw(makeBoard(fresh()));
-    loadingStep('Reel artwork decoded', 3);
+    startup.task('reels','Reel artwork decoded');
   });
   awaitingReceipt = Boolean(pending());
-  const [, restoredBalance] = await Promise.all([paint, awaitingReceipt ? undefined : currentBalance()]);
+  const connection=currentBalance().then(value=>{startup.task('connection',awaitingReceipt?'Pending round preserved for entry':'Connection verified');return value;});
+  const [, restoredBalance] = await Promise.all([paint, connection]);
   if (restoredBalance !== undefined) balance = restoredBalance;
-  loadingStep('Test connection verified', 4);
+  startup.task('connection',awaitingReceipt?'Pending round preserved for entry':'Connection verified');
+  await startup.entered();
   const gumleaf = new Image();
   gumleaf.fetchPriority = 'low';
   gumleaf.src = art('gumleaf');
@@ -1145,8 +1138,7 @@ async function start() {
   status.textContent = 'Choose a stake, then spin.';
   busy = false;
   refreshControls();
-  if('requestIdleCallback' in window)window.requestIdleCallback(()=>warmBonusArt(),{timeout:1800});
-  else setTimeout(warmBonusArt,0);
+  startup.markInteractive();
   settlementRetry.addEventListener('click', resumePendingRound);
   window.addEventListener('online', resumePendingRound);
   resumePendingRound();
@@ -1172,7 +1164,7 @@ queueMicrotask(()=>start().catch(error => {
   console.error(error);
   status.dataset.phase = 'error';
   status.textContent = 'The symbol grid could not load. Reload to try again.';
-  loadingText.textContent='Loading failed. Reload to retry.';
+  startup.fail(error);
 }));
 
 
@@ -1186,28 +1178,21 @@ void mountLivingWorld().catch(() => { /* The painted world remains available wit
 
 import './premium-integration.css';
 
-const loading=document.createElement('div');
-loading.className='premium-loading';
-loading.innerHTML='<img src="'+import.meta.env.BASE_URL+'premium/logo-h-fixed-67a95c14.webp" alt="Koala Khaos"><p>B&amp;K Productions</p><progress max="4" value="0" aria-label="Asset loading"></progress><p role="status">Preparing the forest</p>';
-document.body.append(loading);
-const loadingText=loading.querySelector('p[role=status]')!;
-const loadingBar=loading.querySelector('progress')!;
-function loadingStep(label:string,value:number){
- loadingBar.value=value;loadingText.textContent=label;
- if(value===4)loading.remove();
-}
+const startup=(window as unknown as {koalaCinematic:{task:(name:string,label:string)=>void;entered:()=>Promise<void>;fail:(error:unknown)=>void;markInteractive:()=>void}}).koalaCinematic;
+window.addEventListener('cinematic-enter',()=>{markWelcomeSeen();if(!audioUnlocked)activateSound();},{once:true});
 function premiumScript(name:string){
  return new Promise<void>((resolve,reject)=>{
-  const script=document.createElement('script');script.src=import.meta.env.BASE_URL+'premium/'+name+'.js';
+  const script=document.createElement('script');script.fetchPriority='low';script.src=import.meta.env.BASE_URL+'premium/'+name+'.js';
   script.onload=()=>resolve();script.onerror=()=>reject(Error('Premium asset loader failed'));
   document.body.append(script);
  });
 }
-const premiumReady=Promise.all([premiumScript('character'),premiumScript('environment')]).then(async()=>{
- loadingStep('Premium layers loaded',1);
+void Promise.all([premiumScript('character'),premiumScript('environment')]).then(async()=>{
+
  const runtime=window as unknown as {premiumCharacterLoads:Promise<unknown>[];premiumEnvironmentReady:Promise<unknown>};
  await Promise.all([...runtime.premiumCharacterLoads,runtime.premiumEnvironmentReady]);
-});
+ window.dispatchEvent(new Event('cinematic-environment-ready'));
+}).catch(error=>{document.body.dataset.decorativeError=String(error);});
 
 get('bonus').addEventListener('pointerenter',warmBonusArt,{once:true});
 get('bonus').addEventListener('focus',warmBonusArt,{once:true});

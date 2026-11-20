@@ -55,7 +55,9 @@ try {
       assert.equal(createHash('sha256').update(Buffer.from(bytes)).digest('hex'),track.sha256);
     }
     const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+release.tracks.base.path);
-    const welcome = page.getByRole('button', { name:'Enter the Khaos' });
+    const welcome = page.locator('#startup-continue');
+    await expect(welcome).toBeEnabled();
+    assert(await page.locator('.shell').evaluate(element=>element.inert));
     if (mobile) await welcome.tap();
     else await welcome.click();
     await song;
@@ -117,6 +119,9 @@ try {
       await page.waitForLoadState('networkidle');
       await expect.poll(()=>pendingAssets.size,{timeout:30000}).toBe(0);
       await page.reload({waitUntil:'networkidle'});
+      await page.locator('#startup-continue:enabled').waitFor();
+      if(mobile)await page.locator('#startup-continue').tap();
+      else await page.locator('#startup-continue').click();
       await expect(spin).toBeEnabled();
       await expect(page.locator('#credits')).toHaveText(credits.format(receipt.balance / 100));
     }

@@ -3,12 +3,15 @@
 <head>
   <meta name="koala-release" content="jungle-acoustic-suite-20261120">
   <meta charset="UTF-8">
+  <meta name="koala-cinematic" content="cinematic-20261120">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="A cheeky outback tumble adventure with fictional credits.">
   <title>KOALA KHAOS</title>
   <link rel="icon" href="/art/outback/eucalyptus.webp" type="image/webp">
+<link rel="preload" as="image" href="/cinematic/forest-poster.webp" fetchpriority="high"><link rel="stylesheet" href="/cinematic/startup.css"><script defer src="/cinematic/startup.js"></script>
 </head>
-<body>
+<body data-cinematic="loading">
+<section id="cinematic-startup" role="dialog" aria-modal="true" aria-label="Welcome to Koala Khaos" data-film="waiting"><img id="startup-poster" src="/cinematic/forest-poster.webp" alt="" fetchpriority="high"><div class="startup-waterlight"></div><video id="startup-film" playsinline muted preload="none" aria-label="Mochi's Jungle Mischief cinematic"></video><div class="startup-brand">B&amp;K PRODUCTIONS</div><div class="startup-mochi" aria-hidden="true"><img id="waiting-mochi-still" src="/cinematic/mochi-fallback.webp" alt=""><canvas id="waiting-mochi" width="320" height="374"></canvas></div><div class="startup-copy"><img class="startup-logo" src="/art/outback/logo-h-fixed-67a95c14.webp" alt="Koala Khaos"><h1>A little jungle mischief awaits.</h1><div class="startup-card"><progress id="startup-progress" max="3" value="0" aria-label="Required readiness stages"></progress><p id="startup-status" role="status" aria-live="polite">Preparing the reels and connection…</p><button id="startup-continue" type="button" disabled>PREPARING</button><div class="startup-actions"><button id="startup-skip" type="button">Skip intro</button><button id="startup-sound" type="button" aria-pressed="false">Enable intro sound</button><button id="startup-retry" type="button" hidden>Reload safely</button></div></div></div></section>
   <div class="scenery" aria-hidden="true"><div class="world"><div id="waterfall-field"></div></div><div class="foreground"></div><div class="jungle-canopy"></div><div class="jungle-embers"></div><div class="jungle-glints"></div><div id="scenery-light" class="scenery-light"></div></div>
   <main class="shell">
     <header class="top">

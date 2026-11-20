@@ -1,2 +1,6 @@
 public/premium/environment.js text eol=lf
 public/premium/character.js text eol=lf
+
+public/cinematic/*.js text eol=lf
+public/cinematic/*.css text eol=lf
+scripts/release-cinematic.json text eol=lf
