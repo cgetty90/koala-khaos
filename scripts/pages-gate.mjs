@@ -48,3 +48,7 @@ function audioAudit(dir){for(const item of fs.readdirSync(dir,{withFileTypes:tru
 audioAudit(path.join(root,'audio'));assert.equal(expected.size,0);
 for(const file of fs.readdirSync(path.join(root,'assets')))if(file.endsWith('.js'))assert(!/music-comparison|local-audio|commercial candidate/.test(fs.readFileSync(path.join(root,'assets',file),'utf8')),'Local audio testing control leaked');
 console.log('Four original soundtrack hashes verified; old recordings and comparison control excluded.');
+
+const publicHtml=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert(!/data-qa|data-fixture-count|scatter-demo|Free practice|music-comparison|local-audio/.test(publicHtml),'Testing controls in public HTML');
+console.log('Public HTML excludes practice, scatter fixtures and music-comparison controls.');

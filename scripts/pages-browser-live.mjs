@@ -49,7 +49,7 @@ try {
     });
     await page.goto(frontend);
     assert.equal(await page.locator('meta[name=koala-release]').getAttribute('content'),release.version);
-    assert.equal(await page.locator('[class*=music-comparison]').count(),0);
+    assert.equal(await page.locator('[class*=music-comparison],[data-qa],[data-fixture-count],#scatter-demo').count(),0);
     for(const track of Object.values(release.tracks)) {
       const bytes=await page.evaluate(async url=>Array.from(new Uint8Array(await(await fetch(url)).arrayBuffer())),frontend+track.path);
       assert.equal(createHash('sha256').update(Buffer.from(bytes)).digest('hex'),track.sha256);

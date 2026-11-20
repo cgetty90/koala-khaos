@@ -13,7 +13,6 @@ import { planGumleafSpotlight } from './gumleaf-spotlight';
 import './jungle-v12.css';
 import { mountWaterfall } from './waterfall';
 import { createKartIntro } from './kart-intro';
-import './scatter-demo.css';
 import './cinematic-v23.css';
 import './interface-polish.css';
 import './fullscreen-cinema.css';
@@ -35,7 +34,6 @@ import {mountBonusLeaves,smoothBlend} from './bonus-polish';
 import { mountGraphicsQuality } from './graphics-quality';
 import { mountLivingWorld } from './living-world-v32';
 import { mountAmbientState } from './ambient-state';
-import { mountScatterDemo } from './scatter-demo';
 import { conceptArt as art, presentationCandyNames as candyNames } from './art';
 import { mountMascot } from './mascot';
 import { mountPresentation } from './presentation';
@@ -155,7 +153,6 @@ autoButton.addEventListener('click', () => {
 for (const button of document.querySelectorAll<HTMLButtonElement>('[data-close]')) {
   button.addEventListener('click', () => {const dialog=button.closest('dialog');if(dialog===feature)void closeFeatureSmooth();else dialog?.close()});
 }
-const qa = [...document.querySelectorAll<HTMLButtonElement>('[data-qa]')];
 const formatter = new Intl.NumberFormat('en', { maximumFractionDigits: 2 });
 const creditFormat = new Intl.NumberFormat('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmt = (cents: number) => creditFormat.format(cents / 100);
@@ -278,7 +275,7 @@ document.addEventListener('click', event => {
 document.addEventListener('click', event => {
   if (!event.isTrusted || !(event.target instanceof Element)) return;
   const button = event.target.closest('button');
-  if (!button || button.disabled || button.matches('#deck-sound,#drop,#confirm-buy,[data-qa]')) return;
+  if (!button || button.disabled || button.matches('#deck-sound,#drop,#confirm-buy')) return;
   audio.cue(button.matches('#ante-open')?'ui-ante':button.matches('#bonus')?'ui-bonus':button.matches('#utility-open')?'ui-menu':button.matches('#deck-speed,#deck-sound')?'ui-setting':'ui');
 }, true);
 function changeSound() {
@@ -411,7 +408,6 @@ async function showLeafSpotlight(values: readonly number[]) {
   }
 }
 
-mountScatterDemo(audio, utility, atlas, () => reducedMotion.matches ? 0 : Number(speed.value), () => signal('scatter'));
 
 function skip() {
   if (!busy || purchaseReveal || feature.open || shop.open || autoDialog.open || anteDialog.open || utility.open) return;
@@ -486,7 +482,6 @@ function refreshControls() {
   stakeSelect.disabled = buy.disabled;
   stakeDown.disabled = stakeSelect.disabled || stake() <= stakeStep;
   stakeUp.disabled = stakeSelect.disabled || stake() >= maximumStake;
-  qa.forEach(button => { button.disabled = buy.disabled; });
 }
 function refreshSpinButton() {
   const blocked = purchaseReveal || feature.open || shop.open || utility.open || anteDialog.open || autoDialog.open;
@@ -743,11 +738,6 @@ confirmBuy.addEventListener('click', () => {
   audio.cue('confirm');
   void runSequence(async () => { await playPaid(purchase, locked); });
 });
-qa.forEach(button => button.addEventListener('click', () => {
-  if (busy || session || feature.open || shop.open) return;
-  if (utility.open) utility.close();
-  void runSequence(() => playBonus(button.dataset.qa as BonusMode, 'practice', stake()));
-}));
 
 let display: Awaited<ReturnType<typeof mountBoard>>;
 
