@@ -41,6 +41,7 @@ try {
       return route.fulfill({json:{balance:50000}});
     });
     await page.goto(base+'/koala-khaos/');
+    await page.locator('#entry-sound').click();
     await page.locator('#startup-continue:enabled').waitFor();
     assert(await page.locator('.shell').evaluate(element=>element.inert));
     assert(await page.locator('#drop').isDisabled());

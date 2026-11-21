@@ -6,7 +6,7 @@ import { bands, basis, bonusModes, freeSpins, math, mysteryWeights, naturalOdds,
 const fmt = new Intl.NumberFormat('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const sprite = (candy: Candy) => '<img src="' + import.meta.env.BASE_URL + 'art/outback/' + candy + '.webp" alt="" width="36" height="36">';
 const illustration = (name: string, className = '') =>
-  '<img class="' + className + '" src="' + conceptArt(name) + '" alt="">';
+  '<img class="' + className + '" src="' + (['regular','super','epic'].includes(name)?import.meta.env.BASE_URL+'cinematic/'+name+'-loop.webp':conceptArt(name)) + '" alt="">';
 
 function paytable(mode: Mode) {
   return '<table><caption>' + modeNames[mode] + ' payouts in multiples of the base bet</caption><thead><tr><th scope="col">Symbol</th>' +

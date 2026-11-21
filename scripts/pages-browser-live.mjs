@@ -55,6 +55,7 @@ try {
       assert.equal(createHash('sha256').update(Buffer.from(bytes)).digest('hex'),track.sha256);
     }
     const song = page.waitForResponse(reply => reply.ok() && reply.url() === frontend+release.tracks.base.path);
+    await page.locator('#entry-sound').click();
     const welcome = page.locator('#startup-continue');
     await expect(welcome).toBeEnabled();
     assert(await page.locator('.shell').evaluate(element=>element.inert));
@@ -119,6 +120,7 @@ try {
       await page.waitForLoadState('networkidle');
       await expect.poll(()=>pendingAssets.size,{timeout:30000}).toBe(0);
       await page.reload({waitUntil:'networkidle'});
+      await page.locator('#entry-sound').click();
       await page.locator('#startup-continue:enabled').waitFor();
       if(mobile)await page.locator('#startup-continue').tap();
       else await page.locator('#startup-continue').click();

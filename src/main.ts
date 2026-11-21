@@ -687,7 +687,7 @@ buy.addEventListener('click', () => {
     option.className = 'secondary bonus-option';
     option.setAttribute('aria-label', shopNames[purchase] + ' · ' + fmt(cost) + ' credits');
     const image = document.createElement('img');
-    image.src = import.meta.env.BASE_URL + 'art/outback/' + shopEmblems[purchase] + '.webp';
+    image.src = import.meta.env.BASE_URL + (purchase==='regular'?'cinematic/regular-loop.webp':purchase==='super'?'cinematic/super-loop.webp':'art/outback/'+shopEmblems[purchase]+'.webp');
     image.alt = '';
     const label = document.createElement('strong');
     label.textContent = shopNames[purchase];
@@ -1181,6 +1181,9 @@ void mountLivingWorld().catch(() => { /* The painted world remains available wit
 import './premium-integration.css';
 
 const startup=(window as unknown as {koalaCinematic:{task:(name:string,label:string)=>void;entered:()=>Promise<void>;fail:(error:unknown)=>void;markInteractive:()=>void}}).koalaCinematic;
+function entryAudioChoice(on:boolean){sound.checked=on;preferences.sound=on;storePreferences(preferences);syncSound();}
+window.addEventListener('cinematic-intro-choice',event=>entryAudioChoice((event as CustomEvent<{sound:boolean}>).detail.sound));
+const chosen=(window as Window & {koalaEntrySound?:boolean}).koalaEntrySound;if(chosen!==undefined)entryAudioChoice(chosen);
 window.addEventListener('cinematic-enter',()=>{markWelcomeSeen();if(!audioUnlocked)activateSound();},{once:true});
 function premiumScript(name:string){
  return new Promise<void>((resolve,reject)=>{
@@ -1198,3 +1201,8 @@ void Promise.all([premiumScript('character'),premiumScript('environment')]).then
 
 get('bonus').addEventListener('pointerenter',warmBonusArt,{once:true});
 get('bonus').addEventListener('focus',warmBonusArt,{once:true});
+
+import './polish-v2.css';
+
+import './polish-v2';
+window.addEventListener('polish-transition-cue',event=>cue((event as CustomEvent<'storm-charge'|'storm'|'scatter-impact'|'mystery'>).detail));

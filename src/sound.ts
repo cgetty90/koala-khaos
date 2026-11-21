@@ -300,7 +300,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
   function setup() {
     // Avoid decoding the full soundtrack at a 96 kHz output-device rate.
     let context: AudioContext;
-    try { context = new AudioContext({ sampleRate:48000 }); }
+    try { const entry=(window as Window & {koalaEntryAudioContext?:AudioContext}).koalaEntryAudioContext;context=entry&&entry.state!=='closed'?entry:new AudioContext({ sampleRate:48000 }); }
     catch { context = new AudioContext(); }
     const limiter = context.createDynamicsCompressor();
     limiter.threshold.value = -12;
