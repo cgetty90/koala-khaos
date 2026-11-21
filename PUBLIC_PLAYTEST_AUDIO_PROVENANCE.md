@@ -1,16 +1,17 @@
-# Jungle acoustic soundtrack — public hobby playtest
+# Nocturne cinematic soundtrack — public hobby playtest
 
-New original, Codex-assisted compositions: Jungle Expedition (base), Jungle Awakening (Regular), Storm Rising (Super), Thunder Khaos (Epic). Exact files, sizes, durations and hashes are in `scripts/release-audio.json`.
+Recordings: Eucalyptus Nocturne (base), Jungle Awakening (Regular), Storm Rising (Super), Thunder Khaos (Epic). Exact files, loop durations and hashes are in `scripts/release-audio.json`.
 
-Recorded flute, strings, cello, harp, marimba and percussion use individual CC0 notes/hits from:
+These are Stable Audio 3 model-generated stereo recordings from the user's Free workspace. The user approved the base audition; the three bonus recordings were directed as restyles of that same approved base reference, with new written prompts and progressively stronger energy. No Suno material or third-party copyrighted reference audio was uploaded. No purchase, upgrade, paid credits or HeyGen credits were used.
 
-- https://github.com/sgossner/VSCO-2-CE/tree/440300901dfe9275fd84e0b7763af1f8443ae62e
-- https://github.com/sgossner/VCSL/tree/c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e
+- https://kb.stability.ai/knowledge-base/stable-audio-commerical-and-usage-licensing
+- https://stability.ai/terms-of-service
+- https://stability.ai/use-policy
 
-Upstream credits include Versilian Studios/Sam Gossner, Simon Dalzell and sample preparation contributors identified by those repositories. The CC0 licence is retained in `SOUNDTRACK_SAMPLE_LICENSE.txt`. Source files were pinned, Git-blob checked and SHA-256 recorded. Shared samples are not exclusive property. No stock musical loops, Suno recordings or rejected oscillator-preview compositions are imported into these scores.
+The provider's hosted guidance permits embedded game use, including Free output, subject to its Terms and AUP. The approved base take displayed Free-plan Commercial use rights. This is a new provenance chain, not the former CC0 sample-rendered music. No claim of unique composition, exclusive copyright, complete publisher chain of title or Engine commercial clearance is made.
 
-Air, chirp-like accents, bass, synth layers and thunder-like effects are original signal generation, not authenticated Australian wildlife or storm field recordings. No vocals, paid-generation services or HeyGen credits were used.
+Original service WAVs, prompts, reference hashes and generation settings are preserved privately. The 44.1 kHz/16-bit source recordings were level-matched and edited into short-crossfade browser loops; derived 48 kHz/24-bit WAVs are editing masters, not claims of higher-resolution source recordings. No authentic MIDI performances or original multitrack stems are claimed for model stereo output.
 
-Editable source, MIDI, stems, WAV masters and per-sample provenance are preserved in a separate local production archive. They are not runtime dependencies or Pages assets. Only four optimized Ogg tracks are served, lazy-loaded by scene with the existing controls, ducking, looping and crossfades.
+Four optimized full-track Oggs and one 235 KB entrance pack are served. The small pack contains the first four seconds of each bonus to bridge a cold full-track load, followed by a phase-matched handoff. No full music tracks are requested before browser audio activation. After the base starts, compressed bonus files may warm in the background; only base plus the selected bonus stay decoded. The confirmed receipt prepares the actual tier without delaying settlement or presentation. Existing volume, mute and ducking are preserved; prepared scene changes start immediately with a short crossfade. Cold/offline audio cannot be promised zero latency and never blocks gameplay.
 
 Scope: authorized public, non-monetized fictional-credit hobby testing only. Copyright exclusivity, publisher chain of title and Engine commercial clearance remain unverified. No Engine upload or submission is included. Previous audio remains recoverable from the preceding Git commit and a separate local rollback archive; historical commits and artifacts are not rewritten.

@@ -980,6 +980,8 @@ async function playPaid(mode: PaidMode, stakeMinor: number) {
   status.textContent = 'Settlement pending · confirming this round…';
   const ready = accept(mode, stakeMinor).then(accepted => {
     const spins = splitReceipt(accepted);
+    // Preparation is presentation-only and never awaited by settlement/playback.
+    if(accepted.receipt.record.spec.tier)audio.prepareScene(accepted.receipt.record.spec.tier);
     awaitingReceipt = false;
     delete status.dataset.phase;
     balance = accepted.receipt.balance - accepted.receipt.credit;

@@ -37,7 +37,7 @@ console.log('Pages artifact paths and private-marker checks passed.');
 
 const release=JSON.parse(fs.readFileSync('scripts/release-audio.json','utf8'));
 const expected=new Set(['audio/forest-effects.ogg','audio/forest-tension.ogg','audio/eucalyptus-reels.ogg']);
-for(const track of Object.values(release.tracks)) {
+for(const track of [...Object.values(release.tracks),...(release.entrances?[release.entrances]:[])]) {
  const bytes=fs.readFileSync(path.join(root,track.path));
  assert.equal(bytes.length,track.bytes);
  assert.equal(createHash('sha256').update(bytes).digest('hex'),track.sha256);

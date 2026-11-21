@@ -1,38 +1,49 @@
 {
-  "version": "jungle-acoustic-suite-20261120",
+  "version": "nocturne-cinematic-suite-20261121",
   "tracks": {
     "base": {
-      "title": "Jungle Expedition",
-      "path": "audio/jungle-v2/jungle-expedition.ogg",
-      "bytes": 1072864,
-      "sha256": "bdc3e9a42c9b493a6c6f8ec721b4d2709c9761fab2779c13c77ee4dfde161fae",
-      "duration": 55.384625,
-      "bpm": 104
+      "title": "Eucalyptus Nocturne",
+      "path": "audio/nocturne-v3/eucalyptus-nocturne.ogg",
+      "bytes": 772816,
+      "sha256": "4fb32a46c7d394c39a156892900e4b23c7cb47b4f4d7c18f422867bbb0c658e3",
+      "duration": 39.63333333333333,
+      "requestedBpm": 90
     },
     "regular": {
       "title": "Jungle Awakening",
-      "path": "audio/jungle-v2/jungle-awakening.ogg",
-      "bytes": 937684,
-      "sha256": "f8217f298be046407504cb33b87cc1915789b9de95fb20fa7da82b2e232369b2",
-      "duration": 48.0,
-      "bpm": 120
+      "path": "audio/nocturne-v3/jungle-awakening.ogg",
+      "bytes": 792650,
+      "sha256": "c2351a60cc3ed3be004b6f08a9eef2d53c10dd55c148e7fb065bd373968a74f5",
+      "duration": 39.804541666666665,
+      "requestedBpm": 110
     },
     "super": {
       "title": "Storm Rising",
-      "path": "audio/jungle-v2/storm-rising.ogg",
-      "bytes": 885060,
-      "sha256": "34f905a9753644bc2cb60d79cf19da17ed0a29a979d2ae6eccb49151deee89aa",
-      "duration": 45.0,
-      "bpm": 128
+      "path": "audio/nocturne-v3/storm-rising.ogg",
+      "bytes": 770407,
+      "sha256": "1a79636e85c37231ebfffdf32221a3a2e8c8c50f842396c15c360162e8ec2d9f",
+      "duration": 39.966125,
+      "requestedBpm": 124
     },
     "epic": {
       "title": "Thunder Khaos",
-      "path": "audio/jungle-v2/thunder-khaos.ogg",
-      "bytes": 1114443,
-      "sha256": "14c7bab4975b2bac53191c15a648de2a36c4763aea2b5a97c96b100c8bac822c",
-      "duration": 56.47058333333333,
-      "bpm": 136
+      "path": "audio/nocturne-v3/thunder-khaos.ogg",
+      "bytes": 795066,
+      "sha256": "62871da0f88a555b36f5333cd07e7f174893b62fbef7098d1a9e57dbbdc10e0b",
+      "duration": 39.95883333333333,
+      "requestedBpm": 136
     }
   },
-  "scope": "CC0 acoustic sample-based original compositions for fictional-credit non-monetized hobby playtest; no Engine commercial clearance or exclusivity claim."
+  "scope": "User-approved Stable Audio Free generation and reference-based bonus variations for non-monetized fictional-credit hobby playtest. Engine clearance and exclusivity unverified.",
+  "entrances": {
+    "path": "audio/nocturne-v3/music-entrances.ogg",
+    "bytes": 235159,
+    "sha256": "1409edf6faeb6e9efe9283a8fc33e7697912cb55e12cb0e5431059553ac725b6",
+    "slotSeconds": 4,
+    "slots": {
+      "regular": 0,
+      "super": 4,
+      "epic": 8
+    }
+  }
 }

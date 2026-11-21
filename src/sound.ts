@@ -1,6 +1,7 @@
 import {forestCues} from './forest-cues';
 import {reelCues} from './reel-cues';
 import {CueGate,cuePolicy,type AudioPace} from './audio-policy';
+import {MusicCache} from './music-cache';
 type Scene = 'base' | 'regular' | 'super' | 'epic';
 type Timbre = 'sine' | 'triangle' | 'square';
 type Note = readonly [frequency: number, target: number, delay: number, duration: number, gain: number, timbre: Timbre];
@@ -50,7 +51,7 @@ const effects: Record<string, { notes: readonly Note[]; textures?: readonly Text
 export const defaultMusic = .44;
 export const defaultSfx = .68;
 type AudioState = { status: 'off' | 'paused' | 'loading' | 'playing' | 'unavailable'; scene: Scene };
-interface Track { scene: Scene; source: AudioBufferSourceNode; gain: GainNode; started: number; ramp: number }
+interface Track { scene: Scene; source: AudioBufferSourceNode; gain: GainNode; started: number; ramp: number; entrance?: boolean }
 
 export function createSound(onState: (state: AudioState) => void = () => {}) {
   let ctx: AudioContext | undefined;
@@ -81,13 +82,24 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
   let musicVolume = defaultMusic, sfxVolume = defaultSfx;
   let revision = 0;
   let disposed = false;
-  const buffers = new Map<Scene, Promise<AudioBuffer>>();
+  let entranceBuffer:AudioBuffer|undefined;
+  const entranceSlots={regular:0,super:4,epic:8};
+  let warmTimer: number | undefined;
+  let handoffTimer:number|undefined;
+  let warmStarted = false;
+  const musicFiles: Record<Scene,string> = {base:'eucalyptus-nocturne',regular:'jungle-awakening',super:'storm-rising',epic:'thunder-khaos'};
+  const musicCache = new MusicCache(async track => {
+    const response=await fetch(import.meta.env.BASE_URL+'audio/nocturne-v3/'+musicFiles[track]+'.ogg',{signal:requests.signal});
+    if(!response.ok||response.headers.get('content-type')?.includes('text/html'))throw Error('Music file unavailable');
+    return response.arrayBuffer();
+  });
   const voices = new Set<Set<AudioScheduledSourceNode>>();
   const requests = new AbortController();
   const lastCue = new Map<string, number>();
 
   function report(status: AudioState['status']) {
     onState({ status, scene });
+    if(status==='playing'&&scene==='base')scheduleMusicWarmup();
   }
   function stop(node: AudioScheduledSourceNode, at?: number) {
     try { node.stop(at); } catch { /* The source already ended. */ }
@@ -100,30 +112,35 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     gate.clear();
   }
 
-  async function decodeTrack(url: string, context: AudioContext) {
-    const response = await fetch(url, { signal: requests.signal });
-    if (!response.ok || response.headers.get('content-type')?.includes('text/html')) {
-      throw new Error('Music file unavailable');
-    }
-    return context.decodeAudioData(await response.arrayBuffer());
+  function load(track: Scene, context: AudioContext) {
+    return musicCache.load(track,context);
   }
 
-  function load(track: Scene, context: AudioContext) {
-    let buffer = buffers.get(track);
-    if (!buffer) {
-      const files: Record<Scene, string> = {base:'jungle-expedition',regular:'jungle-awakening',super:'storm-rising',epic:'thunder-khaos'};
-      buffer = decodeTrack(import.meta.env.BASE_URL + 'audio/jungle-v2/' + files[track] + '.ogg', context)
-        .catch(error => { if(buffers.get(track)===buffer) buffers.delete(track); throw error; });
-      buffers.set(track, buffer);
-    }
-    return buffer;
+  function scheduleMusicWarmup(){
+    if(warmStarted||warmTimer!==undefined||disposed||!enabled)return;
+    // Start after the base is audible, not on initial page load. Fetch compressed
+    // bonus bytes sequentially; only the confirmed tier is decoded later.
+    warmTimer=window.setTimeout(()=>{
+      warmTimer=undefined;if(disposed||!enabled||document.hidden)return;
+      warmStarted=true;
+      void (async()=>{for(const track of ['regular','super','epic'] as const){
+        if(disposed||!enabled||document.hidden)break;
+        await musicCache.prefetch(track).catch(()=>{});
+      }})();
+    },1500);
+  }
+
+  function prepareScene(value:Scene){
+    if(!enabled||!ctx||disposed)return;
+    musicCache.keep(value);
+    void load(value,ctx).catch(()=>{});
   }
 
 
   function loadClip(name: string, context: AudioContext) {
     let buffer = clips.get(name);
     if (!buffer) {
-      buffer = fetch(import.meta.env.BASE_URL + 'audio/' + (name==='tension'?'forest-tension':name) + '.ogg', { signal: requests.signal })
+      buffer = fetch(import.meta.env.BASE_URL + 'audio/' + (name==='music-entrances'?'nocturne-v3/':'') + (name==='tension'?'forest-tension':name) + '.ogg', { signal: requests.signal })
         .then(response => {
           if (!response.ok) throw new Error('Cinematic audio unavailable');
           return response.arrayBuffer();
@@ -190,20 +207,30 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     void loadClip('eucalyptus-reels', ctx).then(buffer=>{if(!disposed)reelBuffer=buffer}).catch(()=>{});
   }
 
-  function setTrack(track: Scene, buffer: AudioBuffer, context: AudioContext) {
-    if (active?.scene === track) return;
+  function setTrack(track: Scene, buffer: AudioBuffer, context: AudioContext, entrance=false) {
+    if (active?.scene === track && Boolean(active.entrance)===entrance) return;
     const now = context.currentTime;
+    const handoff=active?.entrance&&active.scene===track&&!entrance;
+    if(handoff&&outgoing&&now-active!.started<active!.ramp){
+      const priorEntrance=active;
+      if(handoffTimer!==undefined)window.clearTimeout(handoffTimer);
+      handoffTimer=window.setTimeout(()=>{
+        handoffTimer=undefined;
+        if(active===priorEntrance&&enabled&&!disposed&&!document.hidden&&context.state==='running')setTrack(track,buffer,context);
+      },Math.ceil((active!.ramp-(now-active!.started))*1000)+30);
+      return;
+    }
     if (outgoing) stop(outgoing.source);
     const prior = active;
     const gain = context.createGain();
     const source = context.createBufferSource();
     source.buffer = buffer;
     source.loop = true;
-    const ramp = prior ? .92 : .32;
+    const ramp = handoff ? .06 : prior ? .35 : .20;
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(1, now + ramp);
     source.connect(gain).connect(bed!);
-    const next = { scene: track, source, gain, started: now, ramp };
+    const next = { scene: track, source, gain, started: now, ramp, entrance };
     active = next;
     source.onended = () => {
       source.disconnect();
@@ -212,13 +239,16 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
       if (active === next) active = undefined;
       if (outgoing === next) outgoing = undefined;
     };
-    source.start(now);
+    if(entrance&&track!=='base'){
+      source.loopStart=entranceSlots[track];source.loopEnd=source.loopStart+4;
+      source.start(now,source.loopStart);
+    }else source.start(now,handoff?(now-prior!.started)%4:0);
     if (prior) {
       outgoing = prior;
       prior.gain.gain.cancelScheduledValues(now);
       prior.gain.gain.setValueAtTime(Math.min(1, (now - prior.started) / prior.ramp), now);
-      prior.gain.gain.linearRampToValueAtTime(0, now + .92);
-      stop(prior.source, now + .94);
+      prior.gain.gain.linearRampToValueAtTime(0, now + ramp);
+      stop(prior.source, now + ramp + .02);
     }
   }
 
@@ -235,16 +265,28 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
       await context.suspend().catch(() => {});
       return;
     }
+    // A prepared scene switches immediately in the current running context.
+    // No resume promise, network request or decoder lies on this warm path.
+    const cached=musicCache.get(track);
+    if(context.state==='running'&&cached){
+      if(active?.scene!==track||active.entrance)setTrack(track,cached,context);
+      void syncTension();report('playing');return;
+    }
+    // Small, predecoded entrance slots bridge a genuinely cold full-track load.
+    // Handoff continues at the same musical position instead of restarting it.
+    if(context.state==='running'&&entranceBuffer&&track!=='base'&&active?.scene!==track){
+      setTrack(track,entranceBuffer,context,true);report('playing');
+    }
     try {
       // When enabled by the switch, resume is called synchronously within the gesture.
       await context.resume();
       if (id !== revision || !enabled || document.hidden || disposed) return;
-      if (active?.scene === track) {
+      if (active?.scene === track && !active.entrance) {
         report('playing');
         void syncTension();
         return;
       }
-      report('loading');
+      if(!active?.entrance||active.scene!==track)report('loading');
       const buffer = await load(track, context);
       if (id !== revision || !enabled || document.hidden || disposed) return;
       setTrack(track, buffer, context);
@@ -456,7 +498,10 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     silence();
     if (active) stop(active.source);
     if (outgoing) stop(outgoing.source);
-    buffers.clear();
+    if(warmTimer!==undefined)window.clearTimeout(warmTimer);
+    if(handoffTimer!==undefined)window.clearTimeout(handoffTimer);
+    musicCache.clear();
+    entranceBuffer=undefined;
     clips.clear();
     accentBuffer = undefined;
     forestBuffer=undefined;reelBuffer=undefined;produced.clear();
@@ -467,7 +512,7 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
   window.addEventListener('pageshow', event => { if (event.persisted) void reconcile(); });
 
   return {
-    cue, silence, prepareCinematics, setKartEngine,
+    cue, silence, prepareCinematics, prepareScene, setKartEngine,
     setPace(rate:number){pace=rate===0?'instant':rate<1?'gentle':rate>=2?'turbo':'normal'},
     setSuspense(value: boolean) {
       if (tensionWanted === value) return;
@@ -481,10 +526,12 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     },
     setEnabled(value: boolean) {
       enabled = value;
+      if(!enabled&&handoffTimer!==undefined){window.clearTimeout(handoffTimer);handoffTimer=undefined;}
       if (!enabled) { tensionRevision++; releaseTension(); }
       try {
         if (enabled && !ctx) {
           setup();
+          void loadClip('music-entrances',ctx!).then(buffer=>{if(!disposed)entranceBuffer=buffer}).catch(()=>{});
           void loadClip('forest-effects', ctx!).then(buffer => {
             if (!disposed) forestBuffer = buffer;
           }).catch(() => {});
@@ -499,10 +546,11 @@ export function createSound(onState: (state: AudioState) => void = () => {}) {
     },
     setScene(value: Scene) {
       if (scene === value) return;
+      if(handoffTimer!==undefined){window.clearTimeout(handoffTimer);handoffTimer=undefined;}
       scene = value;
       // Keep the base bed ready to return, but never cache all long bonus songs.
       // An outgoing source retains its own buffer only until its crossfade ends.
-      for (const cached of buffers.keys()) if(cached !== 'base' && cached !== value) buffers.delete(cached);
+      musicCache.keep(value);
       updateMusicDuck();
       if (scene !== 'base') { tensionRevision++; releaseTension(); }
       if (enabled) void reconcile();
